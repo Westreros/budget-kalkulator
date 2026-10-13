@@ -53,7 +53,7 @@
     label { display: block; font-size: 0.85rem; font-weight: 500; color: #475569; margin-bottom: 4px; }
     .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
     .input-group { position: relative; margin-bottom: 12px; }
-    input[type="number"], input[type="text"], input[type="month"], select {
+    input[type="number"], input[type="text"], select {
       width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; outline: none; background: #fff;
     }
     input:focus, select:focus { border-color: #2563eb; ring: 2px solid #93c5fd; }
@@ -148,7 +148,6 @@
     .fill-blue { background: #2563eb; }
     .fill-purple { background: #a855f7; }
 
-    /* Tabele i raporty */
     .styled-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.85rem; }
     .styled-table th, .styled-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
     .styled-table th { background: #f8fafc; color: #475569; font-weight: 600; }
@@ -168,7 +167,7 @@
 <div class="container">
   <header>
     <h1>Kalkulator Kosztów Przetrwania i Budżetu</h1>
-    <p class="subtitle">Zarządzaj wydatkami, filtruj po miesiącach i prognozuj budżet.</p>
+    <p class="subtitle">Wieloletni monitoring wydatków, uśrednianie rachunków i prognoza budżetowa.</p>
   </header>
 
   <!-- Pasek 3 zakładek -->
@@ -363,7 +362,7 @@
     </div>
   </div>
 
-  <!-- ZAKŁADKA 2: DZIENNIK RACHUNKÓW (Z FILTREM I SORTOWANIEM) -->
+  <!-- ZAKŁADKA 2: DZIENNIK RACHUNKÓW (Z PRECYZYJNYM WYBOREM MIESIĄCA) -->
   <div id="historyTab" class="tab-content">
     <div class="card">
       <h2>Dodaj rzeczywisty rachunek</h2>
@@ -372,7 +371,8 @@
       </p>
 
       <div class="form-inline" style="flex-wrap: wrap;">
-        <input type="month" id="histMonth" style="width: 150px;">
+        <select id="histMonthSelect" style="width: 140px; font-weight: 600;"></select>
+        <input type="number" id="histYearInput" style="width: 95px; font-weight: 600;" min="2000" max="2100">
         <input type="text" id="histName" placeholder="Nazwa (np. Prąd, Gaz, Czynsz)">
         <input type="number" id="histAmount" placeholder="Kwota (PLN)" min="0">
         <button type="button" class="btn-add" id="addHistBtn">Zapisz rachunek</button>
@@ -388,11 +388,15 @@
       <div id="averagedListDisplay" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;"></div>
     </div>
 
-    <!-- Tabela z selektorem miesiąca i sortowaniem -->
+    <!-- Filtry: Wybór pojedynczego miesiąca, roku oraz kierunku sortowania -->
     <div class="card">
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
         <h2>Wpisy w Dzienniku</h2>
-        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <label style="margin: 0; font-size: 0.85rem; font-weight: 600;" for="histFilterYear">Rok:</label>
+            <select id="histFilterYear" style="width: auto; padding: 6px 10px; font-weight: bold;"></select>
+          </div>
           <div style="display: flex; align-items: center; gap: 6px;">
             <label style="margin: 0; font-size: 0.85rem; font-weight: 600;" for="histFilterMonth">Miesiąc:</label>
             <select id="histFilterMonth" style="width: auto; padding: 6px 10px; font-weight: bold;"></select>
@@ -400,23 +404,22 @@
           <div style="display: flex; align-items: center; gap: 6px;">
             <label style="margin: 0; font-size: 0.85rem; font-weight: 600;" for="histSortOrder">Sortuj:</label>
             <select id="histSortOrder" style="width: auto; padding: 6px 10px; font-weight: bold;">
-              <option value="desc">Od najnowszych (od góry)</option>
-              <option value="asc">Od najstarszych (od góry)</option>
+              <option value="desc">Od najnowszych (malejąco)</option>
+              <option value="asc">Od najstarszych (rosnąco)</option>
             </select>
           </div>
         </div>
       </div>
 
-      <!-- Pasek z podsumowaniem dla wybranego filtra -->
       <div id="filterSummaryBar" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin: 10px 0; display: flex; justify-content: space-between; font-size: 0.85rem;">
-        <span style="color: #475569;">Suma widocznych pozycji:</span>
+        <span id="filteredMonthLabel" style="color: #475569;">Suma widocznych pozycji:</span>
         <strong id="filteredMonthSum" style="color: #0f172a;">0 PLN</strong>
       </div>
 
       <table class="styled-table">
         <thead>
           <tr>
-            <th>Miesiąc</th>
+            <th>Okres</th>
             <th>Kategoria</th>
             <th>Kwota</th>
             <th>Akcja</th>
@@ -429,7 +432,6 @@
 
   <!-- ZAKŁADKA 3: MIESIĄCE & PROGNOZA -->
   <div id="reportTab" class="tab-content">
-    
     <div class="forecast-card">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <h2 style="color: #86198f; margin-bottom: 4px;">🔮 Prognoza na kolejny miesiąc</h2>
@@ -463,14 +465,14 @@
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
         <h2>Szczegóły wybranego miesiąca</h2>
         <div style="display: flex; align-items: center; gap: 8px;">
-          <label style="margin: 0; font-size: 0.85rem;" for="selectReportMonth">Wybierz miesiąc:</label>
-          <select id="selectReportMonth" style="width: auto; padding: 6px 12px; font-weight: bold;"></select>
+          <label style="margin: 0; font-size: 0.85rem;" for="selectReportPeriod">Wybierz okres:</label>
+          <select id="selectReportPeriod" style="width: auto; padding: 6px 12px; font-weight: bold;"></select>
         </div>
       </div>
 
       <div style="margin-top: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
         <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
-          <span style="font-size: 0.9rem; color: #475569;">Suma poniesionych wydatków w tym miesiącu:</span>
+          <span style="font-size: 0.9rem; color: #475569;">Suma poniesionych wydatków w wybranym miesiącu:</span>
           <strong id="monthTotalExpense" style="font-size: 1.4rem; color: #0f172a;">0 PLN</strong>
         </div>
       </div>
@@ -486,11 +488,23 @@
         <tbody id="monthDetailsBody"></tbody>
       </table>
     </div>
-
   </div>
 </div>
 
 <script>
+const MONTH_NAMES_PL = [
+  "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec",
+  "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"
+];
+
+function formatPeriodToPL(yearMonthStr) {
+  if (!yearMonthStr || !yearMonthStr.includes('-')) return yearMonthStr;
+  const [year, month] = yearMonthStr.split('-');
+  const monthIdx = parseInt(month, 10) - 1;
+  const monthName = MONTH_NAMES_PL[monthIdx] || month;
+  return `${monthName} ${year}`;
+}
+
 function switchTab(tabId, btn) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -506,7 +520,6 @@ document.addEventListener('DOMContentLoaded', () => {
   let manualCosts = JSON.parse(localStorage.getItem('my_manual_costs') || '[]');
   let historyLogs = JSON.parse(localStorage.getItem('my_history_logs') || '[]');
 
-  // Elementy Zakładki 1
   const incomeInput = document.getElementById('income');
   const rushEmergencyCheckbox = document.getElementById('rushEmergencyFund');
   const useAveragedCheckbox = document.getElementById('useAveragedCosts');
@@ -551,30 +564,41 @@ document.addEventListener('DOMContentLoaded', () => {
   const barSavings = document.getElementById('barSavings');
   const barFun = document.getElementById('barFun');
 
-  // Elementy Zakładki 2
-  const histMonthInput = document.getElementById('histMonth');
+  const histMonthSelect = document.getElementById('histMonthSelect');
+  const histYearInput = document.getElementById('histYearInput');
   const histNameInput = document.getElementById('histName');
   const histAmountInput = document.getElementById('histAmount');
   const addHistBtn = document.getElementById('addHistBtn');
   const historyTableBody = document.getElementById('historyTableBody');
   const averagedListDisplay = document.getElementById('averagedListDisplay');
   const avgGrandTotal = document.getElementById('avgGrandTotal');
+  
+  const histFilterYear = document.getElementById('histFilterYear');
   const histFilterMonth = document.getElementById('histFilterMonth');
   const histSortOrder = document.getElementById('histSortOrder');
   const filteredMonthSum = document.getElementById('filteredMonthSum');
+  const filteredMonthLabel = document.getElementById('filteredMonthLabel');
 
-  // Elementy Zakładki 3
   const forecastBasisTag = document.getElementById('forecastBasisTag');
   const forecastSurvivalVal = document.getElementById('forecastSurvivalVal');
   const forecastSavingsVal = document.getElementById('forecastSavingsVal');
   const forecastFunVal = document.getElementById('forecastFunVal');
   const forecastDailyFunVal = document.getElementById('forecastDailyFunVal');
-  const selectReportMonth = document.getElementById('selectReportMonth');
+  const selectReportPeriod = document.getElementById('selectReportPeriod');
   const monthTotalExpense = document.getElementById('monthTotalExpense');
   const monthDetailsBody = document.getElementById('monthDetailsBody');
 
-  const today = new Date();
-  histMonthInput.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+  // Wypełnienie listy miesięcy do dodawania wpisów
+  MONTH_NAMES_PL.forEach((name, idx) => {
+    const opt = document.createElement('option');
+    opt.value = String(idx + 1).padStart(2, '0');
+    opt.textContent = name;
+    histMonthSelect.appendChild(opt);
+  });
+
+  const now = new Date();
+  histMonthSelect.value = String(now.getMonth() + 1).padStart(2, '0');
+  histYearInput.value = now.getFullYear();
 
   function getAveragedCostsFromHistory() {
     if (historyLogs.length === 0) return [];
@@ -593,69 +617,93 @@ document.addEventListener('DOMContentLoaded', () => {
     }));
   }
 
-  function updateFilterMonthOptions() {
-    const currentSelected = histFilterMonth.value;
-    const uniqueMonths = [...new Set(historyLogs.map(item => item.month))].sort().reverse();
-    
-    histFilterMonth.innerHTML = '';
-    
-    const allOpt = document.createElement('option');
-    allOpt.value = 'ALL';
-    allOpt.textContent = 'Wszystkie miesiące';
-    histFilterMonth.appendChild(allOpt);
+  // Budowa selektorów filtrowania: Rok oraz konkretny pojedynczy Miesiąc
+  function updateHistoryFilterDropdowns() {
+    const currentYear = histFilterYear.value;
+    const currentMonth = histFilterMonth.value;
+    const uniqueYears = [...new Set(historyLogs.map(item => item.year || item.month.split('-')[0]))].sort().reverse();
 
-    uniqueMonths.forEach(m => {
+    // 1. Filtr Roku
+    histFilterYear.innerHTML = '<option value="ALL">Wszystkie lata</option>';
+    uniqueYears.forEach(y => {
       const opt = document.createElement('option');
-      opt.value = m;
-      opt.textContent = m;
+      opt.value = y;
+      opt.textContent = y;
+      histFilterYear.appendChild(opt);
+    });
+    histFilterYear.value = uniqueYears.includes(currentYear) ? currentYear : 'ALL';
+
+    // 2. Filtr pojedynczego miesiąca
+    histFilterMonth.innerHTML = '<option value="ALL">Wszystkie miesiące</option>';
+    MONTH_NAMES_PL.forEach((mName, idx) => {
+      const opt = document.createElement('option');
+      const val = String(idx + 1).padStart(2, '0');
+      opt.value = val;
+      opt.textContent = mName; // np. "Listopad", "Grudzień"
       histFilterMonth.appendChild(opt);
     });
-
-    if (uniqueMonths.includes(currentSelected)) {
-      histFilterMonth.value = currentSelected;
-    } else if (uniqueMonths.length > 0 && currentSelected !== 'ALL') {
-      histFilterMonth.value = uniqueMonths[0];
-    } else {
-      histFilterMonth.value = 'ALL';
-    }
+    histFilterMonth.value = currentMonth || 'ALL';
   }
 
-  // Renderowanie tabeli z uwzględnieniem filtra i wybranego sortowania (ASC/DESC)
+  // Renderowanie tabeli Dziennika z uwzględnieniem wybranego miesiąca i roku
   function renderHistoryTable() {
     historyTableBody.innerHTML = '';
-    const selectedFilter = histFilterMonth.value;
-    const sortOrder = histSortOrder.value; // 'desc' lub 'asc'
+    const selectedYear = histFilterYear.value;
+    const selectedMonth = histFilterMonth.value;
+    const sortOrder = histSortOrder.value;
 
-    // 1. Filtrowanie
     let itemsToDisplay = [...historyLogs];
-    if (selectedFilter && selectedFilter !== 'ALL') {
-      itemsToDisplay = itemsToDisplay.filter(entry => entry.month === selectedFilter);
+
+    // Filtruj po roku (jeśli wybrano)
+    if (selectedYear && selectedYear !== 'ALL') {
+      itemsToDisplay = itemsToDisplay.filter(entry => {
+        const y = entry.year || entry.month.split('-')[0];
+        return y === selectedYear;
+      });
     }
 
-    // 2. Sortowanie
+    // Filtruj po konkretnym miesiącu (np. tylko Listopad = '11')
+    if (selectedMonth && selectedMonth !== 'ALL') {
+      itemsToDisplay = itemsToDisplay.filter(entry => {
+        const m = entry.monthNum || entry.month.split('-')[1];
+        return m === selectedMonth;
+      });
+    }
+
+    // Sortowanie (rosnąco / malejąco)
     itemsToDisplay.sort((a, b) => {
       if (a.month !== b.month) {
-        return sortOrder === 'asc' 
-          ? a.month.localeCompare(b.month) 
-          : b.month.localeCompare(a.month);
+        return sortOrder === 'asc' ? a.month.localeCompare(b.month) : b.month.localeCompare(a.month);
       }
-      // W ramach tego samego miesiąca sortujemy po ID (kolejności dodania)
       return sortOrder === 'asc' ? a.id - b.id : b.id - a.id;
     });
 
     const totalSum = itemsToDisplay.reduce((sum, item) => sum + item.amount, 0);
     filteredMonthSum.textContent = `${totalSum.toLocaleString('pl-PL')} PLN`;
 
+    // Dynamiczny opis na pasku sumy
+    let filterDescription = 'wszystkich pozycji';
+    if (selectedMonth !== 'ALL' && selectedYear !== 'ALL') {
+      const mIdx = parseInt(selectedMonth, 10) - 1;
+      filterDescription = `${MONTH_NAMES_PL[mIdx]} ${selectedYear}`;
+    } else if (selectedMonth !== 'ALL') {
+      const mIdx = parseInt(selectedMonth, 10) - 1;
+      filterDescription = `Miesiąc: ${MONTH_NAMES_PL[mIdx]}`;
+    } else if (selectedYear !== 'ALL') {
+      filterDescription = `Rok: ${selectedYear}`;
+    }
+    filteredMonthLabel.textContent = `Suma dla (${filterDescription}):`;
+
     if (itemsToDisplay.length === 0) {
-      historyTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">Brak rachunków ${selectedFilter !== 'ALL' ? 'dla miesiąca ' + selectedFilter : 'w historii'}.</td></tr>`;
+      historyTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8; padding: 16px;">Brak rachunków spełniających wybrane kryteria (${filterDescription}).</td></tr>`;
       return;
     }
 
     itemsToDisplay.forEach(entry => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${entry.month}</td>
-        <td><strong>${entry.name}</strong></td>
+        <td><strong>${formatPeriodToPL(entry.month)}</strong></td>
+        <td>${entry.name}</td>
         <td>${entry.amount.toLocaleString('pl-PL')} PLN</td>
         <td><button class="del-btn" style="color:#ef4444; border:none; background:none; cursor:pointer;" onclick="deleteHistoryEntry(${entry.id})">✕ Usuń</button></td>
       `;
@@ -665,14 +713,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function renderHistory() {
     localStorage.setItem('my_history_logs', JSON.stringify(historyLogs));
-    
-    if (historyLogs.length === 0) {
-      syncBanner.style.display = 'none';
-    } else {
-      syncBanner.style.display = 'flex';
-    }
+    syncBanner.style.display = historyLogs.length === 0 ? 'none' : 'flex';
 
-    updateFilterMonthOptions();
+    updateHistoryFilterDropdowns();
     renderHistoryTable();
 
     const averaged = getAveragedCostsFromHistory();
@@ -687,12 +730,13 @@ document.addEventListener('DOMContentLoaded', () => {
       averagedListDisplay.appendChild(chip);
     });
 
-    avgGrandTotal.textContent = `${totalAvg} PLN / mc`;
+    avgGrandTotal.textContent = `${totalAvg.toLocaleString('pl-PL')} PLN / mc`;
     avgCountBadge.textContent = `${averaged.length} pozycji`;
 
     calculateAll();
   }
 
+  histFilterYear.addEventListener('change', renderHistoryTable);
   histFilterMonth.addEventListener('change', renderHistoryTable);
   histSortOrder.addEventListener('change', renderHistoryTable);
 
@@ -702,16 +746,25 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   addHistBtn.addEventListener('click', () => {
-    const month = histMonthInput.value;
+    const monthNum = histMonthSelect.value;
+    const yearNum = histYearInput.value.trim();
     const name = histNameInput.value.trim();
     const amount = parseFloat(histAmountInput.value);
 
-    if (month && name && !isNaN(amount) && amount > 0) {
-      historyLogs.push({ id: Date.now(), month, name, amount });
+    if (monthNum && yearNum && name && !isNaN(amount) && amount > 0) {
+      const periodKey = `${yearNum}-${monthNum}`;
+      historyLogs.push({
+        id: Date.now(),
+        month: periodKey,
+        year: yearNum,
+        monthNum: monthNum,
+        name,
+        amount
+      });
       histNameInput.value = '';
       histAmountInput.value = '';
-      
-      histFilterMonth.value = month;
+      histFilterYear.value = yearNum;
+      histFilterMonth.value = monthNum;
       renderHistory();
     }
   });
@@ -771,10 +824,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const rushActive = rushEmergencyCheckbox.checked;
     const useAveraged = useAveragedCheckbox.checked;
 
-    const activeFixedList = (useAveraged && historyLogs.length > 0) 
-      ? getAveragedCostsFromHistory() 
-      : manualCosts;
-
+    const activeFixedList = (useAveraged && historyLogs.length > 0) ? getAveragedCostsFromHistory() : manualCosts;
     renderCostList(activeFixedList, useAveraged);
 
     const res = computeBudget(activeFixedList, income, rushActive);
@@ -947,29 +997,29 @@ document.addEventListener('DOMContentLoaded', () => {
     forecastFunVal.textContent = `${forecastRes.funMoney.toLocaleString('pl-PL')} PLN`;
     forecastDailyFunVal.textContent = `${forecastRes.dailyFun} PLN / dzień`;
 
-    const uniqueMonths = [...new Set(historyLogs.map(item => item.month))].sort().reverse();
-    selectReportMonth.innerHTML = '';
+    const uniquePeriods = [...new Set(historyLogs.map(item => item.month))].sort().reverse();
+    selectReportPeriod.innerHTML = '';
 
-    if (uniqueMonths.length === 0) {
-      selectReportMonth.innerHTML = '<option value="">Brak danych</option>';
+    if (uniquePeriods.length === 0) {
+      selectReportPeriod.innerHTML = '<option value="">Brak danych</option>';
       monthTotalExpense.textContent = '0 PLN';
       monthDetailsBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#94a3b8;">Brak zapisanych miesięcy w Dzienniku. Dodaj wpisy w zakładce 2.</td></tr>';
       return;
     }
 
-    uniqueMonths.forEach(m => {
+    uniquePeriods.forEach(p => {
       const opt = document.createElement('option');
-      opt.value = m;
-      opt.textContent = m;
-      selectReportMonth.appendChild(opt);
+      opt.value = p;
+      opt.textContent = formatPeriodToPL(p);
+      selectReportPeriod.appendChild(opt);
     });
 
-    renderSelectedMonthDetails(selectReportMonth.value);
+    renderSelectedMonthDetails(selectReportPeriod.value);
   }
 
-  function renderSelectedMonthDetails(selectedMonth) {
-    if (!selectedMonth) return;
-    const filtered = historyLogs.filter(item => item.month === selectedMonth);
+  function renderSelectedMonthDetails(selectedPeriod) {
+    if (!selectedPeriod) return;
+    const filtered = historyLogs.filter(item => item.month === selectedPeriod);
     const total = filtered.reduce((sum, item) => sum + item.amount, 0);
 
     monthTotalExpense.textContent = `${total.toLocaleString('pl-PL')} PLN`;
@@ -987,7 +1037,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  selectReportMonth.addEventListener('change', (e) => {
+  selectReportPeriod.addEventListener('change', (e) => {
     renderSelectedMonthDetails(e.target.value);
   });
 
