@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalkulator Kosztów Przetrwania i Budżetu Domowego</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: #f1f5f9; color: #0f172a; padding: 24px 16px; }
+    .container { max-width: 1050px; margin: 0 auto; }
+    header { margin-bottom: 18px; text-align: center; }
+    h1 { font-size: 1.85rem; font-weight: 800; color: #0f172a; }
+    p.subtitle { color: #64748b; margin-top: 4px; font-size: 0.95rem; }
+
+    /* Zakładki */
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 2px;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 10px 18px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #64748b;
+      cursor: pointer;
+      border-radius: 8px 8px 0 0;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: #1e293b; background: #e2e8f0; }
+    .tab-btn.active {
+      color: #2563eb;
+      border-bottom: 3px solid #2563eb;
+      background: #ffffff;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
+    @media (min-width: 860px) { .grid { grid-template-columns: 1.1fr 0.9fr; } }
+
+    .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); margin-bottom: 20px; }
+    h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 14px; color: #1e293b; display: flex; align-items: center; justify-content: space-between; }
+    
+    label { display: block; font-size: 0.85rem; font-weight: 500; color: #475569; margin-bottom: 4px; }
+    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .input-group { position: relative; margin-bottom: 12px; }
+    input[type="number"], input[type="text"], input[type="month"], select {
+      width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; outline: none; background: #fff;
+    }
+    input:focus, select:focus { border-color: #2563eb; ring: 2px solid #93c5fd; }
+    .suffix { position: absolute; right: 10px; top: 9px; color: #94a3b8; font-weight: 600; font-size: 0.8rem; }
+
+    .goal-banner {
+      background: #ecfdf5;
+      border: 2px solid #10b981;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      cursor: pointer;
+    }
+    .goal-banner input { width: 20px; height: 20px; margin-top: 2px; cursor: pointer; }
+    .goal-banner-text strong { display: block; color: #065f46; font-size: 0.95rem; }
+    .goal-banner-text p { font-size: 0.8rem; color: #047857; margin-top: 2px; }
+
+    .sync-banner {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sync-banner label { margin: 0; cursor: pointer; display: flex; align-items: center; gap: 8px; color: #1e40af; font-weight: 600; }
+
+    .checkbox-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; margin-bottom: 12px; cursor: pointer; }
+    .checkbox-box input { width: 18px; height: 18px; cursor: pointer; }
+    .checkbox-box span { font-size: 0.85rem; font-weight: 600; color: #334155; }
+
+    .excel-import-box {
+      border: 2px dashed #93c5fd;
+      background-color: #eff6ff;
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+      margin-bottom: 14px;
+      cursor: pointer;
+    }
+    .excel-import-box:hover { background-color: #dbeafe; }
+    .excel-import-box label { cursor: pointer; color: #1d4ed8; font-weight: 600; display: block; }
+    .excel-import-box span.hint { font-size: 0.75rem; color: #64748b; }
+
+    ul.cost-list { list-style: none; margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px; max-height: 250px; overflow-y: auto; padding-right: 4px; }
+    li.cost-item { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid #f1f5f9; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; }
+    li.cost-item button.del-btn { background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer; padding: 2px 6px; font-size: 0.95rem; }
+    li.empty-msg { color: #94a3b8; font-size: 0.85rem; text-align: center; padding: 10px 0; border: 1px dashed #e2e8f0; border-radius: 8px; }
+
+    .form-inline { display: flex; gap: 8px; }
+    .form-inline input[type="text"] { flex: 1; }
+    .form-inline input[type="number"] { width: 100px; }
+    button.btn-add { background: #2563eb; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    button.btn-add:hover { background: #1d4ed8; }
+
+    .metric-hero { background: #0f172a; color: #fff; border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+    .metric-hero .tag { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 600; }
+    .metric-hero .val { font-size: 2.2rem; font-weight: 800; margin: 4px 0; color: #38bdf8; }
+    .metric-hero .desc { font-size: 0.85rem; color: #cbd5e1; line-height: 1.4; }
+
+    .sprint-card {
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .sprint-header { display: flex; justify-content: space-between; align-items: baseline; }
+    .sprint-header strong { color: #166534; font-size: 1.1rem; }
+    .sprint-details { font-size: 0.85rem; color: #15803d; margin-top: 6px; line-height: 1.5; }
+
+    .stat-badge-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .stat-badge { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; }
+    .stat-badge span { font-size: 0.75rem; color: #64748b; font-weight: 600; display: block; text-transform: uppercase; }
+    .stat-badge strong { font-size: 1.15rem; color: #0f172a; font-weight: 700; margin-top: 2px; display: block; }
+
+    .alert-box { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 12px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 16px; display: none; line-height: 1.4; }
+
+    .bar-group { display: flex; flex-direction: column; gap: 14px; margin-top: 10px; }
+    .bar-header { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px; }
+    .bar-bg { width: 100%; height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+
+    .fill-slate { background: #475569; }
+    .fill-amber { background: #f59e0b; }
+    .fill-emerald { background: #10b981; }
+    .fill-blue { background: #2563eb; }
+    .fill-purple { background: #a855f7; }
+
+    /* Tabele i raporty */
+    .styled-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.85rem; }
+    .styled-table th, .styled-table td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    .styled-table th { background: #f8fafc; color: #475569; font-weight: 600; }
+    .average-card { background: #eff6ff; border: 1px solid #93c5fd; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+
+    .forecast-card {
+      background: #fdf4ff;
+      border: 1px solid #f0abfc;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Kalkulator Kosztów Przetrwania i Budżetu</h1>
+    <p class="subtitle">Zarządzaj wydatkami, filtruj po miesiącach i prognozuj budżet.</p>
+  </header>
+
+  <!-- Pasek 3 zakładek -->
+  <nav class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('calculatorTab', this)">📊 Planer & Budżet</button>
+    <button class="tab-btn" onclick="switchTab('historyTab', this)">📝 Dziennik Rachunków</button>
+    <button class="tab-btn" onclick="switchTab('reportTab', this)">📈 Miesiące & Prognoza</button>
+  </nav>
+
+  <!-- ZAKŁADKA 1: GŁÓWNY KALKULATOR -->
+  <div id="calculatorTab" class="tab-content active">
+    <div class="grid">
+      <!-- LEWY PANEL -->
+      <div>
+        <div class="card">
+          <h2>1. Dochody i Cel Finansowy</h2>
+          <label for="income">Łączny dochód netto rodziny (pensje na rękę)</label>
+          <div class="input-group">
+            <input type="number" id="income" placeholder="np. 7000" min="0" step="100">
+            <span class="suffix">PLN</span>
+          </div>
+
+          <label class="goal-banner">
+            <input type="checkbox" id="rushEmergencyFund">
+            <div class="goal-banner-text">
+              <strong>🎯 Priorytet: Błyskawiczna 6-miesięczna poduszka finansowa</strong>
+              <p>Zaznaczona: 85% do poduszki (Fun Money: 15%). Odznaczona: 80% na oszczędności (Fun Money: 20%).</p>
+            </div>
+          </label>
+        </div>
+
+        <div class="card">
+          <h2>2. Stałe koszty życia</h2>
+          
+          <div class="sync-banner" id="syncBanner" style="display: none;">
+            <label>
+              <input type="checkbox" id="useAveragedCosts">
+              <span>Używaj automatycznie uśrednionych kwot z Dziennika</span>
+            </label>
+            <span id="avgCountBadge" style="font-size: 0.75rem; color: #1e40af; font-weight: bold;"></span>
+          </div>
+
+          <div class="excel-import-box">
+            <label for="excelFile">📂 Wczytaj plik Excel (.xlsx, .xls, .csv)</label>
+            <span class="hint">Automatycznie zaciągnie kolumnę z opisem i kwotą</span>
+            <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" style="display: none;">
+          </div>
+
+          <ul class="cost-list" id="costList"></ul>
+
+          <div class="form-inline" id="manualAddRow">
+            <input type="text" id="newCostName" placeholder="np. Czynsz, Leki, Internet">
+            <input type="number" id="newCostAmount" placeholder="Kwota" min="0">
+            <button type="button" class="btn-add" id="addCostBtn">+</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>3. Rodzina i koszyk żywnościowy</h2>
+          <div class="input-row">
+            <div>
+              <label for="adultsCount">Liczba dorosłych</label>
+              <input type="number" id="adultsCount" placeholder="np. 2" min="1">
+            </div>
+            <div>
+              <label for="kidsCount">Liczba dzieci</label>
+              <input type="number" id="kidsCount" placeholder="np. 1" min="0">
+            </div>
+          </div>
+
+          <label class="checkbox-box">
+            <input type="checkbox" id="include800Plus" checked>
+            <span>Uwzględnij 800+ na każde dziecko (obniża koszyk)</span>
+          </label>
+        </div>
+
+        <div class="card">
+          <h2>4. Dojazdy do pracy</h2>
+          <div class="input-row">
+            <div>
+              <label for="commuteKm">Kilometry w jedną stronę</label>
+              <div class="input-group">
+                <input type="number" id="commuteKm" placeholder="np. 15" min="0">
+                <span class="suffix">km</span>
+              </div>
+            </div>
+            <div>
+              <label for="commuteDays">Dni dojazdu w miesiącu</label>
+              <div class="input-group">
+                <input type="number" id="commuteDays" placeholder="np. 20" min="0" max="31">
+                <span class="suffix">dni</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="input-row">
+            <div>
+              <label for="carFuelUsage">Średnie spalanie</label>
+              <div class="input-group">
+                <input type="number" id="carFuelUsage" placeholder="np. 6.5" step="0.1" min="0">
+                <span class="suffix">l/100km</span>
+              </div>
+            </div>
+            <div>
+              <label for="fuelPrice">Cena paliwa</label>
+              <div class="input-group">
+                <input type="number" id="fuelPrice" placeholder="np. 6.50" step="0.05" min="0">
+                <span class="suffix">zł/l</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRAWY PANEL WYNIKÓW -->
+      <div>
+        <div id="alertBox" class="alert-box"></div>
+
+        <div class="metric-hero">
+          <span class="tag">Miesięczny koszt przetrwania (Minimum)</span>
+          <div class="val"><span id="survivalTotal">0</span> PLN</div>
+          <p class="desc">Suma wszystkich stałych rachunków, dojazdów do pracy oraz minimalnego wyżywienia i chemii rodziny (po 800+).</p>
+        </div>
+
+        <div class="sprint-card" id="sprintCard">
+          <div class="sprint-header">
+            <span style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #166534;">Cel: 6-miesięczna Poduszka</span>
+            <strong id="emergencyGoalVal">0 PLN</strong>
+          </div>
+          <div class="sprint-details">
+            Miesięcznie do skarbonki: <strong id="sprintSavingSpeed" style="color: #047857;">0 PLN</strong><br>
+            Szacowany czas do celu: <strong id="sprintMonthsCount">--</strong>
+          </div>
+        </div>
+
+        <div class="stat-badge-grid">
+          <div class="stat-badge">
+            <span id="funBadgeLabel">Fun Money (mc)</span>
+            <strong id="monthlyFunVal" style="color: #7c3aed;">0 PLN</strong>
+          </div>
+          <div class="stat-badge">
+            <span>Dzienny luz (Fun/dzień)</span>
+            <strong id="dailyFunVal">0 PLN/dzień</strong>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Rekomendowany podział</h2>
+          <div class="bar-group">
+            <div>
+              <div class="bar-header">
+                <span>Stałe zobowiązania</span>
+                <strong id="barFixedVal">0 PLN</strong>
+              </div>
+              <div class="bar-bg"><div id="barFixed" class="bar-fill fill-slate" style="width: 0%;"></div></div>
+            </div>
+
+            <div>
+              <div class="bar-header">
+                <span>Dojazdy do pracy</span>
+                <strong id="barCommuteVal">0 PLN</strong>
+              </div>
+              <div class="bar-bg"><div id="barCommute" class="bar-fill fill-amber" style="width: 0%;"></div></div>
+            </div>
+
+            <div>
+              <div class="bar-header">
+                <span>Żywność i chemia (minimum bytowe)</span>
+                <strong id="barBasketVal">0 PLN</strong>
+              </div>
+              <div class="bar-bg"><div id="barBasket" class="bar-fill fill-blue" style="width: 0%;"></div></div>
+            </div>
+
+            <div>
+              <div class="bar-header">
+                <span style="color: #047857; font-weight: 700;" id="barSavingsTitle">Oszczędności / Poduszka finansowa</span>
+                <strong style="color: #047857;" id="barSavingsVal">0 PLN</strong>
+              </div>
+              <div class="bar-bg"><div id="barSavings" class="bar-fill fill-emerald" style="width: 0%;"></div></div>
+            </div>
+
+            <div>
+              <div class="bar-header">
+                <span style="color: #7c3aed; font-weight: 700;" id="barFunTitle">Fun Money</span>
+                <strong style="color: #7c3aed;" id="barFunVal">0 PLN</strong>
+              </div>
+              <div class="bar-bg"><div id="barFun" class="bar-fill fill-purple" style="width: 0%;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ZAKŁADKA 2: DZIENNIK RACHUNKÓW (Z FILTREM I SORTOWANIEM) -->
+  <div id="historyTab" class="tab-content">
+    <div class="card">
+      <h2>Dodaj rzeczywisty rachunek</h2>
+      <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 14px;">
+        Wpisuj rachunki, które przychodzą nieregularnie (np. prąd co 2 miesiące, gaz zimą, woda).
+      </p>
+
+      <div class="form-inline" style="flex-wrap: wrap;">
+        <input type="month" id="histMonth" style="width: 150px;">
+        <input type="text" id="histName" placeholder="Nazwa (np. Prąd, Gaz, Czynsz)">
+        <input type="number" id="histAmount" placeholder="Kwota (PLN)" min="0">
+        <button type="button" class="btn-add" id="addHistBtn">Zapisz rachunek</button>
+      </div>
+    </div>
+
+    <div class="card average-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <strong style="color: #1e40af; font-size: 1rem;">Podsumowanie uśrednionych kosztów</strong>
+        <span id="avgGrandTotal" style="font-size: 1.1rem; font-weight: 800; color: #1e40af;">0 PLN / mc</span>
+      </div>
+      <p style="font-size: 0.8rem; color: #3b82f6;">Średnia miesięczna ze wszystkich zarejestrowanych rachunków.</p>
+      <div id="averagedListDisplay" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;"></div>
+    </div>
+
+    <!-- Tabela z selektorem miesiąca i sortowaniem -->
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
+        <h2>Wpisy w Dzienniku</h2>
+        <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <label style="margin: 0; font-size: 0.85rem; font-weight: 600;" for="histFilterMonth">Miesiąc:</label>
+            <select id="histFilterMonth" style="width: auto; padding: 6px 10px; font-weight: bold;"></select>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <label style="margin: 0; font-size: 0.85rem; font-weight: 600;" for="histSortOrder">Sortuj:</label>
+            <select id="histSortOrder" style="width: auto; padding: 6px 10px; font-weight: bold;">
+              <option value="desc">Od najnowszych (od góry)</option>
+              <option value="asc">Od najstarszych (od góry)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pasek z podsumowaniem dla wybranego filtra -->
+      <div id="filterSummaryBar" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin: 10px 0; display: flex; justify-content: space-between; font-size: 0.85rem;">
+        <span style="color: #475569;">Suma widocznych pozycji:</span>
+        <strong id="filteredMonthSum" style="color: #0f172a;">0 PLN</strong>
+      </div>
+
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>Miesiąc</th>
+            <th>Kategoria</th>
+            <th>Kwota</th>
+            <th>Akcja</th>
+          </tr>
+        </thead>
+        <tbody id="historyTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ZAKŁADKA 3: MIESIĄCE & PROGNOZA -->
+  <div id="reportTab" class="tab-content">
+    
+    <div class="forecast-card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="color: #86198f; margin-bottom: 4px;">🔮 Prognoza na kolejny miesiąc</h2>
+        <span id="forecastBasisTag" style="font-size: 0.75rem; background: #fae8ff; color: #a21caf; padding: 4px 10px; border-radius: 20px; font-weight: 700;"></span>
+      </div>
+      <p style="font-size: 0.85rem; color: #701a75; margin-bottom: 14px;">
+        Szacunek kosztów, oszczędności i dziennego budżetu Fun Money wyliczony na podstawie historycznych średnich (lub kosztów stałych).
+      </p>
+
+      <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+        <div style="background: #fff; padding: 14px; border-radius: 12px; border: 1px solid #f5d0fe;">
+          <span style="font-size: 0.75rem; color: #86198f; font-weight: 600; text-transform: uppercase;">Przewidywane minimum</span>
+          <strong id="forecastSurvivalVal" style="font-size: 1.3rem; color: #4a044e; display: block; margin-top: 4px;">0 PLN</strong>
+        </div>
+        <div style="background: #fff; padding: 14px; border-radius: 12px; border: 1px solid #f5d0fe;">
+          <span style="font-size: 0.75rem; color: #86198f; font-weight: 600; text-transform: uppercase;">Prognozowane oszczędności</span>
+          <strong id="forecastSavingsVal" style="font-size: 1.3rem; color: #15803d; display: block; margin-top: 4px;">0 PLN</strong>
+        </div>
+        <div style="background: #fff; padding: 14px; border-radius: 12px; border: 1px solid #f5d0fe;">
+          <span style="font-size: 0.75rem; color: #86198f; font-weight: 600; text-transform: uppercase;">Prognozowane Fun Money</span>
+          <strong id="forecastFunVal" style="font-size: 1.3rem; color: #7c3aed; display: block; margin-top: 4px;">0 PLN</strong>
+        </div>
+        <div style="background: #fff; padding: 14px; border-radius: 12px; border: 1px solid #f5d0fe;">
+          <span style="font-size: 0.75rem; color: #86198f; font-weight: 600; text-transform: uppercase;">Dzienny limit luzu</span>
+          <strong id="forecastDailyFunVal" style="font-size: 1.3rem; color: #2563eb; display: block; margin-top: 4px;">0 PLN / dzień</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <h2>Szczegóły wybranego miesiąca</h2>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <label style="margin: 0; font-size: 0.85rem;" for="selectReportMonth">Wybierz miesiąc:</label>
+          <select id="selectReportMonth" style="width: auto; padding: 6px 12px; font-weight: bold;"></select>
+        </div>
+      </div>
+
+      <div style="margin-top: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
+          <span style="font-size: 0.9rem; color: #475569;">Suma poniesionych wydatków w tym miesiącu:</span>
+          <strong id="monthTotalExpense" style="font-size: 1.4rem; color: #0f172a;">0 PLN</strong>
+        </div>
+      </div>
+
+      <table class="styled-table" style="margin-top: 16px;">
+        <thead>
+          <tr>
+            <th>Kategoria wydatku</th>
+            <th>Kwota</th>
+            <th>Udział w miesiącu</th>
+          </tr>
+        </thead>
+        <tbody id="monthDetailsBody"></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function switchTab(tabId, btn) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  btn.classList.add('active');
+
+  if (tabId === 'reportTab') {
+    renderReportTab();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  let manualCosts = JSON.parse(localStorage.getItem('my_manual_costs') || '[]');
+  let historyLogs = JSON.parse(localStorage.getItem('my_history_logs') || '[]');
+
+  // Elementy Zakładki 1
+  const incomeInput = document.getElementById('income');
+  const rushEmergencyCheckbox = document.getElementById('rushEmergencyFund');
+  const useAveragedCheckbox = document.getElementById('useAveragedCosts');
+  const syncBanner = document.getElementById('syncBanner');
+  const avgCountBadge = document.getElementById('avgCountBadge');
+
+  const adultsInput = document.getElementById('adultsCount');
+  const kidsInput = document.getElementById('kidsCount');
+  const include800PlusEl = document.getElementById('include800Plus');
+  const commuteKmInput = document.getElementById('commuteKm');
+  const commuteDaysInput = document.getElementById('commuteDays');
+  const fuelUsageInput = document.getElementById('carFuelUsage');
+  const fuelPriceInput = document.getElementById('fuelPrice');
+  const excelFileInput = document.getElementById('excelFile');
+
+  const costListEl = document.getElementById('costList');
+  const newCostName = document.getElementById('newCostName');
+  const newCostAmount = document.getElementById('newCostAmount');
+  const addCostBtn = document.getElementById('addCostBtn');
+
+  const alertBox = document.getElementById('alertBox');
+  const survivalTotalEl = document.getElementById('survivalTotal');
+  const emergencyGoalValEl = document.getElementById('emergencyGoalVal');
+  const sprintSavingSpeedEl = document.getElementById('sprintSavingSpeed');
+  const sprintMonthsCountEl = document.getElementById('sprintMonthsCount');
+
+  const funBadgeLabel = document.getElementById('funBadgeLabel');
+  const monthlyFunValEl = document.getElementById('monthlyFunVal');
+  const dailyFunValEl = document.getElementById('dailyFunVal');
+  const barFunTitle = document.getElementById('barFunTitle');
+  const barSavingsTitle = document.getElementById('barSavingsTitle');
+
+  const barFixedVal = document.getElementById('barFixedVal');
+  const barCommuteVal = document.getElementById('barCommuteVal');
+  const barBasketVal = document.getElementById('barBasketVal');
+  const barSavingsVal = document.getElementById('barSavingsVal');
+  const barFunVal = document.getElementById('barFunVal');
+
+  const barFixed = document.getElementById('barFixed');
+  const barCommute = document.getElementById('barCommute');
+  const barBasket = document.getElementById('barBasket');
+  const barSavings = document.getElementById('barSavings');
+  const barFun = document.getElementById('barFun');
+
+  // Elementy Zakładki 2
+  const histMonthInput = document.getElementById('histMonth');
+  const histNameInput = document.getElementById('histName');
+  const histAmountInput = document.getElementById('histAmount');
+  const addHistBtn = document.getElementById('addHistBtn');
+  const historyTableBody = document.getElementById('historyTableBody');
+  const averagedListDisplay = document.getElementById('averagedListDisplay');
+  const avgGrandTotal = document.getElementById('avgGrandTotal');
+  const histFilterMonth = document.getElementById('histFilterMonth');
+  const histSortOrder = document.getElementById('histSortOrder');
+  const filteredMonthSum = document.getElementById('filteredMonthSum');
+
+  // Elementy Zakładki 3
+  const forecastBasisTag = document.getElementById('forecastBasisTag');
+  const forecastSurvivalVal = document.getElementById('forecastSurvivalVal');
+  const forecastSavingsVal = document.getElementById('forecastSavingsVal');
+  const forecastFunVal = document.getElementById('forecastFunVal');
+  const forecastDailyFunVal = document.getElementById('forecastDailyFunVal');
+  const selectReportMonth = document.getElementById('selectReportMonth');
+  const monthTotalExpense = document.getElementById('monthTotalExpense');
+  const monthDetailsBody = document.getElementById('monthDetailsBody');
+
+  const today = new Date();
+  histMonthInput.value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+
+  function getAveragedCostsFromHistory() {
+    if (historyLogs.length === 0) return [];
+    const grouped = {};
+    historyLogs.forEach(entry => {
+      const cleanName = entry.name.trim();
+      if (!grouped[cleanName]) grouped[cleanName] = { total: 0, count: 0 };
+      grouped[cleanName].total += entry.amount;
+      grouped[cleanName].count += 1;
+    });
+
+    return Object.keys(grouped).map(name => ({
+      id: name,
+      name: `${name} (średnia z ${grouped[name].count} mies.)`,
+      amount: Math.round(grouped[name].total / grouped[name].count)
+    }));
+  }
+
+  function updateFilterMonthOptions() {
+    const currentSelected = histFilterMonth.value;
+    const uniqueMonths = [...new Set(historyLogs.map(item => item.month))].sort().reverse();
+    
+    histFilterMonth.innerHTML = '';
+    
+    const allOpt = document.createElement('option');
+    allOpt.value = 'ALL';
+    allOpt.textContent = 'Wszystkie miesiące';
+    histFilterMonth.appendChild(allOpt);
+
+    uniqueMonths.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = m;
+      histFilterMonth.appendChild(opt);
+    });
+
+    if (uniqueMonths.includes(currentSelected)) {
+      histFilterMonth.value = currentSelected;
+    } else if (uniqueMonths.length > 0 && currentSelected !== 'ALL') {
+      histFilterMonth.value = uniqueMonths[0];
+    } else {
+      histFilterMonth.value = 'ALL';
+    }
+  }
+
+  // Renderowanie tabeli z uwzględnieniem filtra i wybranego sortowania (ASC/DESC)
+  function renderHistoryTable() {
+    historyTableBody.innerHTML = '';
+    const selectedFilter = histFilterMonth.value;
+    const sortOrder = histSortOrder.value; // 'desc' lub 'asc'
+
+    // 1. Filtrowanie
+    let itemsToDisplay = [...historyLogs];
+    if (selectedFilter && selectedFilter !== 'ALL') {
+      itemsToDisplay = itemsToDisplay.filter(entry => entry.month === selectedFilter);
+    }
+
+    // 2. Sortowanie
+    itemsToDisplay.sort((a, b) => {
+      if (a.month !== b.month) {
+        return sortOrder === 'asc' 
+          ? a.month.localeCompare(b.month) 
+          : b.month.localeCompare(a.month);
+      }
+      // W ramach tego samego miesiąca sortujemy po ID (kolejności dodania)
+      return sortOrder === 'asc' ? a.id - b.id : b.id - a.id;
+    });
+
+    const totalSum = itemsToDisplay.reduce((sum, item) => sum + item.amount, 0);
+    filteredMonthSum.textContent = `${totalSum.toLocaleString('pl-PL')} PLN`;
+
+    if (itemsToDisplay.length === 0) {
+      historyTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">Brak rachunków ${selectedFilter !== 'ALL' ? 'dla miesiąca ' + selectedFilter : 'w historii'}.</td></tr>`;
+      return;
+    }
+
+    itemsToDisplay.forEach(entry => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${entry.month}</td>
+        <td><strong>${entry.name}</strong></td>
+        <td>${entry.amount.toLocaleString('pl-PL')} PLN</td>
+        <td><button class="del-btn" style="color:#ef4444; border:none; background:none; cursor:pointer;" onclick="deleteHistoryEntry(${entry.id})">✕ Usuń</button></td>
+      `;
+      historyTableBody.appendChild(tr);
+    });
+  }
+
+  function renderHistory() {
+    localStorage.setItem('my_history_logs', JSON.stringify(historyLogs));
+    
+    if (historyLogs.length === 0) {
+      syncBanner.style.display = 'none';
+    } else {
+      syncBanner.style.display = 'flex';
+    }
+
+    updateFilterMonthOptions();
+    renderHistoryTable();
+
+    const averaged = getAveragedCostsFromHistory();
+    averagedListDisplay.innerHTML = '';
+    let totalAvg = 0;
+
+    averaged.forEach(item => {
+      totalAvg += item.amount;
+      const chip = document.createElement('div');
+      chip.style.cssText = 'background:#fff; border:1px solid #bfdbfe; padding:6px 10px; border-radius:8px; font-size:0.8rem; font-weight:600; color:#1e40af;';
+      chip.textContent = `${item.name}: ${item.amount} PLN/mc`;
+      averagedListDisplay.appendChild(chip);
+    });
+
+    avgGrandTotal.textContent = `${totalAvg} PLN / mc`;
+    avgCountBadge.textContent = `${averaged.length} pozycji`;
+
+    calculateAll();
+  }
+
+  histFilterMonth.addEventListener('change', renderHistoryTable);
+  histSortOrder.addEventListener('change', renderHistoryTable);
+
+  window.deleteHistoryEntry = function(id) {
+    historyLogs = historyLogs.filter(item => item.id !== id);
+    renderHistory();
+  };
+
+  addHistBtn.addEventListener('click', () => {
+    const month = histMonthInput.value;
+    const name = histNameInput.value.trim();
+    const amount = parseFloat(histAmountInput.value);
+
+    if (month && name && !isNaN(amount) && amount > 0) {
+      historyLogs.push({ id: Date.now(), month, name, amount });
+      histNameInput.value = '';
+      histAmountInput.value = '';
+      
+      histFilterMonth.value = month;
+      renderHistory();
+    }
+  });
+
+  function computeBudget(fixedList, income, rushActive) {
+    const adults = Math.max(income > 0 ? 1 : 0, parseInt(adultsInput.value) || (income > 0 ? 1 : 0));
+    const kids = Math.max(0, parseInt(kidsInput.value) || 0);
+    const has800 = include800PlusEl.checked;
+
+    const kmOneWay = Math.max(0, parseFloat(commuteKmInput.value) || 0);
+    const days = Math.max(0, parseFloat(commuteDaysInput.value) || 0);
+    const usage = Math.max(0, parseFloat(fuelUsageInput.value) || 0);
+    const fuelPrice = Math.max(0, parseFloat(fuelPriceInput.value) || 0);
+
+    const totalFixed = fixedList.reduce((sum, item) => sum + item.amount, 0);
+    const totalKmMonth = 2 * kmOneWay * days;
+    const fuelCostPerKm = (usage / 100) * fuelPrice;
+    const wearPerKm = totalKmMonth > 0 ? 0.20 : 0;
+    const monthlyCommute = Math.round(totalKmMonth * (fuelCostPerKm + wearPerKm));
+
+    const baseBasket = adults > 0 ? 950 : 0;
+    const oecdScale = adults > 0 ? (1.0 + (adults - 1) * 0.5 + kids * 0.3) : 0;
+    const grossFood = Math.round(baseBasket * oecdScale);
+    const total800Plus = (has800 && kids > 0) ? (kids * 800) : 0;
+    const netFood = Math.max(0, grossFood - total800Plus);
+
+    const totalSurvival = totalFixed + monthlyCommute + netFood;
+    const emergency6Months = totalSurvival * 6;
+
+    let savings = 0;
+    let funMoney = 0;
+    let dailyFun = 0;
+
+    if (income > 0 && income >= totalSurvival) {
+      const freeCash = income - totalSurvival;
+      if (rushActive) {
+        if (freeCash <= 200) {
+          funMoney = Math.round(freeCash * 0.15);
+        } else {
+          const rawFun = Math.round(freeCash * 0.15);
+          funMoney = Math.min(600, Math.max(150, rawFun));
+          if (funMoney > freeCash) funMoney = Math.round(freeCash * 0.20);
+        }
+        savings = freeCash - funMoney;
+      } else {
+        funMoney = Math.round(freeCash * 0.20);
+        savings = freeCash - funMoney;
+      }
+      dailyFun = Math.round(funMoney / 30);
+    }
+
+    return { totalFixed, monthlyCommute, netFood, totalSurvival, emergency6Months, savings, funMoney, dailyFun };
+  }
+
+  function calculateAll() {
+    const income = Math.max(0, parseFloat(incomeInput.value) || 0);
+    const rushActive = rushEmergencyCheckbox.checked;
+    const useAveraged = useAveragedCheckbox.checked;
+
+    const activeFixedList = (useAveraged && historyLogs.length > 0) 
+      ? getAveragedCostsFromHistory() 
+      : manualCosts;
+
+    renderCostList(activeFixedList, useAveraged);
+
+    const res = computeBudget(activeFixedList, income, rushActive);
+
+    if (income > 0 && income < res.totalSurvival) {
+      alertBox.className = 'alert-box';
+      alertBox.textContent = `Deficyt! Twoje zarobki (${income} PLN) nie pokrywają minimum kosztów (${res.totalSurvival} PLN). Brakuje ${res.totalSurvival - income} PLN miesięcznie.`;
+      alertBox.style.display = 'block';
+    } else {
+      alertBox.style.display = 'none';
+    }
+
+    if (rushActive) {
+      funBadgeLabel.textContent = 'Fun Money (15% luzu)';
+      barFunTitle.textContent = 'Fun Money (15% wolnych środków)';
+      barSavingsTitle.textContent = 'Poduszka finansowa (85% środków)';
+    } else {
+      funBadgeLabel.textContent = 'Fun Money (20% luzu)';
+      barFunTitle.textContent = 'Fun Money (20% wolnych środków)';
+      barSavingsTitle.textContent = 'Oszczędności / Inwestycje (80%)';
+    }
+
+    let monthsText = '--';
+    if (res.savings > 0 && res.emergency6Months > 0) {
+      const m = Math.ceil(res.emergency6Months / res.savings);
+      monthsText = `${m} mies. (${(m / 12).toFixed(1)} roku)`;
+    }
+
+    survivalTotalEl.textContent = res.totalSurvival.toLocaleString('pl-PL');
+    emergencyGoalValEl.textContent = `${res.emergency6Months.toLocaleString('pl-PL')} PLN`;
+    sprintSavingSpeedEl.textContent = `${res.savings.toLocaleString('pl-PL')} PLN/mc`;
+    sprintMonthsCountEl.textContent = monthsText;
+
+    monthlyFunValEl.textContent = `${res.funMoney.toLocaleString('pl-PL')} PLN`;
+    dailyFunValEl.textContent = `${res.dailyFun} PLN/dzień`;
+
+    barFixedVal.textContent = `${res.totalFixed} PLN`;
+    barCommuteVal.textContent = `${res.monthlyCommute} PLN`;
+    barBasketVal.textContent = `${res.netFood} PLN`;
+    barSavingsVal.textContent = `${res.savings} PLN`;
+    barFunVal.textContent = `${res.funMoney} PLN`;
+
+    const baseDenom = Math.max(income, res.totalSurvival, 1);
+    barFixed.style.width = income > 0 ? `${Math.min(100, (res.totalFixed / baseDenom) * 100)}%` : '0%';
+    barCommute.style.width = income > 0 ? `${Math.min(100, (res.monthlyCommute / baseDenom) * 100)}%` : '0%';
+    barBasket.style.width = income > 0 ? `${Math.min(100, (res.netFood / baseDenom) * 100)}%` : '0%';
+    barSavings.style.width = income > 0 ? `${Math.min(100, (res.savings / baseDenom) * 100)}%` : '0%';
+    barFun.style.width = income > 0 ? `${Math.min(100, (res.funMoney / baseDenom) * 100)}%` : '0%';
+  }
+
+  function renderCostList(listToRender, isAveraged) {
+    costListEl.innerHTML = '';
+    const manualAddRow = document.getElementById('manualAddRow');
+    manualAddRow.style.display = isAveraged ? 'none' : 'flex';
+
+    if (listToRender.length === 0) {
+      costListEl.innerHTML = '<li class="empty-msg">Brak wpisanych pozycji stałych. Wpisz rachunek lub wczytaj plik Excel.</li>';
+    } else {
+      listToRender.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'cost-item';
+        li.innerHTML = `
+          <span>${item.name}</span>
+          <div>
+            <strong>${item.amount.toLocaleString('pl-PL')} PLN</strong>
+            ${!isAveraged ? `<button class="del-btn" type="button">✕</button>` : ''}
+          </div>
+        `;
+        if (!isAveraged) {
+          li.querySelector('.del-btn').addEventListener('click', () => {
+            manualCosts = manualCosts.filter(c => c.id !== item.id);
+            localStorage.setItem('my_manual_costs', JSON.stringify(manualCosts));
+            calculateAll();
+          });
+        }
+        costListEl.appendChild(li);
+      });
+    }
+  }
+
+  function addCost() {
+    const name = newCostName.value.trim();
+    const amount = parseFloat(newCostAmount.value);
+    if (name && !isNaN(amount) && amount > 0) {
+      manualCosts.push({ id: Date.now(), name, amount });
+      localStorage.setItem('my_manual_costs', JSON.stringify(manualCosts));
+      newCostName.value = '';
+      newCostAmount.value = '';
+      calculateAll();
+      newCostName.focus();
+    }
+  }
+
+  function handleExcelUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      try {
+        const data = new Uint8Array(evt.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        
+        let importedCount = 0;
+        jsonData.forEach((row) => {
+          if (!row || row.length < 2) return;
+          let nameCandidate = null;
+          let amountCandidate = null;
+
+          row.forEach(cell => {
+            if (cell === null || cell === undefined) return;
+            const strVal = String(cell).trim();
+            const cleanedNum = parseFloat(strVal.replace(/\s+/g, '').replace('zł', '').replace('PLN', '').replace(',', '.'));
+            
+            if (!isNaN(cleanedNum) && cleanedNum > 0 && amountCandidate === null) {
+              amountCandidate = cleanedNum;
+            } else if (isNaN(Number(strVal)) && strVal.length > 1 && nameCandidate === null) {
+              nameCandidate = strVal;
+            }
+          });
+
+          if (nameCandidate && amountCandidate !== null) {
+            const lower = nameCandidate.toLowerCase();
+            if (lower !== 'nazwa' && lower !== 'kategoria' && lower !== 'wydatek' && lower !== 'opis') {
+              manualCosts.push({
+                id: Date.now() + Math.random(),
+                name: nameCandidate,
+                amount: amountCandidate
+              });
+              importedCount++;
+            }
+          }
+        });
+
+        if (importedCount > 0) {
+          localStorage.setItem('my_manual_costs', JSON.stringify(manualCosts));
+          alert(`Pomyślnie zaimportowano ${importedCount} pozycji stałych!`);
+          calculateAll();
+        } else {
+          alert('Nie udało się rozpoznać wydatków. Sprawdź format pliku.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Błąd odczytu pliku.');
+      }
+      excelFileInput.value = '';
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function renderReportTab() {
+    const income = Math.max(0, parseFloat(incomeInput.value) || 0);
+    const rushActive = rushEmergencyCheckbox.checked;
+
+    const averagedHistory = getAveragedCostsFromHistory();
+    const hasHistory = averagedHistory.length > 0;
+    const forecastFixedList = hasHistory ? averagedHistory : manualCosts;
+
+    forecastBasisTag.textContent = hasHistory 
+      ? `Baza: Średnia z ${historyLogs.length} rachunków` 
+      : 'Baza: Deklarowane koszty stałe';
+
+    const forecastRes = computeBudget(forecastFixedList, income, rushActive);
+
+    forecastSurvivalVal.textContent = `${forecastRes.totalSurvival.toLocaleString('pl-PL')} PLN`;
+    forecastSavingsVal.textContent = `${forecastRes.savings.toLocaleString('pl-PL')} PLN`;
+    forecastFunVal.textContent = `${forecastRes.funMoney.toLocaleString('pl-PL')} PLN`;
+    forecastDailyFunVal.textContent = `${forecastRes.dailyFun} PLN / dzień`;
+
+    const uniqueMonths = [...new Set(historyLogs.map(item => item.month))].sort().reverse();
+    selectReportMonth.innerHTML = '';
+
+    if (uniqueMonths.length === 0) {
+      selectReportMonth.innerHTML = '<option value="">Brak danych</option>';
+      monthTotalExpense.textContent = '0 PLN';
+      monthDetailsBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#94a3b8;">Brak zapisanych miesięcy w Dzienniku. Dodaj wpisy w zakładce 2.</td></tr>';
+      return;
+    }
+
+    uniqueMonths.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = m;
+      selectReportMonth.appendChild(opt);
+    });
+
+    renderSelectedMonthDetails(selectReportMonth.value);
+  }
+
+  function renderSelectedMonthDetails(selectedMonth) {
+    if (!selectedMonth) return;
+    const filtered = historyLogs.filter(item => item.month === selectedMonth);
+    const total = filtered.reduce((sum, item) => sum + item.amount, 0);
+
+    monthTotalExpense.textContent = `${total.toLocaleString('pl-PL')} PLN`;
+    monthDetailsBody.innerHTML = '';
+
+    filtered.forEach(item => {
+      const percent = total > 0 ? Math.round((item.amount / total) * 100) : 0;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${item.name}</strong></td>
+        <td>${item.amount.toLocaleString('pl-PL')} PLN</td>
+        <td>${percent}% całości</td>
+      `;
+      monthDetailsBody.appendChild(tr);
+    });
+  }
+
+  selectReportMonth.addEventListener('change', (e) => {
+    renderSelectedMonthDetails(e.target.value);
+  });
+
+  addCostBtn.addEventListener('click', addCost);
+  newCostAmount.addEventListener('keydown', (e) => { if (e.key === 'Enter') addCost(); });
+  newCostName.addEventListener('keydown', (e) => { if (e.key === 'Enter') newCostAmount.focus(); });
+  excelFileInput.addEventListener('change', handleExcelUpload);
+
+  [incomeInput, rushEmergencyCheckbox, useAveragedCheckbox, adultsInput, kidsInput, include800PlusEl, commuteKmInput, commuteDaysInput, fuelUsageInput, fuelPriceInput]
+    .forEach(el => el.addEventListener('input', calculateAll));
+
+  rushEmergencyCheckbox.addEventListener('change', calculateAll);
+  useAveragedCheckbox.addEventListener('change', calculateAll);
+
+  renderHistory();
+  calculateAll();
+});
+</script>
+
+</body>
+</html>
