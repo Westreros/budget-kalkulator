@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kalkulator Kosztów Przetrwania i Budżetu Domowego</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: #f1f5f9; color: #0f172a; padding: 20px 16px; }
@@ -67,7 +68,6 @@
     .col-inputs { order: 1; }
     .col-results { order: 2; }
 
-    /* Na telefonie czarny pasek jest bardziej kompaktowy, żeby nie zasłaniał ekranu przy przewijaniu */
     .metric-hero {
       background: #0f172a;
       color: #fff;
@@ -84,7 +84,7 @@
     }
     .metric-hero .tag { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 700; }
     .metric-hero .val { font-size: 1.65rem; font-weight: 800; color: #38bdf8; white-space: nowrap; }
-    .metric-hero .desc { display: none; } /* Ukryte na telefonie, by pasek sticky był niski */
+    .metric-hero .desc { display: none; }
 
     /* Układ na komputerze (Full-Width 2 kolumny) */
     @media (min-width: 960px) {
@@ -119,7 +119,6 @@
       .metric-hero .desc { display: block; font-size: 0.85rem; color: #cbd5e1; line-height: 1.4; margin-top: 6px; }
     }
 
-    /* Na dużych monitorach formularze układają się w wewnętrzną siatkę 2x2 */
     @media (min-width: 1400px) {
       .inputs-subgrid {
         display: grid;
@@ -127,6 +126,19 @@
         gap: 24px;
       }
       .inputs-subgrid .card { margin-bottom: 0; }
+    }
+
+    /* Układ w zakładce Dziennik Rachunków: Tabela + Wykres kołowy obok siebie */
+    .history-split-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (min-width: 1024px) {
+      .history-split-grid {
+        grid-template-columns: 1.35fr 0.65fr;
+      }
     }
 
     .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 22px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); margin-bottom: 20px; }
@@ -191,9 +203,9 @@
     li.empty-msg { color: #94a3b8; font-size: 0.85rem; text-align: center; padding: 10px 0; border: 1px dashed #e2e8f0; border-radius: 8px; }
 
     .form-inline { display: flex; gap: 8px; }
-    .form-inline input[type="text"] { flex: 1; }
-    .form-inline input[type="number"] { width: 105px; }
-    button.btn-add { background: #2563eb; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+    .form-inline input[type="text"] { flex: 1; min-width: 180px; }
+    .form-inline input[type="number"] { width: 115px; }
+    button.btn-add { background: #2563eb; color: #fff; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; white-space: nowrap; }
     button.btn-add:hover { background: #1d4ed8; }
 
     .sprint-card {
@@ -229,6 +241,39 @@
     .styled-table th, .styled-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #e2e8f0; }
     .styled-table th { background: #f8fafc; color: #475569; font-weight: 600; }
     .average-card { background: #eff6ff; border: 1px solid #93c5fd; border-radius: 12px; padding: 18px; margin-bottom: 20px; }
+
+    .cat-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .cat-Mieszkanie { background: #dbeafe; color: #1e40af; }
+    .cat-Jedzenie { background: #dcfce7; color: #166534; }
+    .cat-Dziecko { background: #fef3c7; color: #92400e; }
+    .cat-Inne { background: #f1f5f9; color: #475569; }
+
+    .chart-box {
+      position: relative;
+      max-width: 320px;
+      margin: 0 auto;
+      padding: 10px 0;
+    }
+    .cat-legend-list {
+      margin-top: 16px;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 0.85rem;
+    }
+    .cat-legend-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
     .forecast-card {
       background: #fdf4ff;
@@ -450,18 +495,26 @@
   <!-- ZAKŁADKA 2: DZIENNIK RACHUNKÓW -->
   <div id="historyTab" class="tab-content">
     <div class="card">
-      <h2>Dodaj rzeczywisty rachunek</h2>
+      <h2>Dodaj rzeczywisty wydatek / rachunek</h2>
       <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 14px;">
-        Wpisuj rachunki, które przychodzą nieregularnie (np. prąd, gaz, woda).
+        Wybierz miesiąc, główną kategorię (np. Mieszkanie, Jedzenie, Dziecko), wpisz nazwę rachunku oraz kwotę.
       </p>
 
       <div class="form-inline" style="flex-wrap: wrap;">
-        <select id="histInputMonth" style="width: 145px; font-weight: 600;"></select>
+        <select id="histInputMonth" style="width: 140px; font-weight: 600;"></select>
         <input type="number" id="histInputYear" style="width: 90px; font-weight: 600;" min="2000" max="2100">
         
-        <input type="text" id="histName" placeholder="Nazwa (np. Prąd, Gaz, Czynsz)">
+        <!-- Wybór kategorii wydatku -->
+        <select id="histCategory" style="width: 160px; font-weight: 600; color: #1e40af;">
+          <option value="Mieszkanie">1. Mieszkanie</option>
+          <option value="Jedzenie">2. Jedzenie</option>
+          <option value="Dziecko">3. Dziecko</option>
+          <option value="Inne">4. Inne</option>
+        </select>
+
+        <input type="text" id="histName" placeholder="Opis (np. Prąd, Biedronka, Przedszkole)">
         <input type="number" id="histAmount" placeholder="Kwota (PLN)" min="0">
-        <button type="button" class="btn-add" id="addHistBtn">Zapisz rachunek</button>
+        <button type="button" class="btn-add" id="addHistBtn">Zapisz wydatek</button>
       </div>
     </div>
 
@@ -474,44 +527,67 @@
       <div id="averagedListDisplay" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;"></div>
     </div>
 
-    <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
-        <h2>Wpisy w Dzienniku</h2>
-        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <label style="margin: 0; font-size: 0.85rem; font-weight: 600;" for="histFilterYear">Rok:</label>
-            <select id="histFilterYear" style="width: auto; padding: 6px 10px; font-weight: bold;"></select>
+    <!-- DWUKOLUMNOWY UKŁAD: TABELA WYDATKÓW + DIAGRAM KOŁOWY KATEGORII -->
+    <div class="history-split-grid">
+      
+      <!-- Kolumna lewa: Tabela wpisów -->
+      <div class="card" style="margin-bottom: 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
+          <h2>Wpisy w Dzienniku</h2>
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <label style="margin: 0; font-size: 0.85rem; font-weight: 600;" for="histFilterYear">Rok:</label>
+              <select id="histFilterYear" style="width: auto; padding: 6px 10px; font-weight: bold;"></select>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <label style="margin: 0; font-size: 0.85rem; font-weight: 600;" for="histFilterMonth">Miesiąc:</label>
+              <select id="histFilterMonth" style="width: auto; padding: 6px 10px; font-weight: bold;"></select>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <label style="margin: 0; font-size: 0.85rem; font-weight: 600;" for="histSortOrder">Sortuj:</label>
+              <select id="histSortOrder" style="width: auto; padding: 6px 10px; font-weight: bold;">
+                <option value="desc">Od najnowszych</option>
+                <option value="asc">Od najstarszych</option>
+              </select>
+            </div>
           </div>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <label style="margin: 0; font-size: 0.85rem; font-weight: 600;" for="histFilterMonth">Miesiąc:</label>
-            <select id="histFilterMonth" style="width: auto; padding: 6px 10px; font-weight: bold;"></select>
-          </div>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <label style="margin: 0; font-size: 0.85rem; font-weight: 600;" for="histSortOrder">Sortuj:</label>
-            <select id="histSortOrder" style="width: auto; padding: 6px 10px; font-weight: bold;">
-              <option value="desc">Od najnowszych</option>
-              <option value="asc">Od najstarszych</option>
-            </select>
-          </div>
+        </div>
+
+        <div id="filterSummaryBar" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin: 10px 0; display: flex; justify-content: space-between; font-size: 0.85rem;">
+          <span id="filteredMonthLabel" style="color: #475569;">Suma widocznych pozycji:</span>
+          <strong id="filteredMonthSum" style="color: #0f172a;">0 PLN</strong>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th>Okres</th>
+                <th>Kategoria</th>
+                <th>Opis wydatku</th>
+                <th>Kwota</th>
+                <th>Akcja</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody"></tbody>
+          </table>
         </div>
       </div>
 
-      <div id="filterSummaryBar" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin: 10px 0; display: flex; justify-content: space-between; font-size: 0.85rem;">
-        <span id="filteredMonthLabel" style="color: #475569;">Suma widocznych pozycji:</span>
-        <strong id="filteredMonthSum" style="color: #0f172a;">0 PLN</strong>
+      <!-- Kolumna prawa: Diagram kołowy kategorii -->
+      <div class="card" style="margin-bottom: 0;">
+        <h2>Podział wg kategorii</h2>
+        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 12px;">
+          Wykres uwzględnia aktualnie wybrany filtr roku i miesiąca.
+        </p>
+
+        <div class="chart-box">
+          <canvas id="categoryPieChart"></canvas>
+        </div>
+
+        <div id="categoryLegendList" class="cat-legend-list"></div>
       </div>
 
-      <table class="styled-table">
-        <thead>
-          <tr>
-            <th>Okres</th>
-            <th>Kategoria</th>
-            <th>Kwota</th>
-            <th>Akcja</th>
-          </tr>
-        </thead>
-        <tbody id="historyTableBody"></tbody>
-      </table>
     </div>
   </div>
 
@@ -565,7 +641,8 @@
       <table class="styled-table" style="margin-top: 16px;">
         <thead>
           <tr>
-            <th>Kategoria wydatku</th>
+            <th>Kategoria</th>
+            <th>Opis wydatku</th>
             <th>Kwota</th>
             <th>Udział w miesiącu</th>
           </tr>
@@ -581,6 +658,15 @@ var MONTH_NAMES_PL = [
   "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec",
   "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"
 ];
+
+var CATEGORY_COLORS = {
+  "Mieszkanie": "#2563eb",
+  "Jedzenie": "#10b981",
+  "Dziecko": "#f59e0b",
+  "Inne": "#64748b"
+};
+
+var pieChartInstance = null;
 
 function formatPeriodToPL(ym) {
   if (!ym || ym.indexOf('-') === -1) return ym;
@@ -602,6 +688,9 @@ function appSwitchTab(tabId, btn) {
   if (target) target.classList.add('active');
   if (btn) btn.classList.add('active');
 
+  if (tabId === 'historyTab') {
+    renderHistoryTable();
+  }
   if (tabId === 'reportTab' && typeof renderReportTab === 'function') {
     renderReportTab();
   }
@@ -675,6 +764,83 @@ function updateHistoryFilterDropdowns() {
   fMonth.value = curMonth || 'ALL';
 }
 
+function updateCategoryChart(filteredItems) {
+  var canvas = document.getElementById('categoryPieChart');
+  var legendEl = document.getElementById('categoryLegendList');
+  if (!canvas || !legendEl) return;
+
+  var totals = {
+    "Mieszkanie": 0,
+    "Jedzenie": 0,
+    "Dziecko": 0,
+    "Inne": 0
+  };
+
+  var grandTotal = 0;
+  for (var i = 0; i < filteredItems.length; i++) {
+    var cat = filteredItems[i].category || "Inne";
+    if (totals[cat] === undefined) totals[cat] = 0;
+    var amt = Number(filteredItems[i].amount) || 0;
+    totals[cat] += amt;
+    grandTotal += amt;
+  }
+
+  var labels = [];
+  var dataVals = [];
+  var bgColors = [];
+
+  for (var key in totals) {
+    if (totals[key] > 0) {
+      labels.push(key);
+      dataVals.push(totals[key]);
+      bgColors.push(CATEGORY_COLORS[key] || "#94a3b8");
+    }
+  }
+
+  if (pieChartInstance) {
+    pieChartInstance.destroy();
+    pieChartInstance = null;
+  }
+
+  if (grandTotal === 0) {
+    legendEl.innerHTML = '<div style="text-align:center; color:#94a3b8;">Brak danych do wyświetlenia wykresu.</div>';
+    return;
+  }
+
+  if (typeof Chart !== 'undefined') {
+    pieChartInstance = new Chart(canvas, {
+      type: 'doughnut',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: dataVals,
+          backgroundColor: bgColors,
+          borderWidth: 2,
+          borderColor: '#ffffff'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' }
+        }
+      }
+    });
+  }
+
+  legendEl.innerHTML = '';
+  for (var c = 0; c < labels.length; c++) {
+    var cName = labels[c];
+    var cVal = dataVals[c];
+    var pct = Math.round((cVal / grandTotal) * 100);
+    var row = document.createElement('div');
+    row.className = 'cat-legend-item';
+    row.innerHTML = '<span><span class="cat-badge cat-' + cName + '">' + cName + '</span></span>' +
+                    '<strong>' + cVal.toLocaleString('pl-PL') + ' PLN (' + pct + '%)</strong>';
+    legendEl.appendChild(row);
+  }
+}
+
 function renderHistoryTable() {
   var tbody = document.getElementById('historyTableBody');
   if (!tbody) return;
@@ -713,16 +879,21 @@ function renderHistoryTable() {
   var sumEl = document.getElementById('filteredMonthSum');
   if (sumEl) sumEl.textContent = sum.toLocaleString('pl-PL') + ' PLN';
 
+  // Aktualizuj wykres kołowy dla przefiltrowanych pozycji
+  updateCategoryChart(items);
+
   if (items.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8; padding: 14px;">Brak rachunków dla wybranych kryteriów.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding: 14px;">Brak rachunków dla wybranych kryteriów.</td></tr>';
     return;
   }
 
   for (var k = 0; k < items.length; k++) {
+    var cat = items[k].category || 'Mieszkanie';
     var tr = document.createElement('tr');
     tr.innerHTML = '<td><strong>' + formatPeriodToPL(items[k].month) + '</strong></td>' +
+                   '<td><span class="cat-badge cat-' + cat + '">' + cat + '</span></td>' +
                    '<td>' + items[k].name + '</td>' +
-                   '<td>' + Number(items[k].amount).toLocaleString('pl-PL') + ' PLN</td>' +
+                   '<td><strong>' + Number(items[k].amount).toLocaleString('pl-PL') + ' PLN</strong></td>' +
                    '<td><button type="button" class="del-btn" style="color:#ef4444; border:none; background:none; cursor:pointer;" onclick="deleteHistoryEntry(' + items[k].id + ')">Usuń</button></td>';
     tbody.appendChild(tr);
   }
@@ -801,10 +972,8 @@ function computeBudget(fixedList, income, rushActive) {
   if (income > 0 && income >= survival) {
     var free = income - survival;
     if (rushActive) {
-      // 10% na Fun Money, 90% do poduszki finansowej
       funMoney = Math.round(free * 0.10);
     } else {
-      // Standardowo 20% na Fun Money, 80% na oszczędności
       funMoney = Math.round(free * 0.20);
     }
     savings = free - funMoney;
@@ -847,7 +1016,6 @@ function calculateAll() {
     }
   }
 
-  // Aktualizacja etykiet procentowych (10% vs 20%)
   var fBadge = document.getElementById('funBadgeLabel');
   var bFunTitle = document.getElementById('barFunTitle');
   var bSavTitle = document.getElementById('barSavingsTitle');
@@ -991,7 +1159,7 @@ function renderReportTab() {
     var totExp = document.getElementById('monthTotalExpense');
     if (totExp) totExp.textContent = '0 PLN';
     var tbody = document.getElementById('monthDetailsBody');
-    if (tbody) tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#94a3b8;">Brak zapisanych miesięcy.</td></tr>';
+    if (tbody) tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">Brak zapisanych miesięcy.</td></tr>';
     return;
   }
 
@@ -1019,9 +1187,11 @@ function renderSelectedMonthDetails(period) {
   tbody.innerHTML = '';
 
   for (var j = 0; j < filtered.length; j++) {
+    var cat = filtered[j].category || 'Mieszkanie';
     var pct = tot > 0 ? Math.round((Number(filtered[j].amount) / tot) * 100) : 0;
     var tr = document.createElement('tr');
-    tr.innerHTML = '<td><strong>' + filtered[j].name + '</strong></td>' +
+    tr.innerHTML = '<td><span class="cat-badge cat-' + cat + '">' + cat + '</span></td>' +
+                   '<td><strong>' + filtered[j].name + '</strong></td>' +
                    '<td>' + Number(filtered[j].amount).toLocaleString('pl-PL') + ' PLN</td>' +
                    '<td>' + pct + '% całości</td>';
     tbody.appendChild(tr);
@@ -1053,6 +1223,7 @@ window.onload = function() {
     addHistBtn.onclick = function() {
       var selM = document.getElementById('histInputMonth').value;
       var selY = document.getElementById('histInputYear').value;
+      var selCat = document.getElementById('histCategory').value;
       var n = document.getElementById('histName').value.trim();
       var a = parseFloat(document.getElementById('histAmount').value);
 
@@ -1063,6 +1234,7 @@ window.onload = function() {
           month: p,
           year: selY,
           monthNum: selM,
+          category: selCat,
           name: n,
           amount: a
         });
