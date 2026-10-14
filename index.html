@@ -21,31 +21,37 @@
     h1 { font-size: 1.85rem; font-weight: 800; color: #0f172a; }
     p.subtitle { color: #64748b; font-size: 0.95rem; }
 
+    /* Pasek zakładek z pełnym zaokrągleniem przycisków */
     .nav-tabs {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       margin-bottom: 24px;
       border-bottom: 2px solid #e2e8f0;
-      padding-bottom: 2px;
+      padding-bottom: 8px;
       overflow-x: auto;
     }
     .tab-btn {
       background: none;
-      border: none;
+      border: 1px solid transparent;
       padding: 10px 20px;
       font-size: 0.95rem;
       font-weight: 600;
       color: #64748b;
       cursor: pointer;
-      border-radius: 8px 8px 0 0;
-      transition: all 0.2s;
+      border-radius: 10px; /* Pełne zaokrąglenie wszystkich 4 rogów */
+      transition: all 0.2s ease;
       white-space: nowrap;
     }
-    .tab-btn:hover { color: #1e293b; background: #e2e8f0; }
+    .tab-btn:hover {
+      color: #1e293b;
+      background: #e2e8f0;
+      border-radius: 10px;
+    }
     .tab-btn.active {
       color: #2563eb;
-      border-bottom: 3px solid #2563eb;
       background: #ffffff;
+      border-color: #bfdbfe;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.12);
     }
 
     .tab-content { display: none; }
@@ -128,7 +134,7 @@
       .inputs-subgrid .card { margin-bottom: 0; }
     }
 
-    /* NOWY UKŁAD W DZIENNIKU RACHUNKÓW: Lewa kolumna (Dodawanie + Średnie) obok Prawej kolumny (Wykres) */
+    /* UKŁAD W DZIENNIKU RACHUNKÓW: Lewa kolumna (Dodawanie + Średnie) obok Prawej kolumny (Wykres) */
     .history-top-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -150,7 +156,7 @@
       }
     }
 
-    .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); margin-bottom: 20px; }
+    .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); margin-bottom: 20px; overflow: hidden; }
     .card-compact { padding: 16px 20px; }
     h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 12px; color: #1e293b; display: flex; align-items: center; justify-content: space-between; }
     
@@ -158,10 +164,14 @@
     .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
     .input-group { position: relative; margin-bottom: 12px; }
     input[type="number"], input[type="text"], select {
-      width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; outline: none; background: #fff;
+      width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; outline: none; background: #fff; transition: border-color 0.15s, box-shadow 0.15s;
     }
-    input:focus, select:focus { border-color: #2563eb; outline: none; }
-    .suffix { position: absolute; right: 10px; top: 10px; color: #94a3b8; font-weight: 600; font-size: 0.8rem; }
+    input:focus, select:focus {
+      border-color: #2563eb;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+    .suffix { position: absolute; right: 10px; top: 10px; color: #94a3b8; font-weight: 600; font-size: 0.8rem; pointer-events: none; }
 
     .goal-banner {
       background: #ecfdf5;
@@ -173,8 +183,10 @@
       align-items: flex-start;
       gap: 12px;
       cursor: pointer;
+      transition: background-color 0.15s;
     }
-    .goal-banner input { width: 20px; height: 20px; margin-top: 2px; cursor: pointer; }
+    .goal-banner:hover { background: #d1fae5; }
+    .goal-banner input { width: 20px; height: 20px; margin-top: 2px; cursor: pointer; accent-color: #059669; }
     .goal-banner-text strong { display: block; color: #065f46; font-size: 0.95rem; }
     .goal-banner-text p { font-size: 0.8rem; color: #047857; margin-top: 2px; }
 
@@ -190,33 +202,63 @@
     }
     .sync-banner label { margin: 0; cursor: pointer; display: flex; align-items: center; gap: 8px; color: #1e40af; font-weight: 600; }
 
-    .checkbox-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; margin-top: 8px; cursor: pointer; }
-    .checkbox-box input { width: 18px; height: 18px; cursor: pointer; }
+    .checkbox-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 8px;
+      cursor: pointer;
+      transition: background-color 0.15s;
+    }
+    .checkbox-box:hover { background: #f1f5f9; }
+    .checkbox-box input { width: 18px; height: 18px; cursor: pointer; accent-color: #2563eb; }
     .checkbox-box span { font-size: 0.85rem; font-weight: 600; color: #334155; }
 
     .excel-import-box {
       border: 2px dashed #93c5fd;
       background-color: #eff6ff;
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 12px;
       text-align: center;
       margin-bottom: 14px;
       cursor: pointer;
+      transition: background-color 0.15s;
     }
-    .excel-import-box:hover { background-color: #dbeafe; }
+    .excel-import-box:hover { background-color: #dbeafe; border-radius: 12px; }
     .excel-import-box label { cursor: pointer; color: #1d4ed8; font-weight: 600; display: block; }
     .excel-import-box span.hint { font-size: 0.75rem; color: #64748b; }
 
     ul.cost-list { list-style: none; margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px; max-height: 240px; overflow-y: auto; padding-right: 4px; }
-    li.cost-item { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid #f1f5f9; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; }
-    li.cost-item button.del-btn { background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer; padding: 2px 6px; font-size: 0.95rem; }
-    li.empty-msg { color: #94a3b8; font-size: 0.85rem; text-align: center; padding: 10px 0; border: 1px dashed #e2e8f0; border-radius: 8px; }
+    li.cost-item { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid #f1f5f9; padding: 8px 12px; border-radius: 10px; font-size: 0.85rem; transition: background-color 0.15s; }
+    li.cost-item:hover { background: #f1f5f9; border-radius: 10px; }
+    
+    button.del-btn {
+      background: none;
+      border: none;
+      color: #ef4444;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 4px 8px;
+      font-size: 0.85rem;
+      border-radius: 6px;
+      transition: background-color 0.15s;
+    }
+    button.del-btn:hover {
+      background-color: #fee2e2;
+      border-radius: 6px;
+    }
+
+    li.empty-msg { color: #94a3b8; font-size: 0.85rem; text-align: center; padding: 10px 0; border: 1px dashed #e2e8f0; border-radius: 10px; }
 
     .form-inline { display: flex; gap: 8px; }
     .form-inline input[type="text"] { flex: 1; min-width: 150px; }
     .form-inline input[type="number"] { width: 110px; }
-    button.btn-add { background: #2563eb; color: #fff; border: none; padding: 9px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; white-space: nowrap; }
-    button.btn-add:hover { background: #1d4ed8; }
+    button.btn-add { background: #2563eb; color: #fff; border: none; padding: 9px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; white-space: nowrap; transition: background-color 0.15s; }
+    button.btn-add:hover { background: #1d4ed8; border-radius: 8px; }
 
     .sprint-card {
       background: #f0fdf4;
@@ -247,9 +289,18 @@
     .fill-blue { background: #2563eb; }
     .fill-purple { background: #a855f7; }
 
-    .styled-table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.9rem; }
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      margin-top: 12px;
+    }
+    .styled-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
     .styled-table th, .styled-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    .styled-table tr:last-child td { border-bottom: none; }
     .styled-table th { background: #f8fafc; color: #475569; font-weight: 600; }
+    .styled-table tbody tr { transition: background-color 0.15s; }
+    .styled-table tbody tr:hover { background-color: #f8fafc; }
     
     /* Wyróżniona karta średnich kosztów z powiększoną czcionką */
     .average-card {
@@ -282,6 +333,11 @@
       font-weight: 600;
       color: #1e3a8a;
       box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      transition: transform 0.15s, background-color 0.15s;
+    }
+    .avg-chip:hover {
+      background: #f8fafc;
+      border-radius: 10px;
     }
     .avg-chip strong {
       font-size: 1.05rem;
@@ -310,7 +366,7 @@
     }
     .chart-box {
       position: relative;
-      max-width: 220px;
+      max-width: 210px;
       margin: 0 auto;
       padding: 4px 0;
     }
@@ -327,6 +383,21 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: 6px 10px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .cat-legend-item:hover {
+      background: #f1f5f9;
+      border-radius: 10px;
+    }
+    .cat-legend-item.active-cat {
+      background: #eff6ff;
+      border-color: #93c5fd;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+      border-radius: 10px;
     }
 
     .forecast-card {
@@ -595,7 +666,7 @@
         <div>
           <h2 style="margin-bottom: 4px;">Podział wg kategorii</h2>
           <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 8px;">
-            Struktura wydatków dla wybranego filtra.
+            Kliknij kategorię poniżej, aby przefiltrować tabelę.
           </p>
         </div>
 
@@ -608,7 +679,7 @@
 
     </div>
 
-    <!-- DOLNA SEKCJA: Tabela wpisów w Dzienniku -->
+    <!-- DOLNA SEKCJA: Tabela wpisów w Dzienniku z filtrem kategorii -->
     <div class="card" style="margin-bottom: 0;">
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
         <h2>Wpisy w Dzienniku</h2>
@@ -622,6 +693,16 @@
             <select id="histFilterMonth" style="width: auto; padding: 6px 10px; font-weight: bold;"></select>
           </div>
           <div style="display: flex; align-items: center; gap: 6px;">
+            <label style="margin: 0; font-size: 0.85rem; font-weight: 600;" for="histFilterCategory">Kategoria:</label>
+            <select id="histFilterCategory" style="width: auto; padding: 6px 10px; font-weight: bold; color: #1e40af;">
+              <option value="ALL">Wszystkie kategorie</option>
+              <option value="Mieszkanie">Mieszkanie</option>
+              <option value="Jedzenie">Jedzenie</option>
+              <option value="Dziecko">Dziecko</option>
+              <option value="Inne">Inne</option>
+            </select>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
             <label style="margin: 0; font-size: 0.85rem; font-weight: 600;" for="histSortOrder">Sortuj:</label>
             <select id="histSortOrder" style="width: auto; padding: 6px 10px; font-weight: bold;">
               <option value="desc">Od najnowszych</option>
@@ -631,12 +712,12 @@
         </div>
       </div>
 
-      <div id="filterSummaryBar" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin: 10px 0; display: flex; justify-content: space-between; font-size: 0.9rem;">
+      <div id="filterSummaryBar" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 14px; margin: 10px 0; display: flex; justify-content: space-between; font-size: 0.9rem;">
         <span id="filteredMonthLabel" style="color: #475569;">Suma widocznych pozycji:</span>
         <strong id="filteredMonthSum" style="color: #0f172a; font-size: 1.05rem;">0 PLN</strong>
       </div>
 
-      <div style="overflow-x: auto;">
+      <div class="table-wrapper">
         <table class="styled-table">
           <thead>
             <tr>
@@ -701,17 +782,19 @@
         </div>
       </div>
 
-      <table class="styled-table" style="margin-top: 16px;">
-        <thead>
-          <tr>
-            <th>Kategoria</th>
-            <th>Opis wydatku</th>
-            <th>Kwota</th>
-            <th>Udział w miesiącu</th>
-          </tr>
-        </thead>
-        <tbody id="monthDetailsBody"></tbody>
-      </table>
+      <div class="table-wrapper">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>Kategoria</th>
+              <th>Opis wydatku</th>
+              <th>Kwota</th>
+              <th>Udział w miesiącu</th>
+            </tr>
+          </thead>
+          <tbody id="monthDetailsBody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
@@ -829,7 +912,18 @@ function updateHistoryFilterDropdowns() {
   fMonth.value = curMonth || 'ALL';
 }
 
-function updateCategoryChart(filteredItems) {
+function toggleCategoryFilter(catName) {
+  var fCatEl = document.getElementById('histFilterCategory');
+  if (!fCatEl) return;
+  if (fCatEl.value === catName) {
+    fCatEl.value = 'ALL';
+  } else {
+    fCatEl.value = catName;
+  }
+  renderHistoryTable();
+}
+
+function updateCategoryChart(periodItems, selectedCat) {
   var canvas = document.getElementById('categoryPieChart');
   var legendEl = document.getElementById('categoryLegendList');
   if (!canvas || !legendEl) return;
@@ -842,10 +936,10 @@ function updateCategoryChart(filteredItems) {
   };
 
   var grandTotal = 0;
-  for (var i = 0; i < filteredItems.length; i++) {
-    var cat = filteredItems[i].category || "Mieszkanie";
+  for (var i = 0; i < periodItems.length; i++) {
+    var cat = periodItems[i].category || "Mieszkanie";
     if (totals[cat] === undefined) totals[cat] = 0;
-    var amt = Number(filteredItems[i].amount) || 0;
+    var amt = Number(periodItems[i].amount) || 0;
     totals[cat] += amt;
     grandTotal += amt;
   }
@@ -895,14 +989,18 @@ function updateCategoryChart(filteredItems) {
 
   legendEl.innerHTML = '';
   for (var c = 0; c < labels.length; c++) {
-    var cName = labels[c];
-    var cVal = dataVals[c];
-    var pct = Math.round((cVal / grandTotal) * 100);
-    var row = document.createElement('div');
-    row.className = 'cat-legend-item';
-    row.innerHTML = '<span><span class="cat-badge cat-' + cName + '">' + cName + '</span></span>' +
-                    '<strong>' + cVal.toLocaleString('pl-PL') + ' PLN (' + pct + '%)</strong>';
-    legendEl.appendChild(row);
+    (function(cName, cVal) {
+      var pct = Math.round((cVal / grandTotal) * 100);
+      var row = document.createElement('div');
+      row.className = 'cat-legend-item' + (selectedCat === cName ? ' active-cat' : '');
+      row.title = 'Kliknij, aby filtrować po kategorii: ' + cName;
+      row.onclick = function() {
+        toggleCategoryFilter(cName);
+      };
+      row.innerHTML = '<span><span class="cat-badge cat-' + cName + '">' + cName + '</span></span>' +
+                      '<strong>' + cVal.toLocaleString('pl-PL') + ' PLN (' + pct + '%)</strong>';
+      legendEl.appendChild(row);
+    })(labels[c], dataVals[c]);
   }
 }
 
@@ -913,22 +1011,33 @@ function renderHistoryTable() {
 
   var fYear = document.getElementById('histFilterYear') ? document.getElementById('histFilterYear').value : 'ALL';
   var fMonth = document.getElementById('histFilterMonth') ? document.getElementById('histFilterMonth').value : 'ALL';
+  var fCat = document.getElementById('histFilterCategory') ? document.getElementById('histFilterCategory').value : 'ALL';
   var sortOrder = document.getElementById('histSortOrder') ? document.getElementById('histSortOrder').value : 'desc';
 
-  var items = historyLogs.slice();
+  var periodItems = historyLogs.slice();
 
   if (fYear !== 'ALL') {
-    items = items.filter(function(e) {
+    periodItems = periodItems.filter(function(e) {
       return (e.year || e.month.split('-')[0]) === fYear;
     });
   }
   if (fMonth !== 'ALL') {
-    items = items.filter(function(e) {
+    periodItems = periodItems.filter(function(e) {
       return (e.monthNum || e.month.split('-')[1]) === fMonth;
     });
   }
 
-  items.sort(function(a, b) {
+  updateCategoryChart(periodItems, fCat);
+
+  var tableItems = periodItems.slice();
+  if (fCat !== 'ALL') {
+    tableItems = tableItems.filter(function(e) {
+      var itemCat = e.category || 'Mieszkanie';
+      return itemCat === fCat;
+    });
+  }
+
+  tableItems.sort(function(a, b) {
     var mA = a.month || '';
     var mB = b.month || '';
     if (mA !== mB) {
@@ -938,27 +1047,44 @@ function renderHistoryTable() {
   });
 
   var sum = 0;
-  for (var i = 0; i < items.length; i++) {
-    sum += (Number(items[i].amount) || 0);
+  for (var i = 0; i < tableItems.length; i++) {
+    sum += (Number(tableItems[i].amount) || 0);
   }
   var sumEl = document.getElementById('filteredMonthSum');
   if (sumEl) sumEl.textContent = sum.toLocaleString('pl-PL') + ' PLN';
 
-  updateCategoryChart(items);
+  var filterParts = [];
+  if (fMonth !== 'ALL' && fYear !== 'ALL') {
+    filterParts.push(MONTH_NAMES_PL[parseInt(fMonth, 10) - 1] + ' ' + fYear);
+  } else if (fMonth !== 'ALL') {
+    filterParts.push(MONTH_NAMES_PL[parseInt(fMonth, 10) - 1]);
+  } else if (fYear !== 'ALL') {
+    filterParts.push('Rok ' + fYear);
+  }
+  if (fCat !== 'ALL') {
+    filterParts.push('Kategoria: ' + fCat);
+  }
 
-  if (items.length === 0) {
+  var labelEl = document.getElementById('filteredMonthLabel');
+  if (labelEl) {
+    labelEl.textContent = filterParts.length > 0
+      ? 'Suma (' + filterParts.join(' | ') + '):'
+      : 'Suma wszystkich widocznych pozycji:';
+  }
+
+  if (tableItems.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding: 14px;">Brak rachunków dla wybranych kryteriów.</td></tr>';
     return;
   }
 
-  for (var k = 0; k < items.length; k++) {
-    var cat = items[k].category || 'Mieszkanie';
+  for (var k = 0; k < tableItems.length; k++) {
+    var cat = tableItems[k].category || 'Mieszkanie';
     var tr = document.createElement('tr');
-    tr.innerHTML = '<td><strong>' + formatPeriodToPL(items[k].month) + '</strong></td>' +
+    tr.innerHTML = '<td><strong>' + formatPeriodToPL(tableItems[k].month) + '</strong></td>' +
                    '<td><span class="cat-badge cat-' + cat + '">' + cat + '</span></td>' +
-                   '<td>' + items[k].name + '</td>' +
-                   '<td><strong>' + Number(items[k].amount).toLocaleString('pl-PL') + ' PLN</strong></td>' +
-                   '<td><button type="button" class="del-btn" style="color:#ef4444; border:none; background:none; cursor:pointer;" onclick="deleteHistoryEntry(' + items[k].id + ')">Usuń</button></td>';
+                   '<td>' + tableItems[k].name + '</td>' +
+                   '<td><strong>' + Number(tableItems[k].amount).toLocaleString('pl-PL') + ' PLN</strong></td>' +
+                   '<td><button type="button" class="del-btn" onclick="deleteHistoryEntry(' + tableItems[k].id + ')">✕ Usuń</button></td>';
     tbody.appendChild(tr);
   }
 }
@@ -1157,7 +1283,7 @@ function renderCostList(list, isAvg) {
     (function(item) {
       var li = document.createElement('li');
       li.className = 'cost-item';
-      li.innerHTML = '<span>' + item.name + '</span><div><strong>' + Number(item.amount).toLocaleString('pl-PL') + ' PLN</strong>' +
+      li.innerHTML = '<span>' + item.name + '</span><div style="display:flex; align-items:center; gap:6px;"><strong>' + Number(item.amount).toLocaleString('pl-PL') + ' PLN</strong>' +
                      (!isAvg ? '<button type="button" class="del-btn">✕</button>' : '') + '</div>';
       if (!isAvg) {
         var btn = li.querySelector('.del-btn');
@@ -1330,6 +1456,8 @@ window.onload = function() {
   if (fYear) fYear.onchange = renderHistoryTable;
   var fMonth = document.getElementById('histFilterMonth');
   if (fMonth) fMonth.onchange = renderHistoryTable;
+  var fCat = document.getElementById('histFilterCategory');
+  if (fCat) fCat.onchange = renderHistoryTable;
   var fSort = document.getElementById('histSortOrder');
   if (fSort) fSort.onchange = renderHistoryTable;
 
