@@ -38,7 +38,7 @@
       font-weight: 600;
       color: #64748b;
       cursor: pointer;
-      border-radius: 10px; /* Pełne zaokrąglenie wszystkich 4 rogów */
+      border-radius: 10px;
       transition: all 0.2s ease;
       white-space: nowrap;
     }
@@ -189,18 +189,6 @@
     .goal-banner input { width: 20px; height: 20px; margin-top: 2px; cursor: pointer; accent-color: #059669; }
     .goal-banner-text strong { display: block; color: #065f46; font-size: 0.95rem; }
     .goal-banner-text p { font-size: 0.8rem; color: #047857; margin-top: 2px; }
-
-    .sync-banner {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      border-radius: 10px;
-      padding: 12px;
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .sync-banner label { margin: 0; cursor: pointer; display: flex; align-items: center; gap: 8px; color: #1e40af; font-weight: 600; }
 
     .checkbox-box {
       background: #f8fafc;
@@ -463,13 +451,6 @@
 
           <div class="card">
             <h2>2. Stałe koszty życia</h2>
-            <div class="sync-banner" id="syncBanner" style="display: none;">
-              <label>
-                <input type="checkbox" id="useAveragedCosts">
-                <span>Używaj automatycznie uśrednionych kwot z Dziennika</span>
-              </label>
-              <span id="avgCountBadge" style="font-size: 0.75rem; color: #1e40af; font-weight: bold;"></span>
-            </div>
 
             <div class="excel-import-box">
               <label for="excelFile">Wczytaj plik Excel (.xlsx, .xls, .csv)</label>
@@ -1091,8 +1072,6 @@ function renderHistoryTable() {
 
 function renderHistory() {
   localStorage.setItem('my_history_logs', JSON.stringify(historyLogs));
-  var syncBanner = document.getElementById('syncBanner');
-  if (syncBanner) syncBanner.style.display = historyLogs.length === 0 ? 'none' : 'flex';
 
   updateHistoryFilterDropdowns();
   renderHistoryTable();
@@ -1115,8 +1094,6 @@ function renderHistory() {
   }
   var gt = document.getElementById('avgGrandTotal');
   if (gt) gt.textContent = totAvg.toLocaleString('pl-PL') + ' PLN / mc';
-  var badge = document.getElementById('avgCountBadge');
-  if (badge) badge.textContent = avgs.length + ' pozycji';
 
   calculateAll();
 }
@@ -1190,16 +1167,13 @@ function computeBudget(fixedList, income, rushActive) {
 function calculateAll() {
   var incEl = document.getElementById('income');
   var rushEl = document.getElementById('rushEmergencyFund');
-  var avgEl = document.getElementById('useAveragedCosts');
 
   var income = Math.max(0, parseFloat(incEl ? incEl.value : 0) || 0);
   var rush = rushEl ? rushEl.checked : false;
-  var useAvg = avgEl ? avgEl.checked : false;
 
-  var activeFixed = (useAvg && historyLogs.length > 0) ? getAveragedCostsFromHistory() : manualCosts;
-  renderCostList(activeFixed, useAvg);
+  renderCostList(manualCosts);
 
-  var res = computeBudget(activeFixed, income, rush);
+  var res = computeBudget(manualCosts, income, rush);
 
   var alertBox = document.getElementById('alertBox');
   if (alertBox) {
@@ -1268,12 +1242,10 @@ function calculateAll() {
   setBar('barFun', res.fun);
 }
 
-function renderCostList(list, isAvg) {
+function renderCostList(list) {
   var ul = document.getElementById('costList');
   if (!ul) return;
   ul.innerHTML = '';
-  var row = document.getElementById('manualAddRow');
-  if (row) row.style.display = isAvg ? 'none' : 'flex';
 
   if (list.length === 0) {
     ul.innerHTML = '<li class="empty-msg">Brak wpisanych pozycji stałych.</li>';
@@ -1284,16 +1256,14 @@ function renderCostList(list, isAvg) {
       var li = document.createElement('li');
       li.className = 'cost-item';
       li.innerHTML = '<span>' + item.name + '</span><div style="display:flex; align-items:center; gap:6px;"><strong>' + Number(item.amount).toLocaleString('pl-PL') + ' PLN</strong>' +
-                     (!isAvg ? '<button type="button" class="del-btn">✕</button>' : '') + '</div>';
-      if (!isAvg) {
-        var btn = li.querySelector('.del-btn');
-        if (btn) {
-          btn.onclick = function() {
-            manualCosts = manualCosts.filter(function(c) { return c.id !== item.id; });
-            localStorage.setItem('my_manual_costs', JSON.stringify(manualCosts));
-            calculateAll();
-          };
-        }
+                     '<button type="button" class="del-btn">✕</button></div>';
+      var btn = li.querySelector('.del-btn');
+      if (btn) {
+        btn.onclick = function() {
+          manualCosts = manualCosts.filter(function(c) { return c.id !== item.id; });
+          localStorage.setItem('my_manual_costs', JSON.stringify(manualCosts));
+          calculateAll();
+        };
       }
       ul.appendChild(li);
     })(list[i]);
@@ -1314,6 +1284,67 @@ function addCost() {
     calculateAll();
     nEl.focus();
   }
+}
+
+function handleExcelUpload(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+
+  var reader = new FileReader();
+  reader.onload = function(evt) {
+    try {
+      var data = new Uint8Array(evt.target.result);
+      var workbook = XLSX.read(data, { type: 'array' });
+      var sheetName = workbook.SheetNames[0];
+      var worksheet = workbook.Sheets[sheetName];
+      var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      
+      var importedCount = 0;
+      for (var r = 0; r < jsonData.length; r++) {
+        var row = jsonData[r];
+        if (!row || row.length < 2) continue;
+        var nameCandidate = null;
+        var amountCandidate = null;
+
+        for (var c = 0; c < row.length; c++) {
+          var cell = row[c];
+          if (cell === null || cell === undefined) continue;
+          var strVal = String(cell).trim();
+          var cleanedNum = parseFloat(strVal.replace(/\s+/g, '').replace('zł', '').replace('PLN', '').replace(',', '.'));
+          
+          if (!isNaN(cleanedNum) && cleanedNum > 0 && amountCandidate === null) {
+            amountCandidate = cleanedNum;
+          } else if (isNaN(Number(strVal)) && strVal.length > 1 && nameCandidate === null) {
+            nameCandidate = strVal;
+          }
+        }
+
+        if (nameCandidate && amountCandidate !== null) {
+          var lower = nameCandidate.toLowerCase();
+          if (lower !== 'nazwa' && lower !== 'kategoria' && lower !== 'wydatek' && lower !== 'opis') {
+            manualCosts.push({
+              id: Date.now() + Math.random(),
+              name: nameCandidate,
+              amount: amountCandidate
+            });
+            importedCount++;
+          }
+        }
+      }
+
+      if (importedCount > 0) {
+        localStorage.setItem('my_manual_costs', JSON.stringify(manualCosts));
+        alert('Pomyślnie zaimportowano ' + importedCount + ' pozycji stałych!');
+        calculateAll();
+      } else {
+        alert('Nie udało się rozpoznać wydatków. Sprawdź format pliku.');
+      }
+    } catch (err) {
+      alert('Błąd odczytu pliku.');
+    }
+    e.target.value = '';
+  };
+  reader.readAsArrayBuffer(file);
 }
 
 function renderReportTab() {
@@ -1443,7 +1474,10 @@ window.onload = function() {
   var addBtn = document.getElementById('addCostBtn');
   if (addBtn) addBtn.onclick = addCost;
 
-  var inputs = ['income', 'rushEmergencyFund', 'useAveragedCosts', 'adultsCount', 'kidsCount', 'include800Plus', 'commuteKm', 'commuteDays', 'carFuelUsage', 'fuelPrice'];
+  var excelEl = document.getElementById('excelFile');
+  if (excelEl) excelEl.onchange = handleExcelUpload;
+
+  var inputs = ['income', 'rushEmergencyFund', 'adultsCount', 'kidsCount', 'include800Plus', 'commuteKm', 'commuteDays', 'carFuelUsage', 'fuelPrice'];
   for (var i = 0; i < inputs.length; i++) {
     var el = document.getElementById(inputs[i]);
     if (el) {
