@@ -13,7 +13,6 @@
     h1 { font-size: 1.85rem; font-weight: 800; color: #0f172a; }
     p.subtitle { color: #64748b; margin-top: 4px; font-size: 0.95rem; }
 
-    /* Zakładki */
     .nav-tabs {
       display: flex;
       gap: 8px;
@@ -44,8 +43,14 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
+    /* Układ siatki i kolejność na telefonie vs komputerze */
     .grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
-    @media (min-width: 860px) { .grid { grid-template-columns: 1.1fr 0.9fr; } }
+    .col-results { order: -1; } /* Na telefonie wyniki są na samej górze */
+
+    @media (min-width: 860px) {
+      .grid { grid-template-columns: 1.1fr 0.9fr; }
+      .col-results { order: 0; } /* Na komputerze wyniki wracają na prawą stronę */
+    }
 
     .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); margin-bottom: 20px; }
     h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 14px; color: #1e293b; display: flex; align-items: center; justify-content: space-between; }
@@ -53,10 +58,10 @@
     label { display: block; font-size: 0.85rem; font-weight: 500; color: #475569; margin-bottom: 4px; }
     .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
     .input-group { position: relative; margin-bottom: 12px; }
-    input[type="number"], input[type="text"], input[type="month"], select {
+    input[type="number"], input[type="text"], select {
       width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; outline: none; background: #fff;
     }
-    input:focus, select:focus { border-color: #2563eb; ring: 2px solid #93c5fd; }
+    input:focus, select:focus { border-color: #2563eb; outline: none; }
     .suffix { position: absolute; right: 10px; top: 9px; color: #94a3b8; font-weight: 600; font-size: 0.8rem; }
 
     .goal-banner {
@@ -170,38 +175,36 @@
     <p class="subtitle">Wieloletni monitoring wydatków, uśrednianie rachunków i prognoza budżetowa.</p>
   </header>
 
-  <!-- Pasek zakładek -->
   <nav class="nav-tabs">
-    <button class="tab-btn active" data-tab="calculatorTab">📊 Planer & Budżet</button>
-    <button class="tab-btn" data-tab="historyTab">📝 Dziennik Rachunków</button>
-    <button class="tab-btn" data-tab="reportTab">📈 Miesiące & Prognoza</button>
+    <button type="button" class="tab-btn active" onclick="appSwitchTab('calculatorTab', this)">Planer i Budżet</button>
+    <button type="button" class="tab-btn" onclick="appSwitchTab('historyTab', this)">Dziennik Rachunków</button>
+    <button type="button" class="tab-btn" onclick="appSwitchTab('reportTab', this)">Miesiące i Prognoza</button>
   </nav>
 
-  <!-- ZAKŁADKA 1: GŁÓWNY KALKULATOR -->
+  <!-- ZAKŁADKA 1 -->
   <div id="calculatorTab" class="tab-content active">
     <div class="grid">
-      <!-- LEWY PANEL -->
-      <div>
+      <!-- LEWA KOLUMNA (Formularze) -->
+      <div class="col-inputs">
         <div class="card">
           <h2>1. Dochody i Cel Finansowy</h2>
           <label for="income">Łączny dochód netto rodziny (pensje na rękę)</label>
           <div class="input-group">
-            <input type="number" id="income" placeholder="np. 7000" min="0" step="100">
+            <input type="number" id="income" placeholder="np. 7000" min="0" step="100" value="7000">
             <span class="suffix">PLN</span>
           </div>
 
           <label class="goal-banner">
             <input type="checkbox" id="rushEmergencyFund">
             <div class="goal-banner-text">
-              <strong>🎯 Priorytet: Błyskawiczna 6-miesięczna poduszka finansowa</strong>
-              <p>Zaznaczona: 85% do poduszki (Fun Money: 15%). Odznaczona: 80% na oszczędności (Fun Money: 20%).</p>
+              <strong>Cel: Błyskawiczna 6-miesięczna poduszka finansowa</strong>
+              <p>Zaznaczona: 85% do poduszki (Fun Money: 15%). Odznaczona: 80% do poduszki (Fun Money: 20%).</p>
             </div>
           </label>
         </div>
 
         <div class="card">
           <h2>2. Stałe koszty życia</h2>
-          
           <div class="sync-banner" id="syncBanner" style="display: none;">
             <label>
               <input type="checkbox" id="useAveragedCosts">
@@ -211,7 +214,7 @@
           </div>
 
           <div class="excel-import-box">
-            <label for="excelFile">📂 Wczytaj plik Excel (.xlsx, .xls, .csv)</label>
+            <label for="excelFile">Wczytaj plik Excel (.xlsx, .xls, .csv)</label>
             <span class="hint">Automatycznie zaciągnie kolumnę z opisem i kwotą</span>
             <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" style="display: none;">
           </div>
@@ -282,14 +285,14 @@
         </div>
       </div>
 
-      <!-- PRAWY PANEL WYNIKÓW -->
-      <div>
+      <!-- PRAWA KOLUMNA (Wyniki - na telefonie wyświetla się na samej górze) -->
+      <div class="col-results">
         <div id="alertBox" class="alert-box"></div>
 
         <div class="metric-hero">
           <span class="tag">Miesięczny koszt przetrwania (Minimum)</span>
           <div class="val"><span id="survivalTotal">0</span> PLN</div>
-          <p class="desc">Suma wszystkich stałych rachunków, dojazdów do pracy oraz minimalnego wyżywienia i chemii rodziny (po 800+).</p>
+          <p class="desc">Suma wszystkich stałych rachunków, dojazdów do pracy oraz minimalnego wyżywienia i chemii rodziny.</p>
         </div>
 
         <div class="sprint-card" id="sprintCard">
@@ -367,11 +370,13 @@
     <div class="card">
       <h2>Dodaj rzeczywisty rachunek</h2>
       <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 14px;">
-        Wpisuj rachunki, które przychodzą nieregularnie (np. prąd co 2 miesiące, gaz zimą, woda).
+        Wpisuj rachunki, które przychodzą nieregularnie (np. prąd, gaz, woda).
       </p>
 
       <div class="form-inline" style="flex-wrap: wrap;">
-        <input type="month" id="histMonthPicker" style="width: 170px; font-weight: 600;">
+        <select id="histInputMonth" style="width: 145px; font-weight: 600;"></select>
+        <input type="number" id="histInputYear" style="width: 90px; font-weight: 600;" min="2000" max="2100">
+        
         <input type="text" id="histName" placeholder="Nazwa (np. Prąd, Gaz, Czynsz)">
         <input type="number" id="histAmount" placeholder="Kwota (PLN)" min="0">
         <button type="button" class="btn-add" id="addHistBtn">Zapisz rachunek</button>
@@ -402,8 +407,8 @@
           <div style="display: flex; align-items: center; gap: 6px;">
             <label style="margin: 0; font-size: 0.85rem; font-weight: 600;" for="histSortOrder">Sortuj:</label>
             <select id="histSortOrder" style="width: auto; padding: 6px 10px; font-weight: bold;">
-              <option value="desc">Od najnowszych (malejąco)</option>
-              <option value="asc">Od najstarszych (rosnąco)</option>
+              <option value="desc">Od najnowszych</option>
+              <option value="asc">Od najstarszych</option>
             </select>
           </div>
         </div>
@@ -428,15 +433,15 @@
     </div>
   </div>
 
-  <!-- ZAKŁADKA 3: MIESIĄCE & PROGNOZA -->
+  <!-- ZAKŁADKA 3 -->
   <div id="reportTab" class="tab-content">
     <div class="forecast-card">
       <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h2 style="color: #86198f; margin-bottom: 4px;">🔮 Prognoza na kolejny miesiąc</h2>
+        <h2 style="color: #86198f; margin-bottom: 4px;">Prognoza na kolejny miesiąc</h2>
         <span id="forecastBasisTag" style="font-size: 0.75rem; background: #fae8ff; color: #a21caf; padding: 4px 10px; border-radius: 20px; font-weight: 700;"></span>
       </div>
       <p style="font-size: 0.85rem; color: #701a75; margin-bottom: 14px;">
-        Szacunek kosztów, oszczędności i dziennego budżetu Fun Money wyliczony na podstawie historycznych średnich (lub kosztów stałych).
+        Szacunek kosztów, oszczędności i dziennego budżetu Fun Money wyliczony na podstawie średnich.
       </p>
 
       <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
@@ -490,587 +495,520 @@
 </div>
 
 <script>
-// --- ZASIEG GLOBALNY ---
-const MONTH_NAMES_PL = [
+var MONTH_NAMES_PL = [
   "Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec",
   "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"
 ];
 
-function formatPeriodToPL(yearMonthStr) {
-  if (!yearMonthStr || !yearMonthStr.includes('-')) return yearMonthStr;
-  const parts = yearMonthStr.split('-');
-  const year = parts[0];
-  const month = parts[1];
-  const monthIdx = parseInt(month, 10) - 1;
-  const monthName = MONTH_NAMES_PL[monthIdx] || month;
-  return monthName + " " + year;
+function formatPeriodToPL(ym) {
+  if (!ym || ym.indexOf('-') === -1) return ym;
+  var p = ym.split('-');
+  var mIdx = parseInt(p[1], 10) - 1;
+  return (MONTH_NAMES_PL[mIdx] || p[1]) + " " + p[0];
 }
 
-// Globalne referencje do wywoływania z zewnątrz
-let globalRenderReportTab = null;
-
-function switchTab(tabId, btn) {
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-  
-  const target = document.getElementById(tabId);
+function appSwitchTab(tabId, btn) {
+  var contents = document.querySelectorAll('.tab-content');
+  for (var i = 0; i < contents.length; i++) {
+    contents[i].classList.remove('active');
+  }
+  var buttons = document.querySelectorAll('.tab-btn');
+  for (var j = 0; j < buttons.length; j++) {
+    buttons[j].classList.remove('active');
+  }
+  var target = document.getElementById(tabId);
   if (target) target.classList.add('active');
   if (btn) btn.classList.add('active');
 
-  if (tabId === 'reportTab' && typeof globalRenderReportTab === 'function') {
-    globalRenderReportTab();
+  if (tabId === 'reportTab' && typeof renderReportTab === 'function') {
+    renderReportTab();
   }
 }
 
-// Główna logika po załadowaniu drzewa DOM
-document.addEventListener('DOMContentLoaded', () => {
-  // 1. Podpięcie kliknięć w zakładki przez event listenery (bezpieczniejsze niż inline)
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const tabId = btn.getAttribute('data-tab');
-      switchTab(tabId, btn);
+var manualCosts = [];
+var historyLogs = [];
+
+try {
+  manualCosts = JSON.parse(localStorage.getItem('my_manual_costs') || '[]');
+  historyLogs = JSON.parse(localStorage.getItem('my_history_logs') || '[]');
+} catch (e) {
+  manualCosts = [];
+  historyLogs = [];
+}
+
+function getAveragedCostsFromHistory() {
+  if (historyLogs.length === 0) return [];
+  var grp = {};
+  for (var i = 0; i < historyLogs.length; i++) {
+    var item = historyLogs[i];
+    var n = (item.name || '').trim();
+    if (!n) continue;
+    if (!grp[n]) grp[n] = { total: 0, count: 0 };
+    grp[n].total += (Number(item.amount) || 0);
+    grp[n].count += 1;
+  }
+  var out = [];
+  for (var k in grp) {
+    out.push({
+      id: k,
+      name: k + ' (średnia z ' + grp[k].count + ' mc)',
+      amount: Math.round(grp[k].total / grp[k].count)
     });
+  }
+  return out;
+}
+
+function updateHistoryFilterDropdowns() {
+  var fYear = document.getElementById('histFilterYear');
+  var fMonth = document.getElementById('histFilterMonth');
+  if (!fYear || !fMonth) return;
+
+  var curYear = fYear.value;
+  var curMonth = fMonth.value;
+
+  var yearsMap = {};
+  for (var i = 0; i < historyLogs.length; i++) {
+    var y = historyLogs[i].year || historyLogs[i].month.split('-')[0];
+    yearsMap[y] = true;
+  }
+  var uniqueYears = Object.keys(yearsMap).sort().reverse();
+
+  fYear.innerHTML = '<option value="ALL">Wszystkie lata</option>';
+  for (var j = 0; j < uniqueYears.length; j++) {
+    var opt = document.createElement('option');
+    opt.value = uniqueYears[j];
+    opt.textContent = uniqueYears[j];
+    fYear.appendChild(opt);
+  }
+  fYear.value = yearsMap[curYear] ? curYear : 'ALL';
+
+  fMonth.innerHTML = '<option value="ALL">Wszystkie miesiące</option>';
+  for (var m = 0; m < MONTH_NAMES_PL.length; m++) {
+    var mOpt = document.createElement('option');
+    var val = (m + 1 < 10 ? '0' : '') + (m + 1);
+    mOpt.value = val;
+    mOpt.textContent = MONTH_NAMES_PL[m];
+    fMonth.appendChild(mOpt);
+  }
+  fMonth.value = curMonth || 'ALL';
+}
+
+function renderHistoryTable() {
+  var tbody = document.getElementById('historyTableBody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  var fYear = document.getElementById('histFilterYear') ? document.getElementById('histFilterYear').value : 'ALL';
+  var fMonth = document.getElementById('histFilterMonth') ? document.getElementById('histFilterMonth').value : 'ALL';
+  var sortOrder = document.getElementById('histSortOrder') ? document.getElementById('histSortOrder').value : 'desc';
+
+  var items = historyLogs.slice();
+
+  if (fYear !== 'ALL') {
+    items = items.filter(function(e) {
+      return (e.year || e.month.split('-')[0]) === fYear;
+    });
+  }
+  if (fMonth !== 'ALL') {
+    items = items.filter(function(e) {
+      return (e.monthNum || e.month.split('-')[1]) === fMonth;
+    });
+  }
+
+  items.sort(function(a, b) {
+    var mA = a.month || '';
+    var mB = b.month || '';
+    if (mA !== mB) {
+      return sortOrder === 'asc' ? mA.localeCompare(mB) : mB.localeCompare(mA);
+    }
+    return sortOrder === 'asc' ? a.id - b.id : b.id - a.id;
   });
 
-  // 2. Dane lokalne
-  let manualCosts = JSON.parse(localStorage.getItem('my_manual_costs') || '[]');
-  let historyLogs = JSON.parse(localStorage.getItem('my_history_logs') || '[]');
+  var sum = 0;
+  for (var i = 0; i < items.length; i++) {
+    sum += (Number(items[i].amount) || 0);
+  }
+  var sumEl = document.getElementById('filteredMonthSum');
+  if (sumEl) sumEl.textContent = sum.toLocaleString('pl-PL') + ' PLN';
 
-  // 3. Pobranie elementów DOM
-  const incomeInput = document.getElementById('income');
-  const rushEmergencyCheckbox = document.getElementById('rushEmergencyFund');
-  const useAveragedCheckbox = document.getElementById('useAveragedCosts');
-  const syncBanner = document.getElementById('syncBanner');
-  const avgCountBadge = document.getElementById('avgCountBadge');
-
-  const adultsInput = document.getElementById('adultsCount');
-  const kidsInput = document.getElementById('kidsCount');
-  const include800PlusEl = document.getElementById('include800Plus');
-  const commuteKmInput = document.getElementById('commuteKm');
-  const commuteDaysInput = document.getElementById('commuteDays');
-  const fuelUsageInput = document.getElementById('carFuelUsage');
-  const fuelPriceInput = document.getElementById('fuelPrice');
-  const excelFileInput = document.getElementById('excelFile');
-
-  const costListEl = document.getElementById('costList');
-  const newCostName = document.getElementById('newCostName');
-  const newCostAmount = document.getElementById('newCostAmount');
-  const addCostBtn = document.getElementById('addCostBtn');
-
-  const alertBox = document.getElementById('alertBox');
-  const survivalTotalEl = document.getElementById('survivalTotal');
-  const emergencyGoalValEl = document.getElementById('emergencyGoalVal');
-  const sprintSavingSpeedEl = document.getElementById('sprintSavingSpeed');
-  const sprintMonthsCountEl = document.getElementById('sprintMonthsCount');
-
-  const funBadgeLabel = document.getElementById('funBadgeLabel');
-  const monthlyFunValEl = document.getElementById('monthlyFunVal');
-  const dailyFunValEl = document.getElementById('dailyFunVal');
-  const barFunTitle = document.getElementById('barFunTitle');
-  const barSavingsTitle = document.getElementById('barSavingsTitle');
-
-  const barFixedVal = document.getElementById('barFixedVal');
-  const barCommuteVal = document.getElementById('barCommuteVal');
-  const barBasketVal = document.getElementById('barBasketVal');
-  const barSavingsVal = document.getElementById('barSavingsVal');
-  const barFunVal = document.getElementById('barFunVal');
-
-  const barFixed = document.getElementById('barFixed');
-  const barCommute = document.getElementById('barCommute');
-  const barBasket = document.getElementById('barBasket');
-  const barSavings = document.getElementById('barSavings');
-  const barFun = document.getElementById('barFun');
-
-  const histMonthPicker = document.getElementById('histMonthPicker');
-  const histNameInput = document.getElementById('histName');
-  const histAmountInput = document.getElementById('histAmount');
-  const addHistBtn = document.getElementById('addHistBtn');
-  const historyTableBody = document.getElementById('historyTableBody');
-  const averagedListDisplay = document.getElementById('averagedListDisplay');
-  const avgGrandTotal = document.getElementById('avgGrandTotal');
-  
-  const histFilterYear = document.getElementById('histFilterYear');
-  const histFilterMonth = document.getElementById('histFilterMonth');
-  const histSortOrder = document.getElementById('histSortOrder');
-  const filteredMonthSum = document.getElementById('filteredMonthSum');
-  const filteredMonthLabel = document.getElementById('filteredMonthLabel');
-
-  const forecastBasisTag = document.getElementById('forecastBasisTag');
-  const forecastSurvivalVal = document.getElementById('forecastSurvivalVal');
-  const forecastSavingsVal = document.getElementById('forecastSavingsVal');
-  const forecastFunVal = document.getElementById('forecastFunVal');
-  const forecastDailyFunVal = document.getElementById('forecastDailyFunVal');
-  const selectReportPeriod = document.getElementById('selectReportPeriod');
-  const monthTotalExpense = document.getElementById('monthTotalExpense');
-  const monthDetailsBody = document.getElementById('monthDetailsBody');
-
-  // Ustawienie bieżącego miesiąca i roku w kalendarzu
-  const now = new Date();
-  const currentSysYear = now.getFullYear();
-  const currentSysMonth = String(now.getMonth() + 1).padStart(2, '0');
-  if (histMonthPicker) {
-    histMonthPicker.value = currentSysYear + '-' + currentSysMonth;
+  if (items.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8; padding: 14px;">Brak rachunków dla wybranych kryteriów.</td></tr>';
+    return;
   }
 
-  function getAveragedCostsFromHistory() {
-    if (historyLogs.length === 0) return [];
-    const grouped = {};
-    historyLogs.forEach(entry => {
-      const cleanName = (entry.name || '').trim();
-      if (!cleanName) return;
-      if (!grouped[cleanName]) grouped[cleanName] = { total: 0, count: 0 };
-      grouped[cleanName].total += (Number(entry.amount) || 0);
-      grouped[cleanName].count += 1;
-    });
+  for (var k = 0; k < items.length; k++) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><strong>' + formatPeriodToPL(items[k].month) + '</strong></td>' +
+                   '<td>' + items[k].name + '</td>' +
+                   '<td>' + Number(items[k].amount).toLocaleString('pl-PL') + ' PLN</td>' +
+                   '<td><button type="button" class="del-btn" style="color:#ef4444; border:none; background:none; cursor:pointer;" onclick="deleteHistoryEntry(' + items[k].id + ')">Usuń</button></td>';
+    tbody.appendChild(tr);
+  }
+}
 
-    return Object.keys(grouped).map(name => ({
-      id: name,
-      name: name + ' (średnia z ' + grouped[name].count + ' mies.)',
-      amount: Math.round(grouped[name].total / grouped[name].count)
-    }));
+function renderHistory() {
+  localStorage.setItem('my_history_logs', JSON.stringify(historyLogs));
+  var syncBanner = document.getElementById('syncBanner');
+  if (syncBanner) syncBanner.style.display = historyLogs.length === 0 ? 'none' : 'flex';
+
+  updateHistoryFilterDropdowns();
+  renderHistoryTable();
+
+  var avgs = getAveragedCostsFromHistory();
+  var disp = document.getElementById('averagedListDisplay');
+  if (disp) disp.innerHTML = '';
+  var totAvg = 0;
+  for (var i = 0; i < avgs.length; i++) {
+    totAvg += avgs[i].amount;
+    var chip = document.createElement('div');
+    chip.style.cssText = 'background:#fff; border:1px solid #bfdbfe; padding:6px 10px; border-radius:8px; font-size:0.8rem; font-weight:600; color:#1e40af;';
+    chip.textContent = avgs[i].name + ': ' + avgs[i].amount + ' PLN/mc';
+    if (disp) disp.appendChild(chip);
+  }
+  var gt = document.getElementById('avgGrandTotal');
+  if (gt) gt.textContent = totAvg.toLocaleString('pl-PL') + ' PLN / mc';
+  var badge = document.getElementById('avgCountBadge');
+  if (badge) badge.textContent = avgs.length + ' pozycji';
+
+  calculateAll();
+}
+
+function deleteHistoryEntry(id) {
+  historyLogs = historyLogs.filter(function(e) { return e.id !== id; });
+  renderHistory();
+}
+
+function computeBudget(fixedList, income, rushActive) {
+  var aEl = document.getElementById('adultsCount');
+  var kEl = document.getElementById('kidsCount');
+  var inc800El = document.getElementById('include800Plus');
+  var kmEl = document.getElementById('commuteKm');
+  var daysEl = document.getElementById('commuteDays');
+  var usageEl = document.getElementById('carFuelUsage');
+  var priceEl = document.getElementById('fuelPrice');
+
+  var adults = Math.max(1, parseInt(aEl ? aEl.value : 2, 10) || 1);
+  var kids = Math.max(0, parseInt(kEl ? kEl.value : 0, 10) || 0);
+  var has800 = inc800El ? inc800El.checked : true;
+
+  var km = Math.max(0, parseFloat(kmEl ? kmEl.value : 15) || 0);
+  var days = Math.max(0, parseFloat(daysEl ? daysEl.value : 20) || 0);
+  var usage = Math.max(0, parseFloat(usageEl ? usageEl.value : 6.5) || 0);
+  var price = Math.max(0, parseFloat(priceEl ? priceEl.value : 6.50) || 0);
+
+  var totFixed = 0;
+  for (var i = 0; i < fixedList.length; i++) {
+    totFixed += (Number(fixedList[i].amount) || 0);
   }
 
-  function updateHistoryFilterDropdowns() {
-    if (!histFilterYear || !histFilterMonth) return;
-    const currentYear = histFilterYear.value;
-    const currentMonth = histFilterMonth.value;
-    const uniqueYears = [...new Set(historyLogs.map(item => item.year || item.month.split('-')[0]))].sort().reverse();
+  var totKm = 2 * km * days;
+  var commuteCost = Math.round(totKm * (((usage / 100) * price) + (totKm > 0 ? 0.20 : 0)));
 
-    histFilterYear.innerHTML = '<option value="ALL">Wszystkie lata</option>';
-    uniqueYears.forEach(y => {
-      const opt = document.createElement('option');
-      opt.value = y;
-      opt.textContent = y;
-      histFilterYear.appendChild(opt);
-    });
-    histFilterYear.value = uniqueYears.includes(currentYear) ? currentYear : 'ALL';
+  var baseFood = 950;
+  var oecd = 1.0 + (adults - 1) * 0.5 + kids * 0.3;
+  var foodGross = Math.round(baseFood * oecd);
+  var foodNet = Math.max(0, foodGross - ((has800 && kids > 0) ? (kids * 800) : 0));
 
-    histFilterMonth.innerHTML = '<option value="ALL">Wszystkie miesiące</option>';
-    MONTH_NAMES_PL.forEach((mName, idx) => {
-      const opt = document.createElement('option');
-      const val = String(idx + 1).padStart(2, '0');
-      opt.value = val;
-      opt.textContent = mName;
-      histFilterMonth.appendChild(opt);
-    });
-    histFilterMonth.value = currentMonth || 'ALL';
-  }
+  var survival = totFixed + commuteCost + foodNet;
+  var emergency = survival * 6;
 
-  function renderHistoryTable() {
-    if (!historyTableBody) return;
-    historyTableBody.innerHTML = '';
-    const selectedYear = histFilterYear ? histFilterYear.value : 'ALL';
-    const selectedMonth = histFilterMonth ? histFilterMonth.value : 'ALL';
-    const sortOrder = histSortOrder ? histSortOrder.value : 'desc';
+  var savings = 0;
+  var funMoney = 0;
+  var dailyFun = 0;
 
-    let itemsToDisplay = [...historyLogs];
-
-    if (selectedYear && selectedYear !== 'ALL') {
-      itemsToDisplay = itemsToDisplay.filter(entry => (entry.year || entry.month.split('-')[0]) === selectedYear);
-    }
-
-    if (selectedMonth && selectedMonth !== 'ALL') {
-      itemsToDisplay = itemsToDisplay.filter(entry => (entry.monthNum || entry.month.split('-')[1]) === selectedMonth);
-    }
-
-    itemsToDisplay.sort((a, b) => {
-      const mA = a.month || '';
-      const mB = b.month || '';
-      if (mA !== mB) {
-        return sortOrder === 'asc' ? mA.localeCompare(mB) : mB.localeCompare(mA);
+  if (income > 0 && income >= survival) {
+    var free = income - survival;
+    if (rushActive) {
+      if (free <= 200) {
+        funMoney = Math.round(free * 0.15);
+      } else {
+        var rawFun = Math.round(free * 0.15);
+        funMoney = Math.min(600, Math.max(150, rawFun));
+        if (funMoney > free) funMoney = Math.round(free * 0.20);
       }
-      return sortOrder === 'asc' ? a.id - b.id : b.id - a.id;
-    });
-
-    const totalSum = itemsToDisplay.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
-    if (filteredMonthSum) filteredMonthSum.textContent = totalSum.toLocaleString('pl-PL') + ' PLN';
-
-    let filterDescription = 'wszystkich pozycji';
-    if (selectedMonth !== 'ALL' && selectedYear !== 'ALL') {
-      const mIdx = parseInt(selectedMonth, 10) - 1;
-      filterDescription = MONTH_NAMES_PL[mIdx] + ' ' + selectedYear;
-    } else if (selectedMonth !== 'ALL') {
-      const mIdx = parseInt(selectedMonth, 10) - 1;
-      filterDescription = 'Miesiąc: ' + MONTH_NAMES_PL[mIdx];
-    } else if (selectedYear !== 'ALL') {
-      filterDescription = 'Rok: ' + selectedYear;
+    } else {
+      funMoney = Math.round(free * 0.20);
     }
-    if (filteredMonthLabel) filteredMonthLabel.textContent = 'Suma dla (' + filterDescription + '):';
-
-    if (itemsToDisplay.length === 0) {
-      historyTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8; padding: 16px;">Brak rachunków spełniających wybrane kryteria (' + filterDescription + ').</td></tr>';
-      return;
-    }
-
-    itemsToDisplay.forEach(entry => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><strong>${formatPeriodToPL(entry.month)}</strong></td>
-        <td>${entry.name}</td>
-        <td>${Number(entry.amount).toLocaleString('pl-PL')} PLN</td>
-        <td><button class="del-btn" style="color:#ef4444; border:none; background:none; cursor:pointer;" onclick="deleteHistoryEntry(${entry.id})">✕ Usuń</button></td>
-      `;
-      historyTableBody.appendChild(tr);
-    });
+    savings = free - funMoney;
+    dailyFun = Math.round(funMoney / 30);
   }
 
-  function renderHistory() {
-    localStorage.setItem('my_history_logs', JSON.stringify(historyLogs));
-    if (syncBanner) syncBanner.style.display = historyLogs.length === 0 ? 'none' : 'flex';
-
-    updateHistoryFilterDropdowns();
-    renderHistoryTable();
-
-    const averaged = getAveragedCostsFromHistory();
-    if (averagedListDisplay) averagedListDisplay.innerHTML = '';
-    let totalAvg = 0;
-
-    averaged.forEach(item => {
-      totalAvg += item.amount;
-      const chip = document.createElement('div');
-      chip.style.cssText = 'background:#fff; border:1px solid #bfdbfe; padding:6px 10px; border-radius:8px; font-size:0.8rem; font-weight:600; color:#1e40af;';
-      chip.textContent = item.name + ': ' + item.amount + ' PLN/mc';
-      if (averagedListDisplay) averagedListDisplay.appendChild(chip);
-    });
-
-    if (avgGrandTotal) avgGrandTotal.textContent = totalAvg.toLocaleString('pl-PL') + ' PLN / mc';
-    if (avgCountBadge) avgCountBadge.textContent = averaged.length + ' pozycji';
-
-    calculateAll();
-  }
-
-  if (histFilterYear) histFilterYear.addEventListener('change', renderHistoryTable);
-  if (histFilterMonth) histFilterMonth.addEventListener('change', renderHistoryTable);
-  if (histSortOrder) histSortOrder.addEventListener('change', renderHistoryTable);
-
-  window.deleteHistoryEntry = function(id) {
-    historyLogs = historyLogs.filter(item => item.id !== id);
-    renderHistory();
+  return {
+    fixed: totFixed,
+    commute: commuteCost,
+    food: foodNet,
+    survival: survival,
+    emergency: emergency,
+    savings: savings,
+    fun: funMoney,
+    dailyFun: dailyFun
   };
+}
 
+function calculateAll() {
+  var incEl = document.getElementById('income');
+  var rushEl = document.getElementById('rushEmergencyFund');
+  var avgEl = document.getElementById('useAveragedCosts');
+
+  var income = Math.max(0, parseFloat(incEl ? incEl.value : 0) || 0);
+  var rush = rushEl ? rushEl.checked : false;
+  var useAvg = avgEl ? avgEl.checked : false;
+
+  var activeFixed = (useAvg && historyLogs.length > 0) ? getAveragedCostsFromHistory() : manualCosts;
+  renderCostList(activeFixed, useAvg);
+
+  var res = computeBudget(activeFixed, income, rush);
+
+  var alertBox = document.getElementById('alertBox');
+  if (alertBox) {
+    if (income > 0 && income < res.survival) {
+      alertBox.textContent = 'Deficyt! Dochód nie pokrywa kosztów przetrwania (brak: ' + (res.survival - income) + ' PLN).';
+      alertBox.style.display = 'block';
+    } else {
+      alertBox.style.display = 'none';
+    }
+  }
+
+  var elSurv = document.getElementById('survivalTotal');
+  if (elSurv) elSurv.textContent = res.survival.toLocaleString('pl-PL');
+
+  var elEm = document.getElementById('emergencyGoalVal');
+  if (elEm) elEm.textContent = res.emergency.toLocaleString('pl-PL') + ' PLN';
+
+  var elSpeed = document.getElementById('sprintSavingSpeed');
+  if (elSpeed) elSpeed.textContent = res.savings.toLocaleString('pl-PL') + ' PLN/mc';
+
+  var elMonths = document.getElementById('sprintMonthsCount');
+  if (elMonths) {
+    elMonths.textContent = (res.savings > 0 && res.emergency > 0) ? (Math.ceil(res.emergency / res.savings) + ' mies.') : '--';
+  }
+
+  var elFun = document.getElementById('monthlyFunVal');
+  if (elFun) elFun.textContent = res.fun.toLocaleString('pl-PL') + ' PLN';
+
+  var elDaily = document.getElementById('dailyFunVal');
+  if (elDaily) elDaily.textContent = res.dailyFun + ' PLN/dzień';
+
+  var bFixVal = document.getElementById('barFixedVal');
+  if (bFixVal) bFixVal.textContent = res.fixed + ' PLN';
+  var bComVal = document.getElementById('barCommuteVal');
+  if (bComVal) bComVal.textContent = res.commute + ' PLN';
+  var bBasVal = document.getElementById('barBasketVal');
+  if (bBasVal) bBasVal.textContent = res.food + ' PLN';
+  var bSavVal = document.getElementById('barSavingsVal');
+  if (bSavVal) bSavVal.textContent = res.savings + ' PLN';
+  var bFunVal = document.getElementById('barFunVal');
+  if (bFunVal) bFunVal.textContent = res.fun + ' PLN';
+
+  var baseDenom = Math.max(income, res.survival, 1);
+  var setBar = function(id, val) {
+    var b = document.getElementById(id);
+    if (b) b.style.width = income > 0 ? (Math.min(100, (val / baseDenom) * 100) + '%') : '0%';
+  };
+  setBar('barFixed', res.fixed);
+  setBar('barCommute', res.commute);
+  setBar('barBasket', res.food);
+  setBar('barSavings', res.savings);
+  setBar('barFun', res.fun);
+}
+
+function renderCostList(list, isAvg) {
+  var ul = document.getElementById('costList');
+  if (!ul) return;
+  ul.innerHTML = '';
+  var row = document.getElementById('manualAddRow');
+  if (row) row.style.display = isAvg ? 'none' : 'flex';
+
+  if (list.length === 0) {
+    ul.innerHTML = '<li class="empty-msg">Brak wpisanych pozycji stałych.</li>';
+    return;
+  }
+  for (var i = 0; i < list.length; i++) {
+    (function(item) {
+      var li = document.createElement('li');
+      li.className = 'cost-item';
+      li.innerHTML = '<span>' + item.name + '</span><div><strong>' + Number(item.amount).toLocaleString('pl-PL') + ' PLN</strong>' +
+                     (!isAvg ? '<button type="button" class="del-btn">✕</button>' : '') + '</div>';
+      if (!isAvg) {
+        var btn = li.querySelector('.del-btn');
+        if (btn) {
+          btn.onclick = function() {
+            manualCosts = manualCosts.filter(function(c) { return c.id !== item.id; });
+            localStorage.setItem('my_manual_costs', JSON.stringify(manualCosts));
+            calculateAll();
+          };
+        }
+      }
+      ul.appendChild(li);
+    })(list[i]);
+  }
+}
+
+function addCost() {
+  var nEl = document.getElementById('newCostName');
+  var aEl = document.getElementById('newCostAmount');
+  if (!nEl || !aEl) return;
+  var name = nEl.value.trim();
+  var amount = parseFloat(aEl.value);
+  if (name && !isNaN(amount) && amount > 0) {
+    manualCosts.push({ id: Date.now(), name: name, amount: amount });
+    localStorage.setItem('my_manual_costs', JSON.stringify(manualCosts));
+    nEl.value = '';
+    aEl.value = '';
+    calculateAll();
+    nEl.focus();
+  }
+}
+
+function renderReportTab() {
+  var incEl = document.getElementById('income');
+  var income = Math.max(0, parseFloat(incEl ? incEl.value : 0) || 0);
+  var rush = document.getElementById('rushEmergencyFund') ? document.getElementById('rushEmergencyFund').checked : false;
+
+  var avgs = getAveragedCostsFromHistory();
+  var fixedList = avgs.length > 0 ? avgs : manualCosts;
+
+  var tag = document.getElementById('forecastBasisTag');
+  if (tag) tag.textContent = avgs.length > 0 ? ('Baza: Średnia z ' + historyLogs.length + ' rachunków') : 'Baza: Deklarowane koszty stałe';
+
+  var res = computeBudget(fixedList, income, rush);
+
+  var fSurv = document.getElementById('forecastSurvivalVal');
+  if (fSurv) fSurv.textContent = res.survival.toLocaleString('pl-PL') + ' PLN';
+  var fSav = document.getElementById('forecastSavingsVal');
+  if (fSav) fSav.textContent = res.savings.toLocaleString('pl-PL') + ' PLN';
+  var fFun = document.getElementById('forecastFunVal');
+  if (fFun) fFun.textContent = res.fun.toLocaleString('pl-PL') + ' PLN';
+  var fDaily = document.getElementById('forecastDailyFunVal');
+  if (fDaily) fDaily.textContent = res.dailyFun + ' PLN / dzień';
+
+  var sel = document.getElementById('selectReportPeriod');
+  if (!sel) return;
+  var curSel = sel.value;
+
+  var pMap = {};
+  for (var i = 0; i < historyLogs.length; i++) {
+    pMap[historyLogs[i].month] = true;
+  }
+  var uniquePeriods = Object.keys(pMap).sort().reverse();
+  sel.innerHTML = '';
+
+  if (uniquePeriods.length === 0) {
+    sel.innerHTML = '<option value="">Brak danych</option>';
+    var totExp = document.getElementById('monthTotalExpense');
+    if (totExp) totExp.textContent = '0 PLN';
+    var tbody = document.getElementById('monthDetailsBody');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#94a3b8;">Brak zapisanych miesięcy.</td></tr>';
+    return;
+  }
+
+  for (var j = 0; j < uniquePeriods.length; j++) {
+    var opt = document.createElement('option');
+    opt.value = uniquePeriods[j];
+    opt.textContent = formatPeriodToPL(uniquePeriods[j]);
+    sel.appendChild(opt);
+  }
+  sel.value = pMap[curSel] ? curSel : uniquePeriods[0];
+  renderSelectedMonthDetails(sel.value);
+}
+
+function renderSelectedMonthDetails(period) {
+  var tbody = document.getElementById('monthDetailsBody');
+  var totEl = document.getElementById('monthTotalExpense');
+  if (!tbody || !period) return;
+
+  var filtered = historyLogs.filter(function(e) { return e.month === period; });
+  var tot = 0;
+  for (var i = 0; i < filtered.length; i++) {
+    tot += (Number(filtered[i].amount) || 0);
+  }
+  if (totEl) totEl.textContent = tot.toLocaleString('pl-PL') + ' PLN';
+  tbody.innerHTML = '';
+
+  for (var j = 0; j < filtered.length; j++) {
+    var pct = tot > 0 ? Math.round((Number(filtered[j].amount) / tot) * 100) : 0;
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td><strong>' + filtered[j].name + '</strong></td>' +
+                   '<td>' + Number(filtered[j].amount).toLocaleString('pl-PL') + ' PLN</td>' +
+                   '<td>' + pct + '% całości</td>';
+    tbody.appendChild(tr);
+  }
+}
+
+window.onload = function() {
+  var mSelect = document.getElementById('histInputMonth');
+  var yInput = document.getElementById('histInputYear');
+
+  if (mSelect && yInput) {
+    mSelect.innerHTML = '';
+    for (var m = 0; m < MONTH_NAMES_PL.length; m++) {
+      var opt = document.createElement('option');
+      var val = (m + 1 < 10 ? '0' : '') + (m + 1);
+      opt.value = val;
+      opt.textContent = MONTH_NAMES_PL[m];
+      mSelect.appendChild(opt);
+    }
+
+    var d = new Date();
+    var curM = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1);
+    mSelect.value = curM;
+    yInput.value = d.getFullYear();
+  }
+
+  var addHistBtn = document.getElementById('addHistBtn');
   if (addHistBtn) {
-    addHistBtn.addEventListener('click', () => {
-      const pickerVal = histMonthPicker.value;
-      const name = histNameInput.value.trim();
-      const amount = parseFloat(histAmountInput.value);
+    addHistBtn.onclick = function() {
+      var selM = document.getElementById('histInputMonth').value;
+      var selY = document.getElementById('histInputYear').value;
+      var n = document.getElementById('histName').value.trim();
+      var a = parseFloat(document.getElementById('histAmount').value);
 
-      if (pickerVal && name && !isNaN(amount) && amount > 0) {
-        const parts = pickerVal.split('-');
+      if (selM && selY && n && !isNaN(a) && a > 0) {
+        var p = selY + '-' + selM;
         historyLogs.push({
           id: Date.now(),
-          month: pickerVal,
-          year: parts[0],
-          monthNum: parts[1],
-          name: name,
-          amount: amount
+          month: p,
+          year: selY,
+          monthNum: selM,
+          name: n,
+          amount: a
         });
-        histNameInput.value = '';
-        histAmountInput.value = '';
-        
-        if (histFilterYear) histFilterYear.value = parts[0];
-        if (histFilterMonth) histFilterMonth.value = parts[1];
+        document.getElementById('histName').value = '';
+        document.getElementById('histAmount').value = '';
         renderHistory();
       }
-    });
-  }
-
-  function computeBudget(fixedList, income, rushActive) {
-    const adults = Math.max(1, parseInt(adultsInput.value, 10) || 1);
-    const kids = Math.max(0, parseInt(kidsInput.value, 10) || 0);
-    const has800 = include800PlusEl ? include800PlusEl.checked : true;
-
-    const kmOneWay = Math.max(0, parseFloat(commuteKmInput.value) || 0);
-    const days = Math.max(0, parseFloat(commuteDaysInput.value) || 0);
-    const usage = Math.max(0, parseFloat(fuelUsageInput.value) || 0);
-    const fuelPrice = Math.max(0, parseFloat(fuelPriceInput.value) || 0);
-
-    const totalFixed = fixedList.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
-    const totalKmMonth = 2 * kmOneWay * days;
-    const fuelCostPerKm = (usage / 100) * fuelPrice;
-    const wearPerKm = totalKmMonth > 0 ? 0.20 : 0;
-    const monthlyCommute = Math.round(totalKmMonth * (fuelCostPerKm + wearPerKm));
-
-    const baseBasket = 950;
-    const oecdScale = 1.0 + (adults - 1) * 0.5 + kids * 0.3;
-    const grossFood = Math.round(baseBasket * oecdScale);
-    const total800Plus = (has800 && kids > 0) ? (kids * 800) : 0;
-    const netFood = Math.max(0, grossFood - total800Plus);
-
-    const totalSurvival = totalFixed + monthlyCommute + netFood;
-    const emergency6Months = totalSurvival * 6;
-
-    let savings = 0;
-    let funMoney = 0;
-    let dailyFun = 0;
-
-    if (income > 0 && income >= totalSurvival) {
-      const freeCash = income - totalSurvival;
-      if (rushActive) {
-        if (freeCash <= 200) {
-          funMoney = Math.round(freeCash * 0.15);
-        } else {
-          const rawFun = Math.round(freeCash * 0.15);
-          funMoney = Math.min(600, Math.max(150, rawFun));
-          if (funMoney > freeCash) funMoney = Math.round(freeCash * 0.20);
-        }
-        savings = freeCash - funMoney;
-      } else {
-        funMoney = Math.round(freeCash * 0.20);
-        savings = freeCash - funMoney;
-      }
-      dailyFun = Math.round(funMoney / 30);
-    }
-
-    return { totalFixed, monthlyCommute, netFood, totalSurvival, emergency6Months, savings, funMoney, dailyFun };
-  }
-
-  function calculateAll() {
-    const income = Math.max(0, parseFloat(incomeInput.value) || 0);
-    const rushActive = rushEmergencyCheckbox ? rushEmergencyCheckbox.checked : false;
-    const useAveraged = useAveragedCheckbox ? useAveragedCheckbox.checked : false;
-
-    const activeFixedList = (useAveraged && historyLogs.length > 0) ? getAveragedCostsFromHistory() : manualCosts;
-    renderCostList(activeFixedList, useAveraged);
-
-    const res = computeBudget(activeFixedList, income, rushActive);
-
-    if (alertBox) {
-      if (income > 0 && income < res.totalSurvival) {
-        alertBox.className = 'alert-box';
-        alertBox.textContent = `Deficyt! Twoje zarobki (${income} PLN) nie pokrywają minimum kosztów (${res.totalSurvival} PLN). Brakuje ${res.totalSurvival - income} PLN miesięcznie.`;
-        alertBox.style.display = 'block';
-      } else {
-        alertBox.style.display = 'none';
-      }
-    }
-
-    if (funBadgeLabel) funBadgeLabel.textContent = rushActive ? 'Fun Money (15% luzu)' : 'Fun Money (20% luzu)';
-    if (barFunTitle) barFunTitle.textContent = rushActive ? 'Fun Money (15% wolnych środków)' : 'Fun Money (20% wolnych środków)';
-    if (barSavingsTitle) barSavingsTitle.textContent = rushActive ? 'Poduszka finansowa (85% środków)' : 'Oszczędności / Inwestycje (80%)';
-
-    let monthsText = '--';
-    if (res.savings > 0 && res.emergency6Months > 0) {
-      const m = Math.ceil(res.emergency6Months / res.savings);
-      monthsText = `${m} mies. (${(m / 12).toFixed(1)} roku)`;
-    }
-
-    if (survivalTotalEl) survivalTotalEl.textContent = res.totalSurvival.toLocaleString('pl-PL');
-    if (emergencyGoalValEl) emergencyGoalValEl.textContent = res.emergency6Months.toLocaleString('pl-PL') + ' PLN';
-    if (sprintSavingSpeedEl) sprintSavingSpeedEl.textContent = res.savings.toLocaleString('pl-PL') + ' PLN/mc';
-    if (sprintMonthsCountEl) sprintMonthsCountEl.textContent = monthsText;
-
-    if (monthlyFunValEl) monthlyFunValEl.textContent = res.funMoney.toLocaleString('pl-PL') + ' PLN';
-    if (dailyFunValEl) dailyFunValEl.textContent = res.dailyFun + ' PLN/dzień';
-
-    if (barFixedVal) barFixedVal.textContent = res.totalFixed + ' PLN';
-    if (barCommuteVal) barCommuteVal.textContent = res.monthlyCommute + ' PLN';
-    if (barBasketVal) barBasketVal.textContent = res.netFood + ' PLN';
-    if (barSavingsVal) barSavingsVal.textContent = res.savings + ' PLN';
-    if (barFunVal) barFunVal.textContent = res.funMoney + ' PLN';
-
-    const baseDenom = Math.max(income, res.totalSurvival, 1);
-    if (barFixed) barFixed.style.width = income > 0 ? `${Math.min(100, (res.totalFixed / baseDenom) * 100)}%` : '0%';
-    if (barCommute) barCommute.style.width = income > 0 ? `${Math.min(100, (res.monthlyCommute / baseDenom) * 100)}%` : '0%';
-    if (barBasket) barBasket.style.width = income > 0 ? `${Math.min(100, (res.netFood / baseDenom) * 100)}%` : '0%';
-    if (barSavings) barSavings.style.width = income > 0 ? `${Math.min(100, (res.savings / baseDenom) * 100)}%` : '0%';
-    if (barFun) barFun.style.width = income > 0 ? `${Math.min(100, (res.funMoney / baseDenom) * 100)}%` : '0%';
-  }
-
-  function renderCostList(listToRender, isAveraged) {
-    if (!costListEl) return;
-    costListEl.innerHTML = '';
-    const manualAddRow = document.getElementById('manualAddRow');
-    if (manualAddRow) manualAddRow.style.display = isAveraged ? 'none' : 'flex';
-
-    if (listToRender.length === 0) {
-      costListEl.innerHTML = '<li class="empty-msg">Brak wpisanych pozycji stałych. Wpisz rachunek lub wczytaj plik Excel.</li>';
-    } else {
-      listToRender.forEach(item => {
-        const li = document.createElement('li');
-        li.className = 'cost-item';
-        li.innerHTML = `
-          <span>${item.name}</span>
-          <div>
-            <strong>${Number(item.amount).toLocaleString('pl-PL')} PLN</strong>
-            ${!isAveraged ? `<button class="del-btn" type="button">✕</button>` : ''}
-          </div>
-        `;
-        if (!isAveraged) {
-          const btn = li.querySelector('.del-btn');
-          if (btn) {
-            btn.addEventListener('click', () => {
-              manualCosts = manualCosts.filter(c => c.id !== item.id);
-              localStorage.setItem('my_manual_costs', JSON.stringify(manualCosts));
-              calculateAll();
-            });
-          }
-        }
-        costListEl.appendChild(li);
-      });
-    }
-  }
-
-  function addCost() {
-    const name = newCostName.value.trim();
-    const amount = parseFloat(newCostAmount.value);
-    if (name && !isNaN(amount) && amount > 0) {
-      manualCosts.push({ id: Date.now(), name, amount });
-      localStorage.setItem('my_manual_costs', JSON.stringify(manualCosts));
-      newCostName.value = '';
-      newCostAmount.value = '';
-      calculateAll();
-      newCostName.focus();
-    }
-  }
-
-  function handleExcelUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(evt) {
-      try {
-        const data = new Uint8Array(evt.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-        
-        let importedCount = 0;
-        jsonData.forEach((row) => {
-          if (!row || row.length < 2) return;
-          let nameCandidate = null;
-          let amountCandidate = null;
-
-          row.forEach(cell => {
-            if (cell === null || cell === undefined) return;
-            const strVal = String(cell).trim();
-            const cleanedNum = parseFloat(strVal.replace(/\s+/g, '').replace('zł', '').replace('PLN', '').replace(',', '.'));
-            
-            if (!isNaN(cleanedNum) && cleanedNum > 0 && amountCandidate === null) {
-              amountCandidate = cleanedNum;
-            } else if (isNaN(Number(strVal)) && strVal.length > 1 && nameCandidate === null) {
-              nameCandidate = strVal;
-            }
-          });
-
-          if (nameCandidate && amountCandidate !== null) {
-            const lower = nameCandidate.toLowerCase();
-            if (lower !== 'nazwa' && lower !== 'kategoria' && lower !== 'wydatek' && lower !== 'opis') {
-              manualCosts.push({
-                id: Date.now() + Math.random(),
-                name: nameCandidate,
-                amount: amountCandidate
-              });
-              importedCount++;
-            }
-          }
-        });
-
-        if (importedCount > 0) {
-          localStorage.setItem('my_manual_costs', JSON.stringify(manualCosts));
-          alert(`Pomyślnie zaimportowano ${importedCount} pozycji stałych!`);
-          calculateAll();
-        } else {
-          alert('Nie udało się rozpoznać wydatków. Sprawdź format pliku.');
-        }
-      } catch (err) {
-        console.error(err);
-        alert('Błąd odczytu pliku.');
-      }
-      excelFileInput.value = '';
     };
-    reader.readAsArrayBuffer(file);
   }
 
-  function renderReportTab() {
-    const income = Math.max(0, parseFloat(incomeInput.value) || 0);
-    const rushActive = rushEmergencyCheckbox ? rushEmergencyCheckbox.checked : false;
+  var addBtn = document.getElementById('addCostBtn');
+  if (addBtn) addBtn.onclick = addCost;
 
-    const averagedHistory = getAveragedCostsFromHistory();
-    const hasHistory = averagedHistory.length > 0;
-    const forecastFixedList = hasHistory ? averagedHistory : manualCosts;
-
-    if (forecastBasisTag) {
-      forecastBasisTag.textContent = hasHistory 
-        ? `Baza: Średnia z ${historyLogs.length} rachunków` 
-        : 'Baza: Deklarowane koszty stałe';
+  var inputs = ['income', 'rushEmergencyFund', 'useAveragedCosts', 'adultsCount', 'kidsCount', 'include800Plus', 'commuteKm', 'commuteDays', 'carFuelUsage', 'fuelPrice'];
+  for (var i = 0; i < inputs.length; i++) {
+    var el = document.getElementById(inputs[i]);
+    if (el) {
+      el.oninput = calculateAll;
+      el.onchange = calculateAll;
     }
-
-    const forecastRes = computeBudget(forecastFixedList, income, rushActive);
-
-    if (forecastSurvivalVal) forecastSurvivalVal.textContent = forecastRes.totalSurvival.toLocaleString('pl-PL') + ' PLN';
-    if (forecastSavingsVal) forecastSavingsVal.textContent = forecastRes.savings.toLocaleString('pl-PL') + ' PLN';
-    if (forecastFunVal) forecastFunVal.textContent = forecastRes.funMoney.toLocaleString('pl-PL') + ' PLN';
-    if (forecastDailyFunVal) forecastDailyFunVal.textContent = forecastRes.dailyFun + ' PLN / dzień';
-
-    const uniquePeriods = [...new Set(historyLogs.map(item => item.month))].sort().reverse();
-    if (!selectReportPeriod) return;
-    selectReportPeriod.innerHTML = '';
-
-    if (uniquePeriods.length === 0) {
-      selectReportPeriod.innerHTML = '<option value="">Brak danych</option>';
-      if (monthTotalExpense) monthTotalExpense.textContent = '0 PLN';
-      if (monthDetailsBody) monthDetailsBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#94a3b8;">Brak zapisanych miesięcy w Dzienniku. Dodaj wpisy w zakładce 2.</td></tr>';
-      return;
-    }
-
-    uniquePeriods.forEach(p => {
-      const opt = document.createElement('option');
-      opt.value = p;
-      opt.textContent = formatPeriodToPL(p);
-      selectReportPeriod.appendChild(opt);
-    });
-
-    renderSelectedMonthDetails(selectReportPeriod.value);
   }
 
-  function renderSelectedMonthDetails(selectedPeriod) {
-    if (!selectedPeriod || !monthDetailsBody) return;
-    const filtered = historyLogs.filter(item => item.month === selectedPeriod);
-    const total = filtered.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+  var fYear = document.getElementById('histFilterYear');
+  if (fYear) fYear.onchange = renderHistoryTable;
+  var fMonth = document.getElementById('histFilterMonth');
+  if (fMonth) fMonth.onchange = renderHistoryTable;
+  var fSort = document.getElementById('histSortOrder');
+  if (fSort) fSort.onchange = renderHistoryTable;
 
-    if (monthTotalExpense) monthTotalExpense.textContent = total.toLocaleString('pl-PL') + ' PLN';
-    monthDetailsBody.innerHTML = '';
-
-    filtered.forEach(item => {
-      const percent = total > 0 ? Math.round((Number(item.amount) / total) * 100) : 0;
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><strong>${item.name}</strong></td>
-        <td>${Number(item.amount).toLocaleString('pl-PL')} PLN</td>
-        <td>${percent}% całości</td>
-      `;
-      monthDetailsBody.appendChild(tr);
-    });
+  var repSel = document.getElementById('selectReportPeriod');
+  if (repSel) {
+    repSel.onchange = function() {
+      renderSelectedMonthDetails(this.value);
+    };
   }
 
-  // Udostępnienie dla globalnej funkcji switchTab
-  globalRenderReportTab = renderReportTab;
-
-  if (selectReportPeriod) {
-    selectReportPeriod.addEventListener('change', (e) => {
-      renderSelectedMonthDetails(e.target.value);
-    });
-  }
-
-  if (addCostBtn) addCostBtn.addEventListener('click', addCost);
-  if (newCostAmount) newCostAmount.addEventListener('keydown', (e) => { if (e.key === 'Enter') addCost(); });
-  if (newCostName) newCostName.addEventListener('keydown', (e) => { if (e.key === 'Enter') newCostAmount.focus(); });
-  if (excelFileInput) excelFileInput.addEventListener('change', handleExcelUpload);
-
-  [incomeInput, rushEmergencyCheckbox, useAveragedCheckbox, adultsInput, kidsInput, include800PlusEl, commuteKmInput, commuteDaysInput, fuelUsageInput, fuelPriceInput]
-    .forEach(el => {
-      if (el) el.addEventListener('input', calculateAll);
-    });
-
-  if (rushEmergencyCheckbox) rushEmergencyCheckbox.addEventListener('change', calculateAll);
-  if (useAveragedCheckbox) useAveragedCheckbox.addEventListener('change', calculateAll);
-
-  // Inicjalizacja startowa
   renderHistory();
   calculateAll();
-});
+};
 </script>
 
 </body>
