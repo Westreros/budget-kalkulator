@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/baza/:path*",
+      "destination": "https://kbzspdwizcwpzlvytdzw.supabase.co/:path*"
+    }
+  ]
+}
