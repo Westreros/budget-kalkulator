@@ -119,6 +119,23 @@
     input:focus, select:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
     .suffix { position: absolute; right: 10px; top: 10px; color: #94a3b8; font-weight: 600; font-size: 0.8rem; pointer-events: none; }
 
+    /* BANER PEŁNEGO BUDŻETU */
+    .total-income-banner {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border-radius: 12px;
+      padding: 16px;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      margin-bottom: 8px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    }
+    .tib-text span { display: block; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; }
+    .tib-text p { font-size: 0.75rem; color: #cbd5e1; margin-top: 2px; }
+    .tib-val { font-size: 1.5rem; font-weight: 800; color: #38bdf8; white-space: nowrap; }
+
     /* STYLE SUWAKÓW */
     .slider-group { margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid #f1f5f9; }
     .slider-group:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
@@ -331,42 +348,6 @@
                 </div>
               </label>
             </div>
-
-            <div class="card">
-              <h2>3. Baza suwaka transportu (Dojazdy autem)</h2>
-              <div class="input-row">
-                <div>
-                  <label for="commuteKm">Km w jedną stronę</label>
-                  <div class="input-group">
-                    <input type="number" id="commuteKm" placeholder="np. 15" min="0">
-                    <span class="suffix">km</span>
-                  </div>
-                </div>
-                <div>
-                  <label for="commuteDays">Dni w miesiącu</label>
-                  <div class="input-group">
-                    <input type="number" id="commuteDays" placeholder="np. 20" min="0" max="31">
-                    <span class="suffix">dni</span>
-                  </div>
-                </div>
-              </div>
-              <div class="input-row">
-                <div>
-                  <label for="carFuelUsage">Średnie spalanie</label>
-                  <div class="input-group">
-                    <input type="number" id="carFuelUsage" placeholder="np. 6.5" step="0.1" min="0">
-                    <span class="suffix">l/100km</span>
-                  </div>
-                </div>
-                <div>
-                  <label for="fuelPrice">Cena paliwa</label>
-                  <div class="input-group">
-                    <input type="number" id="fuelPrice" placeholder="np. 6.50" step="0.05" min="0">
-                    <span class="suffix">zł/l</span>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
 
           <div class="subgrid-col">
@@ -403,7 +384,7 @@
                   <strong id="valTransport">0 PLN (0%)</strong>
                 </div>
                 <input type="range" id="sliderTransport" min="0" max="3000" step="50" value="0">
-                <div class="slider-info">Sugerowane 5% (min. koszt dojazdów: <span id="minTransport">0</span> PLN)</div>
+                <div class="slider-info">Sugerowane 10%: <span id="recTransport">0</span> PLN</div>
               </div>
 
               <div class="slider-group" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
@@ -812,45 +793,32 @@ function getTotalIncome() {
   return base + (k800 * 800) + (kHome * 500) + (kWork * 1500);
 }
 
-function calcCommuteMin() {
-  var km = parseFloat(document.getElementById('commuteKm').value) || 0;
-  var days = parseFloat(document.getElementById('commuteDays').value) || 0;
-  var usage = parseFloat(document.getElementById('carFuelUsage').value) || 0;
-  var price = parseFloat(document.getElementById('fuelPrice').value) || 0;
-  var totKm = 2 * km * days;
-  return Math.round(totKm * (((usage / 100) * price) + (totKm > 0 ? 0.20 : 0)));
-}
-
 function updateSliderMinsAndLabels() {
   var totalInc = getTotalIncome();
-  var commuteCost = calcCommuteMin();
 
   elFood.min = 0;
-  elTransport.min = commuteCost;
+  elTransport.min = 0;
   
   elHousing.max = Math.max(totalInc, 5000);
   elFood.max = Math.max(totalInc, 4000);
   elTransport.max = Math.max(totalInc, 3000);
   elOther.max = Math.max(totalInc, 3000);
 
-  if (parseInt(elTransport.value) < commuteCost) elTransport.value = commuteCost;
-
   document.getElementById('recHousing').textContent = Math.round(totalInc * 0.30);
   document.getElementById('recFood').textContent = Math.round(totalInc * 0.15);
-  document.getElementById('minTransport').textContent = commuteCost;
+  document.getElementById('recTransport').textContent = Math.round(totalInc * 0.10);
   document.getElementById('recOther').textContent = Math.round(totalInc * 0.05);
 
   updateSliderValuesDisplay();
 }
 
-// Ustawia suwaki dokładnie w proporcji bazowej Needs: 50% (30% + 15% + 5% + 0%)
+// Ustawia suwaki dokładnie w proporcji bazowej Needs: 50%
 function autoSetLimitsAndValues() {
   var totalInc = getTotalIncome();
-  var commuteCost = calcCommuteMin();
 
   elHousing.value = Math.round(totalInc * 0.30);
   elFood.value = Math.round(totalInc * 0.15);
-  elTransport.value = Math.max(Math.round(totalInc * 0.05), commuteCost);
+  elTransport.value = Math.round(totalInc * 0.10);
   elOther.value = 0;
 
   updateSliderMinsAndLabels();
@@ -905,27 +873,22 @@ function calculateAll() {
   // ----------------------------------------------------
   var free = Math.max(0, totalInc - survival);
   
-  // Fun money to domyślnie 30% całego dochodu, chyba że "Rush" to 10%
   var funMoneyTargetPct = rush ? 0.10 : 0.30;
   var funMoney = Math.round(totalInc * funMoneyTargetPct);
   
-  // Zabezpieczenie: jeśli koszty przeżycia (suwaki) zjedzą za dużo, fun money maleje do reszty
   if (funMoney > free) {
     funMoney = free;
   }
   
-  // Oszczędności to wszystko to, co zostanie (domyślnie 20%)
   var savings = free - funMoney;
   var dailyFun = Math.round(funMoney / 30);
 
-  // Aktualizacja koloru procentów Planowanego Kosztu na górze
   var safeInc = Math.max(totalInc, 1);
   var survivalPct = Math.round((survival / safeInc) * 100);
   var survPctEl = document.getElementById('survivalPctDisplay');
   survPctEl.textContent = survivalPct + '% budżetu (Zalecane max 50%)';
   if (survivalPct > 50) { survPctEl.style.color = '#ef4444'; } else { survPctEl.style.color = '#10b981'; }
 
-  // Ostrzeżenie o całkowitym deficycie (ponad 100%)
   var alertBox = document.getElementById('alertBox');
   if (alertBox) {
     if (totalInc > 0 && totalInc < survival) {
@@ -1280,12 +1243,6 @@ window.onload = async function() {
   ['income', 'kids800', 'kidsActiveHome', 'kidsActiveWork'].forEach(id => {
     var el = document.getElementById(id);
     if(el) el.addEventListener('input', () => { autoSetLimitsAndValues(); });
-  });
-
-  // Reagowanie tylko na koszty transportu (bez resetowania całości)
-  ['commuteKm', 'commuteDays', 'carFuelUsage', 'fuelPrice'].forEach(id => {
-    var el = document.getElementById(id);
-    if(el) el.addEventListener('input', () => { updateSliderMinsAndLabels(); calculateAll(); });
   });
 
   ['rushEmergencyFund', 'currentSavings'].forEach(id => {
