@@ -113,29 +113,16 @@
     .tib-text p { font-size: 0.75rem; color: #cbd5e1; margin-top: 2px; }
     .tib-val { font-size: 1.5rem; font-weight: 800; color: #38bdf8; white-space: nowrap; }
 
-    /* STYLE SUWAKÓW I RĘCZNEGO WPISYWANIA */
-    .slider-group { margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid #f1f5f9; }
+    /* STYLE SUWAKÓW ZABLOKOWANYCH (TYLKO ODCZYT) */
+    .slider-group { margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid #f1f5f9; pointer-events: none; }
     .slider-group:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
     .slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .slider-header span { font-weight: 600; color: #334155; font-size: 0.9rem; }
+    .slider-header strong { font-size: 1.1rem; color: #2563eb; font-weight: 800; background: #eff6ff; padding: 4px 8px; border-radius: 6px; }
     
-    .slider-val-container {
-      background: #eff6ff; padding: 4px 8px; border-radius: 6px; display: flex; align-items: baseline; gap: 4px; transition: background 0.15s, box-shadow 0.15s;
-    }
-    .slider-val-container:hover { background: #dbeafe; box-shadow: 0 0 0 2px rgba(147, 197, 253, 0.5); cursor: text; }
-    .slider-val-container:focus-within { background: #ffffff; box-shadow: 0 0 0 2px #3b82f6; }
-    
-    .invisible-input {
-      border: none; background: transparent; color: #2563eb; font-weight: 800; font-size: 1.1rem; text-align: right; width: 65px; outline: none; font-family: inherit; padding: 0; -moz-appearance: textfield;
-    }
-    .invisible-input::-webkit-outer-spin-button, .invisible-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    .val-suffix { color: #2563eb; font-weight: 800; font-size: 1.1rem; }
-    
-    input[type="range"] { -webkit-appearance: none; width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; outline: none; transition: background 0.15s; margin: 8px 0; }
-    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #2563eb; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: transform 0.1s; }
-    input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none; border-radius: 50%; background: #2563eb; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: transform 0.1s; }
-    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
-    input[type="range"]::-moz-range-thumb:hover { transform: scale(1.15); }
+    input[type="range"] { -webkit-appearance: none; width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; outline: none; margin: 8px 0; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #2563eb; cursor: default; }
+    input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none; border-radius: 50%; background: #2563eb; cursor: default; }
     .slider-info { font-size: 0.75rem; color: #64748b; margin-top: 4px; display: flex; justify-content: space-between; }
 
     .goal-banner { background: #ecfdf5; border: 2px solid #10b981; border-radius: 12px; padding: 14px; margin-top: 8px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; transition: background-color 0.15s; }
@@ -143,11 +130,6 @@
     .goal-banner input { width: 20px; height: 20px; margin-top: 2px; cursor: pointer; accent-color: #059669; }
     .goal-banner-text strong { display: block; color: #065f46; font-size: 0.95rem; }
     .goal-banner-text p { font-size: 0.8rem; color: #047857; margin-top: 2px; }
-
-    .checkbox-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; margin-top: 8px; cursor: pointer; transition: background-color 0.15s; }
-    .checkbox-box:hover { background: #f1f5f9; }
-    .checkbox-box input { width: 18px; height: 18px; cursor: pointer; accent-color: #2563eb; }
-    .checkbox-box span { font-size: 0.85rem; font-weight: 600; color: #334155; }
 
     .form-inline { display: flex; gap: 8px; }
     .form-inline input[type="text"] { flex: 1; min-width: 140px; }
@@ -169,8 +151,6 @@
     .stat-badge { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; }
     .stat-badge span { font-size: 0.75rem; color: #64748b; font-weight: 600; display: block; text-transform: uppercase; }
     .stat-badge strong { font-size: 1.25rem; color: #0f172a; font-weight: 700; margin-top: 4px; display: block; }
-
-    .alert-box { border-radius: 10px; padding: 12px; font-size: 0.85rem; margin-bottom: 16px; display: none; line-height: 1.4; transition: 0.2s; }
 
     .bar-group { display: flex; flex-direction: column; gap: 16px; margin-top: 12px; }
     .bar-header { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 5px; }
@@ -283,8 +263,8 @@
           <span class="tag">Planowany Koszt Życia (Potrzeby)</span>
         </div>
         <div class="val"><span id="survivalTotal">0</span> PLN</div>
-        <p class="desc">Suma suwaków: mieszkanie, jedzenie, transport, raty.</p>
-        <p class="desc" style="color: #ef4444; font-weight: 600; margin-top: 4px;" id="survivalPctDisplay">0% budżetu (Zalecane max 50%)</p>
+        <p class="desc">Suma idealnych potrzeb: mieszkanie, jedzenie, transport, raty.</p>
+        <p class="desc" style="color: #10b981; font-weight: 600; margin-top: 4px;" id="survivalPctDisplay">50% budżetu (Zalecane max 50%)</p>
       </div>
     </div>
 
@@ -332,7 +312,7 @@
                 <input type="checkbox" id="rushEmergencyFund">
                 <div class="goal-banner-text">
                   <strong>Szybka 6-miesięczna poduszka finansowa</strong>
-                  <p>Obcina zachcianki do 10% i potęguje oszczędności do maksimum.</p>
+                  <p>Maksymalizuje oszczędności, tnąc zachcianki do zaledwie 10% budżetu.</p>
                 </div>
               </label>
             </div>
@@ -340,85 +320,45 @@
 
           <div class="subgrid-col">
             <div class="card">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <div>
-                  <h2 style="margin-bottom:4px;">2. Planowane Koszty (Reguła 50/20/30)</h2>
-                  <p style="font-size: 0.8rem; color: #64748b; margin: 0; max-width: 90%;">Przesuń suwak lub wpisz ręcznie.</p>
-                </div>
-                <button id="btnResetLimits" class="btn-register" style="width: auto; padding: 6px 12px; font-size: 0.85rem; margin: 0; border-radius: 8px; white-space: nowrap;">🔄 Reset</button>
+              <div style="margin-bottom: 16px;">
+                <h2 style="margin-bottom:4px;">2. Idealne Koszty (Reguła 50/20/30)</h2>
+                <p style="font-size: 0.8rem; color: #64748b; margin: 0;">Ten panel pokazuje idealny, modelowy podział Twoich środków pozwalający na najszybsze bogacenie się. Edycja zablokowana.</p>
               </div>
 
               <div class="slider-group">
                 <div class="slider-header">
                   <span>Mieszkanie i Rachunki</span>
-                  <div class="slider-val-container">
-                    <input type="number" id="inputHousing" class="invisible-input" value="0">
-                    <span class="val-suffix">PLN (<span id="pctHousing">0</span>%)</span>
-                  </div>
+                  <strong id="valHousing" style="color: #2563eb;">0 PLN (30%)</strong>
                 </div>
-                <input type="range" id="sliderHousing" min="0" max="10000" step="50" value="0">
-                <div class="slider-info">Sugerowane 30% budżetu: <span id="recHousing">0</span> PLN</div>
+                <input type="range" id="sliderHousing" min="0" max="100" step="1" value="0">
+                <div class="slider-info">Zalecane 30% budżetu</div>
               </div>
 
               <div class="slider-group">
                 <div class="slider-header">
                   <span>Żywność i Chemia</span>
-                  <div class="slider-val-container">
-                    <input type="number" id="inputFood" class="invisible-input" value="0">
-                    <span class="val-suffix">PLN (<span id="pctFood">0</span>%)</span>
-                  </div>
+                  <strong id="valFood" style="color: #2563eb;">0 PLN (15%)</strong>
                 </div>
-                <input type="range" id="sliderFood" min="0" max="5000" step="50" value="0">
-                <div class="slider-info">Sugerowane 15% budżetu: <span id="recFood">0</span> PLN</div>
+                <input type="range" id="sliderFood" min="0" max="100" step="1" value="0">
+                <div class="slider-info">Zalecane 15% budżetu</div>
               </div>
 
               <div class="slider-group">
                 <div class="slider-header">
                   <span>Transport i Dojazdy</span>
-                  <div class="slider-val-container">
-                    <input type="number" id="inputTransport" class="invisible-input" value="0">
-                    <span class="val-suffix">PLN (<span id="pctTransport">0</span>%)</span>
-                  </div>
+                  <strong id="valTransport" style="color: #2563eb;">0 PLN (5%)</strong>
                 </div>
-                <input type="range" id="sliderTransport" min="0" max="3000" step="50" value="0">
-                <div class="slider-info">Sugerowane 5% budżetu: <span id="recTransport">0</span> PLN</div>
-              </div>
-
-              <div class="slider-group">
-                <div class="slider-header">
-                  <span>Zobowiązania (Raty)</span>
-                  <div class="slider-val-container">
-                    <input type="number" id="inputOther" class="invisible-input" value="0">
-                    <span class="val-suffix">PLN (<span id="pctOther">0</span>%)</span>
-                  </div>
-                </div>
-                <input type="range" id="sliderOther" min="0" max="5000" step="50" value="0">
-                <div class="slider-info">Sugerowane 0-5%: <span id="recOther">0</span> PLN</div>
-              </div>
-
-              <!-- NOWE SUWAKI -->
-              <div class="slider-group">
-                <div class="slider-header">
-                  <span>Oszczędności / Inwestycje</span>
-                  <div class="slider-val-container">
-                    <input type="number" id="inputSavings" class="invisible-input" value="0">
-                    <span class="val-suffix">PLN (<span id="pctSavings">0</span>%)</span>
-                  </div>
-                </div>
-                <input type="range" id="sliderSavings" min="0" max="10000" step="50" value="0">
-                <div class="slider-info">Sugerowane 30% budżetu: <span id="recSavings">0</span> PLN</div>
+                <input type="range" id="sliderTransport" min="0" max="100" step="1" value="0">
+                <div class="slider-info">Zalecane 5% budżetu</div>
               </div>
 
               <div class="slider-group" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
                 <div class="slider-header">
-                  <span>Zachcianki / Fun Money</span>
-                  <div class="slider-val-container">
-                    <input type="number" id="inputFun" class="invisible-input" value="0">
-                    <span class="val-suffix">PLN (<span id="pctFun">0</span>%)</span>
-                  </div>
+                  <span>Zobowiązania (Raty)</span>
+                  <strong id="valOther" style="color: #2563eb;">0 PLN (0%)</strong>
                 </div>
-                <input type="range" id="sliderFun" min="0" max="10000" step="50" value="0">
-                <div class="slider-info">Sugerowane 20% budżetu: <span id="recFun">0</span> PLN</div>
+                <input type="range" id="sliderOther" min="0" max="100" step="1" value="0">
+                <div class="slider-info">Idealnie 0% (Brak długów)</div>
               </div>
             </div>
           </div>
@@ -428,8 +368,6 @@
 
       <div class="col-results">
         
-        <div id="alertBox" class="alert-box"></div>
-
         <div class="sprint-card" id="sprintCard">
           <div class="sprint-header">
             <span style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: #166534;">Cel: 6-miesięczna Poduszka</span>
@@ -437,7 +375,7 @@
           </div>
           <div class="sprint-details">
             Brakująca kwota: <strong id="emergencyRemainingVal" style="color:#0f172a;">0 PLN</strong><br>
-            Miesięcznie odłożysz (z suwaka): <strong id="sprintSavingSpeed" style="color: #047857;">0 PLN</strong><br>
+            Miesięcznie odłożysz (w planie idealnym): <strong id="sprintSavingSpeed" style="color: #047857;">0 PLN</strong><br>
             Osiągniesz cel za: <strong id="sprintMonthsCount">--</strong>
           </div>
           <div class="progress-bar-bg">
@@ -723,13 +661,6 @@ if (isOfflineMode) {
 var isLoggedIn = false;
 var historyLogs = [];
 
-var elHousing = document.getElementById('sliderHousing');
-var elFood = document.getElementById('sliderFood');
-var elTransport = document.getElementById('sliderTransport');
-var elOther = document.getElementById('sliderOther');
-var elSavings = document.getElementById('sliderSavings');
-var elFun = document.getElementById('sliderFun');
-
 // Funkcje Auth
 async function handleLogin() {
   const errorEl = document.getElementById('authError');
@@ -773,7 +704,7 @@ async function loadCloudData() {
   const { data: hlData, error: hlErr } = await supabase.from('history_logs').select('*');
   if(!hlErr && hlData) { historyLogs = hlData; }
   renderHistory();
-  autoSetLimitsAndValues(); 
+  calculateAll(); 
 }
 
 // -------------------------------------------
@@ -809,75 +740,6 @@ function getTotalIncome() {
   return base + (k800 * 800) + (kHome * 500) + (kWork * 1500);
 }
 
-function updateSliderMinsAndLabels() {
-  var totalInc = getTotalIncome();
-  
-  elHousing.max = totalInc;
-  elFood.max = totalInc;
-  elTransport.max = totalInc;
-  elOther.max = totalInc;
-  elSavings.max = totalInc;
-  elFun.max = totalInc;
-
-  document.getElementById('recHousing').textContent = Math.round(totalInc * 0.30);
-  document.getElementById('recFood').textContent = Math.round(totalInc * 0.15);
-  document.getElementById('recTransport').textContent = Math.round(totalInc * 0.05);
-  document.getElementById('recOther').textContent = 0;
-  document.getElementById('recSavings').textContent = Math.round(totalInc * 0.30);
-  document.getElementById('recFun').textContent = Math.round(totalInc * 0.20);
-
-  updateSliderValuesDisplay();
-}
-
-// Ustawia wszystkie suwaki zgodnie z wytycznymi i rozdziela 100% budżetu
-function autoSetLimitsAndValues() {
-  var totalInc = getTotalIncome();
-  var rush = document.getElementById('rushEmergencyFund').checked;
-
-  elHousing.value = Math.round(totalInc * 0.30);
-  elFood.value = Math.round(totalInc * 0.15);
-  elTransport.value = Math.round(totalInc * 0.05);
-  elOther.value = 0;
-
-  var remaining = totalInc - (parseInt(elHousing.value) + parseInt(elFood.value) + parseInt(elTransport.value));
-  var funTarget = rush ? 0.10 : 0.20;
-  var funVal = Math.round(totalInc * funTarget);
-  
-  if (funVal > remaining) funVal = remaining;
-  
-  elFun.value = funVal;
-  elSavings.value = Math.max(0, remaining - funVal);
-
-  updateSliderMinsAndLabels();
-  calculateAll();
-}
-
-function updateSliderValuesDisplay() {
-  var totalInc = getTotalIncome();
-  var safeInc = Math.max(totalInc, 1); 
-  
-  var hVal = parseInt(elHousing.value) || 0;
-  var fVal = parseInt(elFood.value) || 0;
-  var tVal = parseInt(elTransport.value) || 0;
-  var oVal = parseInt(elOther.value) || 0;
-  var sVal = parseInt(elSavings.value) || 0;
-  var fmVal = parseInt(elFun.value) || 0;
-
-  document.getElementById('inputHousing').value = hVal;
-  document.getElementById('inputFood').value = fVal;
-  document.getElementById('inputTransport').value = tVal;
-  document.getElementById('inputOther').value = oVal;
-  document.getElementById('inputSavings').value = sVal;
-  document.getElementById('inputFun').value = fmVal;
-
-  document.getElementById('pctHousing').textContent = Math.round((hVal / safeInc) * 100);
-  document.getElementById('pctFood').textContent = Math.round((fVal / safeInc) * 100);
-  document.getElementById('pctTransport').textContent = Math.round((tVal / safeInc) * 100);
-  document.getElementById('pctOther').textContent = Math.round((oVal / safeInc) * 100);
-  document.getElementById('pctSavings').textContent = Math.round((sVal / safeInc) * 100);
-  document.getElementById('pctFun').textContent = Math.round((fmVal / safeInc) * 100);
-}
-
 function calculateAll() {
   var totalInc = getTotalIncome();
   var baseInc = Math.max(0, parseFloat(document.getElementById('income').value) || 0);
@@ -892,39 +754,46 @@ function calculateAll() {
   }
 
   var currentSavings = Math.max(0, parseFloat(document.getElementById('currentSavings').value) || 0);
+  var rush = document.getElementById('rushEmergencyFund').checked;
 
-  var housing = parseInt(elHousing.value) || 0;
-  var food = parseInt(elFood.value) || 0;
-  var transport = parseInt(elTransport.value) || 0;
-  var other = parseInt(elOther.value) || 0;
-  var savings = parseInt(elSavings.value) || 0;
-  var funMoney = parseInt(elFun.value) || 0;
+  // Matematyka sztywna (50/20/30) dla idealnego modelu
+  var housing = Math.round(totalInc * 0.30);
+  var food = Math.round(totalInc * 0.15);
+  var transport = Math.round(totalInc * 0.05);
+  var other = 0;
 
   var survival = housing + food + transport + other;
-  var totalAllocated = survival + savings + funMoney;
   var emergencyGoal = survival * 6;
+
+  var funMoneyTargetPct = rush ? 0.10 : 0.20;
+  var funMoney = Math.round(totalInc * funMoneyTargetPct);
+  var savings = totalInc - survival - funMoney; // Wypełnia resztę do 100%
+  
   var dailyFun = Math.round(funMoney / 30);
 
-  var alertBox = document.getElementById('alertBox');
-  if (alertBox) {
-    if (totalInc > 0 && totalAllocated > totalInc) {
-      alertBox.textContent = 'Ostrzeżenie! Przypisano na suwakach (' + totalAllocated.toLocaleString('pl-PL') + ' PLN) więcej niż wynosi Twój budżet. Jesteś na minusie o ' + (totalAllocated - totalInc).toLocaleString('pl-PL') + ' PLN!';
-      alertBox.style.display = 'block';
-      alertBox.style.color = '#991b1b'; alertBox.style.backgroundColor = '#fef2f2'; alertBox.style.borderColor = '#fecaca';
-    } else if (totalInc > 0 && totalAllocated < totalInc) {
-      alertBox.textContent = 'Masz jeszcze ' + (totalInc - totalAllocated).toLocaleString('pl-PL') + ' PLN wolnych środków. Rozdysponuj je na suwakach (np. zwiększ oszczędności).';
-      alertBox.style.display = 'block';
-      alertBox.style.color = '#047857'; alertBox.style.backgroundColor = '#ecfdf5'; alertBox.style.borderColor = '#10b981';
-    } else {
-      alertBox.style.display = 'none';
-    }
-  }
+  // Aktualizacja kafelka Idealne Koszty (zablokowane suwaki pełniące funkcję pasków)
+  var safeInc = Math.max(totalInc, 1); 
 
-  var safeInc = Math.max(totalInc, 1);
-  var survivalPct = Math.round((survival / safeInc) * 100);
-  var survPctEl = document.getElementById('survivalPctDisplay');
-  survPctEl.textContent = survivalPct + '% budżetu (Zalecane max 50%)';
-  if (survivalPct > 50) { survPctEl.style.color = '#ef4444'; } else { survPctEl.style.color = '#10b981'; }
+  document.getElementById('sliderHousing').max = safeInc;
+  document.getElementById('sliderHousing').value = housing;
+  document.getElementById('valHousing').textContent = housing.toLocaleString('pl-PL') + ' PLN (30%)';
+
+  document.getElementById('sliderFood').max = safeInc;
+  document.getElementById('sliderFood').value = food;
+  document.getElementById('valFood').textContent = food.toLocaleString('pl-PL') + ' PLN (15%)';
+
+  document.getElementById('sliderTransport').max = safeInc;
+  document.getElementById('sliderTransport').value = transport;
+  document.getElementById('valTransport').textContent = transport.toLocaleString('pl-PL') + ' PLN (5%)';
+
+  document.getElementById('sliderOther').max = safeInc;
+  document.getElementById('sliderOther').value = other;
+  document.getElementById('valOther').textContent = other.toLocaleString('pl-PL') + ' PLN (0%)';
+
+  // Pozostałe uaktualnienia interfejsu
+  document.getElementById('funBadgeLabel').textContent = rush ? 'Zachcianki (10% budżetu)' : 'Zachcianki (20% budżetu)';
+  document.getElementById('barFunTitle').textContent = 'Zachcianki / Fun Money';
+  document.getElementById('barSavingsTitle').textContent = rush ? 'Szybka Poduszka (Maksymalizacja oszczędności)' : 'Oszczędności / Inwestycje';
 
   document.getElementById('survivalTotal').textContent = survival.toLocaleString('pl-PL');
   document.getElementById('monthlyFunVal').textContent = funMoney.toLocaleString('pl-PL') + ' PLN';
@@ -940,7 +809,7 @@ function calculateAll() {
   document.getElementById('sprintMonthsCount').textContent = remainingGoal === 0 ? 'Cel osiągnięty!' : (monthsToGoal + ' mies.');
   document.getElementById('emergencyProgressBar').style.width = progressPct + '%';
 
-  // Obliczenia % do pasków na dole (Suma zależy od tego, co wpiszesz!)
+  // Obliczenia % do pasków na dole
   var hPct = Math.round((housing / safeInc) * 100);
   var fPct = Math.round((food / safeInc) * 100);
   var tPct = Math.round((transport / safeInc) * 100);
@@ -948,12 +817,12 @@ function calculateAll() {
   var sPct = Math.round((savings / safeInc) * 100);
   var fmPct = Math.round((funMoney / safeInc) * 100);
 
-  document.getElementById('barHousingVal').textContent = housing + ' PLN (' + hPct + '%)';
-  document.getElementById('barFoodVal').textContent = food + ' PLN (' + fPct + '%)';
-  document.getElementById('barTransportVal').textContent = transport + ' PLN (' + tPct + '%)';
-  document.getElementById('barOtherVal').textContent = other + ' PLN (' + oPct + '%)';
-  document.getElementById('barSavingsVal').textContent = savings + ' PLN (' + sPct + '%)';
-  document.getElementById('barFunVal').textContent = funMoney + ' PLN (' + fmPct + '%)';
+  document.getElementById('barHousingVal').textContent = housing.toLocaleString('pl-PL') + ' PLN (' + hPct + '%)';
+  document.getElementById('barFoodVal').textContent = food.toLocaleString('pl-PL') + ' PLN (' + fPct + '%)';
+  document.getElementById('barTransportVal').textContent = transport.toLocaleString('pl-PL') + ' PLN (' + tPct + '%)';
+  document.getElementById('barOtherVal').textContent = other.toLocaleString('pl-PL') + ' PLN (' + oPct + '%)';
+  document.getElementById('barSavingsVal').textContent = savings.toLocaleString('pl-PL') + ' PLN (' + sPct + '%)';
+  document.getElementById('barFunVal').textContent = funMoney.toLocaleString('pl-PL') + ' PLN (' + fmPct + '%)';
 
   var setBar = function(id, val) {
     document.getElementById(id).style.width = totalInc > 0 ? (Math.min(100, (val / safeInc) * 100) + '%') : '0%';
@@ -1260,42 +1129,16 @@ window.onload = async function() {
     var d = new Date(); mSelect.value = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1); yInput.value = d.getFullYear();
   }
 
-  const slidersInputs = [
-    { sl: elHousing, inp: document.getElementById('inputHousing') },
-    { sl: elFood, inp: document.getElementById('inputFood') },
-    { sl: elTransport, inp: document.getElementById('inputTransport') },
-    { sl: elOther, inp: document.getElementById('inputOther') },
-    { sl: elSavings, inp: document.getElementById('inputSavings') },
-    { sl: elFun, inp: document.getElementById('inputFun') }
-  ];
-
-  slidersInputs.forEach(item => {
-    item.sl.addEventListener('input', () => { 
-      item.inp.value = item.sl.value; 
-      updateSliderValuesDisplay(); 
-      calculateAll(); 
-    });
-    item.inp.addEventListener('input', () => { 
-      item.sl.value = item.inp.value; 
-      updateSliderValuesDisplay(); 
-      calculateAll(); 
-    });
-  });
-
   ['income', 'kids800', 'kidsActiveHome', 'kidsActiveWork'].forEach(id => {
     var el = document.getElementById(id);
-    if(el) el.addEventListener('input', () => { autoSetLimitsAndValues(); });
+    if(el) el.addEventListener('input', () => { calculateAll(); });
   });
 
-  ['rushEmergencyFund'].forEach(id => {
-    document.getElementById(id).addEventListener('change', autoSetLimitsAndValues);
+  ['rushEmergencyFund', 'currentSavings'].forEach(id => {
+    var el = document.getElementById(id);
+    if(el) el.addEventListener('change', calculateAll);
+    if(el) el.addEventListener('input', calculateAll);
   });
-  
-  ['currentSavings'].forEach(id => {
-    document.getElementById(id).addEventListener('input', calculateAll);
-  });
-
-  document.getElementById('btnResetLimits').onclick = autoSetLimitsAndValues;
 
   document.getElementById('addHistBtn').onclick = async function() {
     var selM = document.getElementById('histInputMonth').value; var selY = document.getElementById('histInputYear').value;
@@ -1332,7 +1175,7 @@ window.onload = async function() {
   document.getElementById('selectReportPeriod').onchange = function() { renderSelectedMonthDetails(this.value); };
 
   renderHistory();
-  autoSetLimitsAndValues(); 
+  calculateAll(); 
 };
 </script>
 </body>
