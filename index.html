@@ -91,6 +91,7 @@
     input[type="number"], input[type="text"], select {
       width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; outline: none; background-color: #fff; transition: border-color 0.15s, box-shadow 0.15s; appearance: none; -webkit-appearance: none; -moz-appearance: none;
     }
+    
     input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     input[type="number"] { -moz-appearance: textfield; }
     .input-group input[type="number"], .input-group input[type="text"] { padding-right: 42px; }
@@ -125,7 +126,7 @@
     .slider-val-container:focus-within { background: #ffffff; box-shadow: 0 0 0 2px #3b82f6; }
     
     .invisible-input {
-      border: none; background: transparent; color: #2563eb; font-weight: 800; font-size: 1.1rem; text-align: right; width: 60px; outline: none; font-family: inherit; padding: 0; -moz-appearance: textfield;
+      border: none; background: transparent; color: #2563eb; font-weight: 800; font-size: 1.1rem; text-align: right; width: 65px; outline: none; font-family: inherit; padding: 0; -moz-appearance: textfield;
     }
     .invisible-input::-webkit-outer-spin-button, .invisible-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .val-suffix { color: #2563eb; font-weight: 800; font-size: 1.1rem; }
@@ -169,7 +170,7 @@
     .stat-badge span { font-size: 0.75rem; color: #64748b; font-weight: 600; display: block; text-transform: uppercase; }
     .stat-badge strong { font-size: 1.25rem; color: #0f172a; font-weight: 700; margin-top: 4px; display: block; }
 
-    .alert-box { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 12px; border-radius: 10px; font-size: 0.85rem; margin-top: 10px; display: none; line-height: 1.4; }
+    .alert-box { border-radius: 10px; padding: 12px; font-size: 0.85rem; margin-bottom: 16px; display: none; line-height: 1.4; transition: 0.2s; }
 
     .bar-group { display: flex; flex-direction: column; gap: 16px; margin-top: 12px; }
     .bar-header { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 5px; }
@@ -331,7 +332,7 @@
                 <input type="checkbox" id="rushEmergencyFund">
                 <div class="goal-banner-text">
                   <strong>Szybka 6-miesięczna poduszka finansowa</strong>
-                  <p>Maksymalizuje oszczędności do 40%, tnąc zachcianki do zaledwie 10% budżetu.</p>
+                  <p>Obcina zachcianki do 10% i potęguje oszczędności do maksimum.</p>
                 </div>
               </label>
             </div>
@@ -342,7 +343,7 @@
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                 <div>
                   <h2 style="margin-bottom:4px;">2. Planowane Koszty (Reguła 50/20/30)</h2>
-                  <p style="font-size: 0.8rem; color: #64748b; margin: 0; max-width: 90%;">Przesuń suwak lub kliknij na kwotę i wpisz z klawiatury.</p>
+                  <p style="font-size: 0.8rem; color: #64748b; margin: 0; max-width: 90%;">Przesuń suwak lub wpisz ręcznie.</p>
                 </div>
                 <button id="btnResetLimits" class="btn-register" style="width: auto; padding: 6px 12px; font-size: 0.85rem; margin: 0; border-radius: 8px; white-space: nowrap;">🔄 Reset</button>
               </div>
@@ -380,10 +381,10 @@
                   </div>
                 </div>
                 <input type="range" id="sliderTransport" min="0" max="3000" step="50" value="0">
-                <div class="slider-info">Sugerowane 5%: <span id="recTransport">0</span> PLN</div>
+                <div class="slider-info">Sugerowane 5% budżetu: <span id="recTransport">0</span> PLN</div>
               </div>
 
-              <div class="slider-group" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
+              <div class="slider-group">
                 <div class="slider-header">
                   <span>Zobowiązania (Raty)</span>
                   <div class="slider-val-container">
@@ -394,6 +395,31 @@
                 <input type="range" id="sliderOther" min="0" max="5000" step="50" value="0">
                 <div class="slider-info">Sugerowane 0-5%: <span id="recOther">0</span> PLN</div>
               </div>
+
+              <!-- NOWE SUWAKI -->
+              <div class="slider-group">
+                <div class="slider-header">
+                  <span>Oszczędności / Inwestycje</span>
+                  <div class="slider-val-container">
+                    <input type="number" id="inputSavings" class="invisible-input" value="0">
+                    <span class="val-suffix">PLN (<span id="pctSavings">0</span>%)</span>
+                  </div>
+                </div>
+                <input type="range" id="sliderSavings" min="0" max="10000" step="50" value="0">
+                <div class="slider-info">Sugerowane 30% budżetu: <span id="recSavings">0</span> PLN</div>
+              </div>
+
+              <div class="slider-group" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
+                <div class="slider-header">
+                  <span>Zachcianki / Fun Money</span>
+                  <div class="slider-val-container">
+                    <input type="number" id="inputFun" class="invisible-input" value="0">
+                    <span class="val-suffix">PLN (<span id="pctFun">0</span>%)</span>
+                  </div>
+                </div>
+                <input type="range" id="sliderFun" min="0" max="10000" step="50" value="0">
+                <div class="slider-info">Sugerowane 20% budżetu: <span id="recFun">0</span> PLN</div>
+              </div>
             </div>
           </div>
 
@@ -401,6 +427,9 @@
       </div>
 
       <div class="col-results">
+        
+        <div id="alertBox" class="alert-box"></div>
+
         <div class="sprint-card" id="sprintCard">
           <div class="sprint-header">
             <span style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: #166534;">Cel: 6-miesięczna Poduszka</span>
@@ -408,7 +437,7 @@
           </div>
           <div class="sprint-details">
             Brakująca kwota: <strong id="emergencyRemainingVal" style="color:#0f172a;">0 PLN</strong><br>
-            Miesięcznie odłożysz: <strong id="sprintSavingSpeed" style="color: #047857;">0 PLN</strong><br>
+            Miesięcznie odłożysz (z suwaka): <strong id="sprintSavingSpeed" style="color: #047857;">0 PLN</strong><br>
             Osiągniesz cel za: <strong id="sprintMonthsCount">--</strong>
           </div>
           <div class="progress-bar-bg">
@@ -416,11 +445,9 @@
           </div>
         </div>
 
-        <div id="alertBox" class="alert-box" style="margin-bottom: 16px;"></div>
-
         <div class="stat-badge-grid">
           <div class="stat-badge">
-            <span id="funBadgeLabel">Zachcianki (20% budżetu)</span>
+            <span id="funBadgeLabel">Zachcianki na miesiąc</span>
             <strong id="monthlyFunVal" style="color: #7c3aed;">0 PLN</strong>
           </div>
           <div class="stat-badge">
@@ -700,6 +727,8 @@ var elHousing = document.getElementById('sliderHousing');
 var elFood = document.getElementById('sliderFood');
 var elTransport = document.getElementById('sliderTransport');
 var elOther = document.getElementById('sliderOther');
+var elSavings = document.getElementById('sliderSavings');
+var elFun = document.getElementById('sliderFun');
 
 // Funkcje Auth
 async function handleLogin() {
@@ -713,11 +742,7 @@ async function handleLogin() {
   if(!email || !password) { errorEl.textContent = 'Wpisz email i hasło.'; return; }
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) {
-    errorEl.textContent = 'Błąd logowania: ' + error.message;
-  } else {
-    window.location.reload();
-  }
+  if (error) { errorEl.textContent = 'Błąd logowania: ' + error.message; } else { window.location.reload(); }
 }
 
 async function handleRegister() {
@@ -731,14 +756,9 @@ async function handleRegister() {
   if(!email || password.length < 6) { errorEl.textContent = 'Email i hasło (min. 6 znaków) są wymagane.'; return; }
 
   const { data, error } = await supabase.auth.signUp({ email, password });
-  if (error) {
-    errorEl.textContent = 'Błąd rejestracji: ' + error.message;
-  } else {
-    if (data.session) {
-      window.location.reload();
-    } else {
-      errorEl.style.color = '#10b981';
-      errorEl.textContent = 'Konto utworzone pomyślnie! Zaloguj się.';
+  if (error) { errorEl.textContent = 'Błąd rejestracji: ' + error.message; } else {
+    if (data.session) { window.location.reload(); } else {
+      errorEl.style.color = '#10b981'; errorEl.textContent = 'Konto utworzone pomyślnie! Zaloguj się.';
     }
   }
 }
@@ -751,9 +771,7 @@ async function handleLogout() {
 async function loadCloudData() {
   if (isOfflineMode) return;
   const { data: hlData, error: hlErr } = await supabase.from('history_logs').select('*');
-  if(!hlErr && hlData) {
-    historyLogs = hlData;
-  }
+  if(!hlErr && hlData) { historyLogs = hlData; }
   renderHistory();
   autoSetLimitsAndValues(); 
 }
@@ -794,26 +812,41 @@ function getTotalIncome() {
 function updateSliderMinsAndLabels() {
   var totalInc = getTotalIncome();
   
-  elHousing.max = Math.max(totalInc, 5000);
-  elFood.max = Math.max(totalInc, 4000);
-  elTransport.max = Math.max(totalInc, 3000);
-  elOther.max = Math.max(totalInc, 3000);
+  elHousing.max = totalInc;
+  elFood.max = totalInc;
+  elTransport.max = totalInc;
+  elOther.max = totalInc;
+  elSavings.max = totalInc;
+  elFun.max = totalInc;
 
   document.getElementById('recHousing').textContent = Math.round(totalInc * 0.30);
   document.getElementById('recFood').textContent = Math.round(totalInc * 0.15);
   document.getElementById('recTransport').textContent = Math.round(totalInc * 0.05);
   document.getElementById('recOther').textContent = 0;
+  document.getElementById('recSavings').textContent = Math.round(totalInc * 0.30);
+  document.getElementById('recFun').textContent = Math.round(totalInc * 0.20);
 
   updateSliderValuesDisplay();
 }
 
+// Ustawia wszystkie suwaki zgodnie z wytycznymi i rozdziela 100% budżetu
 function autoSetLimitsAndValues() {
   var totalInc = getTotalIncome();
+  var rush = document.getElementById('rushEmergencyFund').checked;
 
   elHousing.value = Math.round(totalInc * 0.30);
   elFood.value = Math.round(totalInc * 0.15);
   elTransport.value = Math.round(totalInc * 0.05);
   elOther.value = 0;
+
+  var remaining = totalInc - (parseInt(elHousing.value) + parseInt(elFood.value) + parseInt(elTransport.value));
+  var funTarget = rush ? 0.10 : 0.20;
+  var funVal = Math.round(totalInc * funTarget);
+  
+  if (funVal > remaining) funVal = remaining;
+  
+  elFun.value = funVal;
+  elSavings.value = Math.max(0, remaining - funVal);
 
   updateSliderMinsAndLabels();
   calculateAll();
@@ -827,16 +860,22 @@ function updateSliderValuesDisplay() {
   var fVal = parseInt(elFood.value) || 0;
   var tVal = parseInt(elTransport.value) || 0;
   var oVal = parseInt(elOther.value) || 0;
+  var sVal = parseInt(elSavings.value) || 0;
+  var fmVal = parseInt(elFun.value) || 0;
 
   document.getElementById('inputHousing').value = hVal;
   document.getElementById('inputFood').value = fVal;
   document.getElementById('inputTransport').value = tVal;
   document.getElementById('inputOther').value = oVal;
+  document.getElementById('inputSavings').value = sVal;
+  document.getElementById('inputFun').value = fmVal;
 
   document.getElementById('pctHousing').textContent = Math.round((hVal / safeInc) * 100);
   document.getElementById('pctFood').textContent = Math.round((fVal / safeInc) * 100);
   document.getElementById('pctTransport').textContent = Math.round((tVal / safeInc) * 100);
   document.getElementById('pctOther').textContent = Math.round((oVal / safeInc) * 100);
+  document.getElementById('pctSavings').textContent = Math.round((sVal / safeInc) * 100);
+  document.getElementById('pctFun').textContent = Math.round((fmVal / safeInc) * 100);
 }
 
 function calculateAll() {
@@ -848,60 +887,44 @@ function calculateAll() {
   
   var breakdownHeroEl = document.getElementById('incomeBreakdownDisplayHero');
   if(breakdownHeroEl) {
-    if(benefitsInc > 0) {
-      breakdownHeroEl.textContent = baseInc.toLocaleString('pl-PL') + ' PLN pensji + ' + benefitsInc.toLocaleString('pl-PL') + ' PLN świadczeń';
-    } else {
-      breakdownHeroEl.textContent = 'Sama pensja (brak świadczeń)';
-    }
+    if(benefitsInc > 0) { breakdownHeroEl.textContent = baseInc.toLocaleString('pl-PL') + ' PLN pensji + ' + benefitsInc.toLocaleString('pl-PL') + ' PLN świadczeń'; } 
+    else { breakdownHeroEl.textContent = 'Sama pensja (brak świadczeń)'; }
   }
 
   var currentSavings = Math.max(0, parseFloat(document.getElementById('currentSavings').value) || 0);
-  var rush = document.getElementById('rushEmergencyFund').checked;
 
   var housing = parseInt(elHousing.value) || 0;
   var food = parseInt(elFood.value) || 0;
   var transport = parseInt(elTransport.value) || 0;
   var other = parseInt(elOther.value) || 0;
+  var savings = parseInt(elSavings.value) || 0;
+  var funMoney = parseInt(elFun.value) || 0;
 
   var survival = housing + food + transport + other;
+  var totalAllocated = survival + savings + funMoney;
   var emergencyGoal = survival * 6;
-
-  // ----------------------------------------------------
-  // MATEMATYKA 50/20/30 (Suma dokładnie 100% z TotalInc)
-  // ----------------------------------------------------
-  var free = Math.max(0, totalInc - survival);
-  
-  // Zachcianki (Fun Money) - 20% domyślnie, 10% przy szybkiej poduszce
-  var funMoneyTargetPct = rush ? 0.10 : 0.20;
-  var funMoney = Math.round(totalInc * funMoneyTargetPct);
-  
-  if (funMoney > free) {
-    funMoney = free;
-  }
-  
-  // Oszczędności to wszystko to co zostanie (Domyślnie 30%)
-  var savings = free - funMoney;
   var dailyFun = Math.round(funMoney / 30);
+
+  var alertBox = document.getElementById('alertBox');
+  if (alertBox) {
+    if (totalInc > 0 && totalAllocated > totalInc) {
+      alertBox.textContent = 'Ostrzeżenie! Przypisano na suwakach (' + totalAllocated.toLocaleString('pl-PL') + ' PLN) więcej niż wynosi Twój budżet. Jesteś na minusie o ' + (totalAllocated - totalInc).toLocaleString('pl-PL') + ' PLN!';
+      alertBox.style.display = 'block';
+      alertBox.style.color = '#991b1b'; alertBox.style.backgroundColor = '#fef2f2'; alertBox.style.borderColor = '#fecaca';
+    } else if (totalInc > 0 && totalAllocated < totalInc) {
+      alertBox.textContent = 'Masz jeszcze ' + (totalInc - totalAllocated).toLocaleString('pl-PL') + ' PLN wolnych środków. Rozdysponuj je na suwakach (np. zwiększ oszczędności).';
+      alertBox.style.display = 'block';
+      alertBox.style.color = '#047857'; alertBox.style.backgroundColor = '#ecfdf5'; alertBox.style.borderColor = '#10b981';
+    } else {
+      alertBox.style.display = 'none';
+    }
+  }
 
   var safeInc = Math.max(totalInc, 1);
   var survivalPct = Math.round((survival / safeInc) * 100);
   var survPctEl = document.getElementById('survivalPctDisplay');
   survPctEl.textContent = survivalPct + '% budżetu (Zalecane max 50%)';
   if (survivalPct > 50) { survPctEl.style.color = '#ef4444'; } else { survPctEl.style.color = '#10b981'; }
-
-  var alertBox = document.getElementById('alertBox');
-  if (alertBox) {
-    if (totalInc > 0 && totalInc < survival) {
-      alertBox.textContent = 'Deficyt! Ustawione na suwakach koszty (' + survival + ' PLN) przekraczają Twój cały budżet (brak: ' + (survival - totalInc) + ' PLN).';
-      alertBox.style.display = 'block';
-    } else {
-      alertBox.style.display = 'none';
-    }
-  }
-
-  document.getElementById('funBadgeLabel').textContent = rush ? 'Zachcianki (10% budżetu)' : 'Zachcianki (20% budżetu)';
-  document.getElementById('barFunTitle').textContent = 'Zachcianki / Fun Money';
-  document.getElementById('barSavingsTitle').textContent = rush ? 'Szybka Poduszka (Maksymalizacja oszczędności)' : 'Oszczędności / Inwestycje';
 
   document.getElementById('survivalTotal').textContent = survival.toLocaleString('pl-PL');
   document.getElementById('monthlyFunVal').textContent = funMoney.toLocaleString('pl-PL') + ' PLN';
@@ -917,7 +940,7 @@ function calculateAll() {
   document.getElementById('sprintMonthsCount').textContent = remainingGoal === 0 ? 'Cel osiągnięty!' : (monthsToGoal + ' mies.');
   document.getElementById('emergencyProgressBar').style.width = progressPct + '%';
 
-  // Obliczenia % do pasków
+  // Obliczenia % do pasków na dole (Suma zależy od tego, co wpiszesz!)
   var hPct = Math.round((housing / safeInc) * 100);
   var fPct = Math.round((food / safeInc) * 100);
   var tPct = Math.round((transport / safeInc) * 100);
@@ -1237,12 +1260,13 @@ window.onload = async function() {
     var d = new Date(); mSelect.value = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1); yInput.value = d.getFullYear();
   }
 
-  // Zintegrowany sync: Suwak <-> Input Ręczny
   const slidersInputs = [
     { sl: elHousing, inp: document.getElementById('inputHousing') },
     { sl: elFood, inp: document.getElementById('inputFood') },
     { sl: elTransport, inp: document.getElementById('inputTransport') },
-    { sl: elOther, inp: document.getElementById('inputOther') }
+    { sl: elOther, inp: document.getElementById('inputOther') },
+    { sl: elSavings, inp: document.getElementById('inputSavings') },
+    { sl: elFun, inp: document.getElementById('inputFun') }
   ];
 
   slidersInputs.forEach(item => {
@@ -1263,7 +1287,11 @@ window.onload = async function() {
     if(el) el.addEventListener('input', () => { autoSetLimitsAndValues(); });
   });
 
-  ['rushEmergencyFund', 'currentSavings'].forEach(id => {
+  ['rushEmergencyFund'].forEach(id => {
+    document.getElementById(id).addEventListener('change', autoSetLimitsAndValues);
+  });
+  
+  ['currentSavings'].forEach(id => {
     document.getElementById(id).addEventListener('input', calculateAll);
   });
 
