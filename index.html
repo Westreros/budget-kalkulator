@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Budżetnik - Twój Plan 50/20/30</title>
+  <title>WalletWise - Twój Plan 50/20/30</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   
-  <!-- Pobieranie bazy danych przez Twój bezpieczny tunel na Vercelu (Niewidoczne dla AdBlocka!) -->
+  <!-- Pobieranie bazy danych przez Twój bezpieczny tunel na Vercelu -->
   <script src="/core-lib.js"></script>
   
   <style>
@@ -42,8 +42,16 @@
     @media (min-width: 1024px) { body { padding: 28px 40px; } }
     
     header { margin-bottom: 18px; text-align: left; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; }
-    h1 { font-size: 1.85rem; font-weight: 800; color: #0f172a; }
+    h1 { font-size: 2.2rem; font-weight: 800; color: #0f172a; background: linear-gradient(to right, #0f172a, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     p.subtitle { color: #64748b; font-size: 0.95rem; margin-top: 4px; }
+
+    /* STYLE PROFILU UŻYTKOWNIKA (NOWE) */
+    .user-profile-badge { display: flex; align-items: center; gap: 10px; background: #ffffff; border: 1px solid #cbd5e1; padding: 6px 18px 6px 6px; border-radius: 50px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: all 0.2s; }
+    .user-profile-badge:hover { border-color: #94a3b8; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+    .user-avatar { background: linear-gradient(135deg, #38bdf8, #2563eb); color: #fff; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; box-shadow: inset 0 -2px 4px rgba(0,0,0,0.1); }
+    .user-name { font-size: 1.1rem; font-weight: 700; color: #0f172a; white-space: nowrap; }
+    .btn-logout { background: #f8fafc; border: 1px solid #e2e8f0; color: #64748b; padding: 8px 18px; border-radius: 20px; font-weight: 700; cursor: pointer; font-size: 0.85rem; transition: all 0.2s ease; white-space: nowrap; }
+    .btn-logout:hover { background: #fee2e2; color: #ef4444; border-color: #fca5a5; }
 
     .nav-tabs { display: flex; gap: 10px; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; overflow-x: auto; }
     .tab-btn { background: none; border: 1px solid transparent; padding: 10px 20px; font-size: 0.95rem; font-weight: 600; color: #64748b; cursor: pointer; border-radius: 10px; transition: all 0.2s ease; white-space: nowrap; }
@@ -219,16 +227,21 @@
   
   <header>
     <div>
-      <h1>Budżetnik</h1>
+      <h1>WalletWise</h1>
       <p class="subtitle">Twój inteligentny plan 50/20/30 i dziennik wydatków.</p>
     </div>
     
     <div style="margin-top: 10px;" id="authHeaderBlock">
+      <!-- Przycisk przed zalogowaniem -->
       <button id="showAuthBtn" class="btn-add" style="background-color: #0f172a;" onclick="document.getElementById('authScreen').style.display='flex'">Zaloguj / Zarejestruj</button>
       
-      <div id="userNav" style="display: none; align-items: center; gap: 12px; background: #e2e8f0; padding: 8px 16px; border-radius: 10px;">
-        <span id="userEmailDisplay" style="font-size: 0.9rem; font-weight: 700; color: #1e40af;"></span>
-        <button id="logoutBtn" style="background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.85rem;">Wyloguj</button>
+      <!-- Panel uzytkownika po zalogowaniu -->
+      <div id="userNav" style="display: none; align-items: center; gap: 14px;">
+        <div class="user-profile-badge">
+          <div class="user-avatar" id="userAvatarInitials">U</div>
+          <span id="userEmailDisplay" class="user-name"></span>
+        </div>
+        <button id="logoutBtn" class="btn-logout">Wyloguj</button>
       </div>
     </div>
   </header>
@@ -744,7 +757,7 @@ async function handleRegister() {
     if (error) { errorEl.textContent = 'Błąd rejestracji: ' + error.message; } else {
       if (data.session) { window.location.reload(); } else {
         errorEl.style.color = '#10b981'; errorEl.textContent = 'Konto utworzone pomyślnie! Teraz możesz się zalogować.';
-        document.getElementById('toggleAuthBtn').click(); // Powrót do logowania
+        document.getElementById('toggleAuthBtn').click();
       }
     }
   } catch (err) {
@@ -781,6 +794,21 @@ async function setupAuthListeners() {
       // Wyświetlanie Imienia z metadanych zamiast maila
       const displayName = session.user.user_metadata?.full_name || session.user.email;
       document.getElementById('userEmailDisplay').textContent = displayName;
+      
+      // Generowanie Inicjałów do Avatara
+      let initials = "U";
+      if (displayName.includes('@')) {
+        initials = displayName.charAt(0).toUpperCase();
+      } else {
+        const parts = displayName.trim().split(' ');
+        if (parts.length > 1) {
+          initials = (parts[0][0] + parts[parts.length-1][0]).toUpperCase();
+        } else {
+          initials = displayName.substring(0, 2).toUpperCase();
+        }
+      }
+      const avatarEl = document.getElementById('userAvatarInitials');
+      if (avatarEl) avatarEl.textContent = initials;
       
       loadCloudData();
     } else {
@@ -1186,7 +1214,6 @@ window.onload = async function() {
   document.getElementById('registerBtn').onclick = handleRegister;
   document.getElementById('logoutBtn').onclick = handleLogout;
 
-  // Próbujemy odpalić bazę z tunelu Vercela (/core-lib.js)
   if (!initSupabase()) {
     var fallbackScript = document.createElement('script');
     fallbackScript.src = 'https://unpkg.com/@supabase/supabase-js@2';
