@@ -634,8 +634,8 @@
 </div>
 
 <script>
-// ---------- KONFIGURACJA SUPABASE Z OCHRONĄ PRZED ADBLOCKIEM ----------
-const SUPABASE_URL = 'https://kbzspdwizcwpzlvytdzw.supabase.co';
+// Aplikacja "myśli", że baza danych jest na tym samym serwerze co strona!
+const SUPABASE_URL = window.location.origin + '/baza';
 const SUPABASE_KEY = 'sb_publishable_nPfkgQfKOapm-t9OqWZ4KA__KuU0jqB';
 
 var supabase = null;
