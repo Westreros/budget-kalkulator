@@ -31,7 +31,7 @@
     .close-auth-btn { position: absolute; top: 12px; right: 16px; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #94a3b8; padding: 4px; transition: color 0.15s; }
     .close-auth-btn:hover { color: #0f172a; }
     .auth-card h2 { justify-content: center; font-size: 1.5rem; margin-bottom: 24px; color: #0f172a; }
-    .auth-input { width: 100%; padding: 12px; margin-bottom: 16px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 1rem; }
+    .auth-input { width: 100%; padding: 12px; margin-bottom: 16px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 1rem; transition: all 0.2s ease; }
     .auth-btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 12px; transition: 0.2s; }
     .btn-login { background: #2563eb; color: #fff; }
     .btn-login:hover { background: #1d4ed8; }
@@ -193,17 +193,24 @@
 </head>
 <body>
 
-<!-- WIDOK LOGOWANIA I REJESTRACJI (Popup) -->
+<!-- WIDOK LOGOWANIA I REJESTRACJI (Z Przełącznikiem) -->
 <div id="authScreen">
   <div class="auth-card">
     <button id="closeAuthBtn" class="close-auth-btn" title="Zamknij" onclick="document.getElementById('authScreen').style.display='none'">✕</button>
-    <h2>Zaloguj się do chmury</h2>
+    <h2 id="authModeTitle">Zaloguj się</h2>
     <div id="authError" class="auth-error"></div>
+    
+    <!-- Pole imienia ukryte domyślnie (tylko dla rejestracji) -->
+    <input type="text" id="fullNameInput" class="auth-input" placeholder="Imię i nazwisko" style="display: none;">
     <input type="email" id="emailInput" class="auth-input" placeholder="Adres e-mail" required>
     <input type="password" id="passwordInput" class="auth-input" placeholder="Hasło (min. 6 znaków)" required>
+    
     <button id="loginBtn" class="auth-btn btn-login">Zaloguj się</button>
-    <button id="registerBtn" class="auth-btn btn-register">Utwórz nowe konto</button>
-    <p style="font-size: 0.8rem; color: #64748b; margin-top: 10px;">Zalogowanie gwarantuje bezpieczny zapis danych po odświeżeniu strony.</p>
+    <button id="registerBtn" class="auth-btn btn-login" style="display: none; background: #10b981;">Zarejestruj mnie</button>
+    
+    <button id="toggleAuthBtn" class="auth-btn btn-register" style="margin-top: 8px;">Nie masz konta? Utwórz je.</button>
+    
+    <p style="font-size: 0.8rem; color: #64748b; margin-top: 10px;">Dane są w pełni szyfrowane i bezpieczne.</p>
   </div>
 </div>
 
@@ -220,7 +227,7 @@
       <button id="showAuthBtn" class="btn-add" style="background-color: #0f172a;" onclick="document.getElementById('authScreen').style.display='flex'">Zaloguj / Zarejestruj</button>
       
       <div id="userNav" style="display: none; align-items: center; gap: 12px; background: #e2e8f0; padding: 8px 16px; border-radius: 10px;">
-        <span id="userEmailDisplay" style="font-size: 0.85rem; font-weight: 600; color: #334155;"></span>
+        <span id="userEmailDisplay" style="font-size: 0.9rem; font-weight: 700; color: #1e40af;"></span>
         <button id="logoutBtn" style="background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.85rem;">Wyloguj</button>
       </div>
     </div>
@@ -625,7 +632,6 @@ var supabase = null;
 var isLoggedIn = false;
 var historyLogs = [];
 
-// Obejście dla trybu Incognito (Wirtualna pamięć RAM gdy przeglądarka blokuje zapis)
 var memoryStorage = {
   items: {},
   getItem: function(k) { return this.items[k] || null; },
@@ -648,7 +654,6 @@ function initSupabase() {
       var origin = window.location.origin;
       var isLocalOrGithub = origin === 'file://' || origin === 'null' || origin.includes('github.io') || origin.includes('127.0.0.1') || origin.includes('localhost');
       
-      // Na Vercelu (i własnych domenach) wszystko idzie przez niewidzialny dla AdBlocka tunel /baza
       var supabaseUrl = isLocalOrGithub 
         ? 'https://kbzspdwizcwpzlvytdzw.supabase.co' 
         : origin + '/baza';
@@ -669,6 +674,21 @@ function initSupabase() {
   return false;
 }
 
+// -------------------------------------------
+// LOGIKA PRZEŁĄCZANIA REJESTRACJA / LOGOWANIE
+// -------------------------------------------
+var isRegisterMode = false;
+document.getElementById('toggleAuthBtn').onclick = function() {
+  isRegisterMode = !isRegisterMode;
+  document.getElementById('authModeTitle').textContent = isRegisterMode ? 'Utwórz konto' : 'Zaloguj się';
+  document.getElementById('fullNameInput').style.display = isRegisterMode ? 'block' : 'none';
+  document.getElementById('loginBtn').style.display = isRegisterMode ? 'none' : 'block';
+  document.getElementById('registerBtn').style.display = isRegisterMode ? 'block' : 'none';
+  document.getElementById('toggleAuthBtn').textContent = isRegisterMode ? 'Masz już konto? Zaloguj się.' : 'Nie masz konta? Utwórz je.';
+  document.getElementById('authError').textContent = '';
+};
+
+
 // Funkcje Auth
 async function handleLogin() {
   const errorEl = document.getElementById('authError');
@@ -681,7 +701,7 @@ async function handleLogin() {
     return; 
   }
   
-  const email = document.getElementById('emailInput').value;
+  const email = document.getElementById('emailInput').value.trim();
   const password = document.getElementById('passwordInput').value;
   if(!email || !password) { errorEl.textContent = 'Wpisz email i hasło.'; return; }
 
@@ -704,19 +724,31 @@ async function handleRegister() {
     return; 
   }
 
-  const email = document.getElementById('emailInput').value;
+  const fullName = document.getElementById('fullNameInput').value.trim();
+  const email = document.getElementById('emailInput').value.trim();
   const password = document.getElementById('passwordInput').value;
+  
+  if(!fullName) { errorEl.textContent = 'Imię i nazwisko jest wymagane.'; return; }
   if(!email || password.length < 6) { errorEl.textContent = 'Email i hasło (min. 6 znaków) są wymagane.'; return; }
 
   try {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { data, error } = await supabase.auth.signUp({ 
+      email: email, 
+      password: password,
+      options: {
+        data: {
+          full_name: fullName
+        }
+      }
+    });
     if (error) { errorEl.textContent = 'Błąd rejestracji: ' + error.message; } else {
       if (data.session) { window.location.reload(); } else {
-        errorEl.style.color = '#10b981'; errorEl.textContent = 'Konto utworzone pomyślnie! Możesz się zalogować.';
+        errorEl.style.color = '#10b981'; errorEl.textContent = 'Konto utworzone pomyślnie! Teraz możesz się zalogować.';
+        document.getElementById('toggleAuthBtn').click(); // Powrót do logowania
       }
     }
   } catch (err) {
-    errorEl.textContent = 'Błąd połączenia z serwerem. Upewnij się, że masz plik vercel.json.';
+    errorEl.textContent = 'Błąd połączenia z serwerem.';
   }
 }
 
@@ -745,7 +777,11 @@ async function setupAuthListeners() {
       isLoggedIn = true;
       document.getElementById('showAuthBtn').style.display = 'none';
       document.getElementById('userNav').style.display = 'flex';
-      document.getElementById('userEmailDisplay').textContent = session.user.email;
+      
+      // Wyświetlanie Imienia z metadanych zamiast maila
+      const displayName = session.user.user_metadata?.full_name || session.user.email;
+      document.getElementById('userEmailDisplay').textContent = displayName;
+      
       loadCloudData();
     } else {
       try { historyLogs = JSON.parse(safeStorage.getItem('my_history_logs_offline') || '[]'); } catch(e){}
@@ -804,7 +840,6 @@ function calculateAll() {
   var currentSavings = Math.max(0, parseFloat(document.getElementById('currentSavings').value) || 0);
   var rush = document.getElementById('rushEmergencyFund').checked;
 
-  // Matematyka sztywna (50/20/30)
   var housing = Math.round(totalInc * 0.30);
   var food = Math.round(totalInc * 0.15);
   var transport = Math.round(totalInc * 0.05);
@@ -1153,7 +1188,6 @@ window.onload = async function() {
 
   // Próbujemy odpalić bazę z tunelu Vercela (/core-lib.js)
   if (!initSupabase()) {
-    // Koło ratunkowe: jeśli otwierasz plik lokalnie z dysku (bez Vercela), dociągamy bibliotekę w tle
     var fallbackScript = document.createElement('script');
     fallbackScript.src = 'https://unpkg.com/@supabase/supabase-js@2';
     fallbackScript.onload = async function() {
