@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kalkulator Budżetu i Kosztów Przetrwania</title>
+  <title>Kalkulator Kosztów Przetrwania i Budżetu Domowego</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -73,7 +73,12 @@
       .metric-hero .val { font-size: 2.5rem; margin: 6px 0; }
       .metric-hero .desc { display: block; font-size: 0.85rem; color: #cbd5e1; line-height: 1.4; margin-top: 6px; }
     }
-    @media (min-width: 1400px) { .inputs-subgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; } .inputs-subgrid .card { margin-bottom: 0; } }
+    
+    /* ZMIANA: align-items: start zapobiega rozciąganiu kart do siebie na wysokość */
+    @media (min-width: 1400px) { 
+      .inputs-subgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; } 
+      .inputs-subgrid .card { margin-bottom: 0; } 
+    }
 
     .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); margin-bottom: 20px; overflow: hidden; }
     .card-compact { padding: 16px 20px; }
@@ -83,19 +88,36 @@
     .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
     .input-group { position: relative; margin-bottom: 12px; }
     
+    /* Podstawowe style dla inputów */
     input[type="number"], input[type="text"], select {
-      width: 100%; padding: 9px 32px 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; outline: none; background-color: #fff; transition: border-color 0.15s, box-shadow 0.15s; appearance: none; -webkit-appearance: none; -moz-appearance: none;
+      width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; outline: none; background-color: #fff; transition: border-color 0.15s, box-shadow 0.15s; appearance: none; -webkit-appearance: none; -moz-appearance: none;
     }
+    
+    /* Ukrycie domyślnych strzałek góra/dół dla pól liczbowych we wszystkich przeglądarkach */
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+
+    /* Prawy margines dla pól z absolutnym tekstem w środku, by długie liczby nie weszły pod PLN */
+    .input-group input[type="number"], .input-group input[type="text"] {
+      padding-right: 42px;
+    }
+
     select {
+      padding-right: 32px;
       background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
       background-repeat: no-repeat; background-position: right 10px center; background-size: 16px;
     }
-    input[type="number"]:not(select), input[type="text"]:not(select) { background-image: none; padding-right: 12px; }
     input[type="number"]:hover, input[type="text"]:hover, select:hover { border-color: #94a3b8; }
     input:focus, select:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
     .suffix { position: absolute; right: 10px; top: 10px; color: #94a3b8; font-weight: 600; font-size: 0.8rem; pointer-events: none; }
 
-    /* STYLE SUWAKÓW (Nowość) */
+    /* STYLE SUWAKÓW */
     .slider-group { margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid #f1f5f9; }
     .slider-group:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
     .slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
@@ -126,11 +148,6 @@
     .checkbox-box input { width: 18px; height: 18px; cursor: pointer; accent-color: #2563eb; }
     .checkbox-box span { font-size: 0.85rem; font-weight: 600; color: #334155; }
 
-    .excel-import-box { border: 2px dashed #93c5fd; background-color: #eff6ff; border-radius: 12px; padding: 12px; text-align: center; margin-bottom: 14px; cursor: pointer; transition: background-color 0.15s; }
-    .excel-import-box:hover { background-color: #dbeafe; border-radius: 12px; }
-    .excel-import-box label { cursor: pointer; color: #1d4ed8; font-weight: 600; display: block; }
-    .excel-import-box span.hint { font-size: 0.75rem; color: #64748b; }
-
     .form-inline { display: flex; gap: 8px; }
     .form-inline input[type="text"] { flex: 1; min-width: 140px; }
     .form-inline input[type="number"] { width: 95px; }
@@ -144,7 +161,6 @@
     .sprint-header strong { color: #166534; font-size: 1.2rem; }
     .sprint-details { font-size: 0.85rem; color: #15803d; margin-top: 6px; line-height: 1.5; position: relative; z-index: 2; }
     
-    /* Pasek postępu poduszki */
     .progress-bar-bg { width: 100%; height: 8px; background: #dcfce7; border-radius: 4px; margin-top: 12px; overflow: hidden; position: relative; z-index: 2; border: 1px solid #bbf7d0; }
     .progress-bar-fill { height: 100%; background: #22c55e; width: 0%; transition: width 0.5s ease; }
 
@@ -182,7 +198,7 @@
     .average-card { background: #eff6ff; border: 2px solid #93c5fd; border-radius: 16px; padding: 18px 20px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
     .avg-grand-val { font-size: 1.85rem; font-weight: 900; color: #1d4ed8; background: #ffffff; padding: 6px 16px; border-radius: 12px; border: 1px solid #bfdbfe; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.08); white-space: nowrap; }
     .avg-chip { background: #ffffff; border: 1px solid #93c5fd; padding: 8px 14px; border-radius: 10px; font-size: 0.95rem; font-weight: 600; color: #1e3a8a; box-shadow: 0 1px 2px rgba(0,0,0,0.03); transition: transform 0.15s, background-color 0.15s; }
-    .avg-chip:hover { background: #f8fafc; }
+    .avg-chip:hover { background: #f8fafc; border-radius: 10px; }
     .avg-chip strong { font-size: 1.05rem; font-weight: 800; color: #1d4ed8; margin-left: 4px; }
 
     .cat-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
@@ -196,6 +212,11 @@
     .cat-legend-item.active-cat { background: #eff6ff; border-color: #93c5fd; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15); border-radius: 10px; }
 
     .forecast-card { background: #fdf4ff; border: 1px solid #f0abfc; border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+    
+    .excel-import-box { border: 2px dashed #93c5fd; background-color: #eff6ff; border-radius: 12px; padding: 12px; text-align: center; margin-bottom: 14px; cursor: pointer; transition: background-color 0.15s; }
+    .excel-import-box:hover { background-color: #dbeafe; border-radius: 12px; }
+    .excel-import-box label { cursor: pointer; color: #1d4ed8; font-weight: 600; display: block; }
+    .excel-import-box span.hint { font-size: 0.75rem; color: #64748b; }
   </style>
 </head>
 <body>
@@ -661,17 +682,15 @@ try {
   console.error("Supabase się nie załadowało:", e);
 }
 
-// Jeśli włączono blokowanie reklam / brave shields - informujemy użytkownika i pozwalamy działać w trybie Offline
 if (isOfflineMode) {
   document.getElementById('offlineWarning').style.display = 'block';
-  document.getElementById('authHeaderBlock').style.display = 'none'; // Ukryj opcję logowania
+  document.getElementById('authHeaderBlock').style.display = 'none';
 }
 
 // ---------- STAN AUTORYZACJI I DANE ----------
 var isLoggedIn = false;
 var historyLogs = [];
 
-// Zmienne do suwaków
 var elHousing = document.getElementById('sliderHousing');
 var elFood = document.getElementById('sliderFood');
 var elTransport = document.getElementById('sliderTransport');
@@ -724,7 +743,6 @@ async function handleLogout() {
   window.location.reload();
 }
 
-// Ładowanie z chmury
 async function loadCloudData() {
   if (isOfflineMode) return;
   const { data: hlData, error: hlErr } = await supabase.from('history_logs').select('*');
@@ -760,7 +778,6 @@ function appSwitchTab(tabId, btn) {
   if (tabId === 'reportTab') renderReportTab();
 }
 
-// --- SUWAKI I LIMITY (NOWOŚĆ) ---
 function calcOecdFood() {
   var adults = Math.max(1, parseInt(document.getElementById('adultsCount').value) || 1);
   var kids = Math.max(0, parseInt(document.getElementById('kidsCount').value) || 0);
@@ -785,21 +802,17 @@ function updateSliderMinsAndLabels() {
   var foodNet = calcOecdFood();
   var commuteCost = calcCommuteMin();
 
-  // Ustawienie minimum fizycznego
   elFood.min = foodNet;
   elTransport.min = commuteCost;
   
-  // Ustawienie max suwaków
   elHousing.max = Math.max(income, 5000);
   elFood.max = Math.max(income, 4000);
   elTransport.max = Math.max(income, 3000);
   elOther.max = Math.max(income, 3000);
 
-  // Bezpieczniki: jeśli slider jest poniżej nowego min, podciągamy go w górę
   if (parseInt(elFood.value) < foodNet) elFood.value = foodNet;
   if (parseInt(elTransport.value) < commuteCost) elTransport.value = commuteCost;
 
-  // Etykiety
   document.getElementById('recHousing').textContent = Math.round(income * 0.30);
   document.getElementById('minFood').textContent = foodNet;
   document.getElementById('minTransport').textContent = commuteCost;
@@ -847,7 +860,6 @@ function calculateAll() {
   var savings = free - funMoney;
   var dailyFun = Math.round(funMoney / 30);
 
-  // Ostrzeżenie o deficycie
   var alertBox = document.getElementById('alertBox');
   if (alertBox) {
     if (income > 0 && income < survival) {
@@ -858,17 +870,14 @@ function calculateAll() {
     }
   }
 
-  // Tytuły na wykresie
   document.getElementById('funBadgeLabel').textContent = rush ? 'Fun Money (10% luzu)' : 'Fun Money (20% luzu)';
   document.getElementById('barFunTitle').textContent = rush ? 'Fun Money (10%)' : 'Fun Money (20%)';
   document.getElementById('barSavingsTitle').textContent = rush ? 'Szybka Poduszka (90%)' : 'Oszczędności (80%)';
 
-  // Wartości podstawowe
   document.getElementById('survivalTotal').textContent = survival.toLocaleString('pl-PL');
   document.getElementById('monthlyFunVal').textContent = funMoney.toLocaleString('pl-PL') + ' PLN';
   document.getElementById('dailyFunVal').textContent = dailyFun + ' PLN/dzień';
 
-  // Obliczenia Poduszki
   var remainingGoal = Math.max(0, emergencyGoal - currentSavings);
   var monthsToGoal = (savings > 0 && remainingGoal > 0) ? Math.ceil(remainingGoal / savings) : (remainingGoal === 0 ? 0 : '--');
   var progressPct = emergencyGoal > 0 ? Math.min(100, (currentSavings / emergencyGoal) * 100) : 0;
@@ -879,7 +888,6 @@ function calculateAll() {
   document.getElementById('sprintMonthsCount').textContent = remainingGoal === 0 ? 'Cel osiągnięty!' : (monthsToGoal + ' mies.');
   document.getElementById('emergencyProgressBar').style.width = progressPct + '%';
 
-  // Wartości słupków
   document.getElementById('barHousingVal').textContent = housing + ' PLN';
   document.getElementById('barFoodVal').textContent = food + ' PLN';
   document.getElementById('barTransportVal').textContent = transport + ' PLN';
@@ -897,7 +905,6 @@ function calculateAll() {
   setBar('barFun', funMoney);
 }
 
-// --- HISTORIA I RAPORTY ---
 function updateHistoryFilterDropdowns() {
   var fYear = document.getElementById('histFilterYear');
   var fMonth = document.getElementById('histFilterMonth');
@@ -1180,7 +1187,6 @@ window.onload = async function() {
       loadCloudData();
     }
   } else {
-    // Ładowanie z przeglądarki jeśli Adblock
     try { historyLogs = JSON.parse(localStorage.getItem('my_history_logs_offline') || '[]'); } catch(e){}
   }
 
@@ -1192,12 +1198,10 @@ window.onload = async function() {
     var d = new Date(); mSelect.value = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1); yInput.value = d.getFullYear();
   }
 
-  // Zdarzenia dla suwaków (na żywo)
   [elHousing, elFood, elTransport, elOther].forEach(el => {
     el.addEventListener('input', () => { updateSliderValuesDisplay(); calculateAll(); });
   });
 
-  // Zdarzenia wyzwalające przeliczenie podstaw bazy 50/30/20
   ['income', 'adultsCount', 'kidsCount', 'include800Plus', 'commuteKm', 'commuteDays', 'carFuelUsage', 'fuelPrice'].forEach(id => {
     document.getElementById(id).addEventListener('change', () => { updateSliderMinsAndLabels(); calculateAll(); });
   });
@@ -1243,7 +1247,7 @@ window.onload = async function() {
   document.getElementById('selectReportPeriod').onchange = function() { renderSelectedMonthDetails(this.value); };
 
   renderHistory();
-  autoSetLimitsAndValues(); // Pierwsze auto-ustawienie na start!
+  autoSetLimitsAndValues();
 };
 </script>
 </body>
