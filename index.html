@@ -134,7 +134,7 @@
       .inputs-subgrid .card { margin-bottom: 0; }
     }
 
-    /* UKŁAD W DZIENNIKU RACHUNKÓW: Lewa kolumna (Dodawanie + Średnie) obok Prawej kolumny (Wykres) */
+    /* UKŁAD W DZIENNIKU RACHUNKÓW */
     .history-top-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -323,6 +323,7 @@
     .fill-blue { background: #2563eb; }
     .fill-purple { background: #a855f7; }
 
+    /* TABELA WYDATKÓW */
     .table-wrapper {
       overflow-x: auto;
       border-radius: 12px;
@@ -330,15 +331,38 @@
       margin-top: 12px;
     }
     .styled-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-    .styled-table th, .styled-table td { padding: 12px 14px; text-align: center; border-bottom: 1px solid #e2e8f0; }
-    .styled-table th:first-child, .styled-table td:first-child { text-align: left; } /* Okres do lewej */
-    .styled-table th:nth-child(3), .styled-table td:nth-child(3) { text-align: left; } /* Opis wydatku do lewej */
+    
+    /* Wyśrodkowanie całości poza kolumną Okres */
+    .styled-table th, .styled-table td { 
+      padding: 12px 14px; 
+      text-align: center; 
+      border-bottom: 1px solid #e2e8f0; 
+      vertical-align: middle;
+    }
+    
+    /* Okres (Kolumna 1) skurczona i do lewej */
+    .col-okres {
+      text-align: left !important;
+      white-space: nowrap;
+      width: 1%; /* Kolumna dopasuje się idealnie do najdłuższego miesiąca */
+    }
+
+    /* Opis wydatku zawija tekst i trzyma go na środku */
+    .col-opis {
+      text-align: center !important;
+      white-space: normal;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      max-width: 250px; /* Zabezpieczenie przed tasiemcami bez spacji */
+    }
+
     .styled-table tr:last-child td { border-bottom: none; }
     .styled-table th { background: #f8fafc; color: #475569; font-weight: 600; }
     .styled-table tbody tr { transition: background-color 0.15s; }
     .styled-table tbody tr:hover { background-color: #f8fafc; }
     
-    /* Wyróżniona karta średnich kosztów z powiększoną czcionką */
+    /* Karta średnich kosztów */
     .average-card {
       background: #eff6ff;
       border: 2px solid #93c5fd;
@@ -643,7 +667,6 @@
     <div class="history-top-grid">
       
       <div class="history-left-stack">
-        <!-- Formularz dodawania / edycji wydatku -->
         <div class="card card-compact" id="expenseFormCard" style="transition: background-color 0.2s;">
           <h2 id="formTitle" style="margin-bottom: 6px;">Dodaj rzeczywiste wydatki</h2>
           <p id="formSubtitle" style="font-size: 0.8rem; color: #64748b; margin-bottom: 12px;">
@@ -738,9 +761,9 @@
         <table class="styled-table">
           <thead>
             <tr>
-              <th>Okres</th>
+              <th class="col-okres">Okres</th>
               <th>Kategoria</th>
-              <th>Opis wydatku</th>
+              <th class="col-opis">Opis wydatku</th>
               <th>Kwota</th>
               <th>Akcja</th>
             </tr>
@@ -804,7 +827,7 @@
           <thead>
             <tr>
               <th>Kategoria</th>
-              <th>Opis wydatku</th>
+              <th class="col-opis">Opis wydatku</th>
               <th>Kwota</th>
               <th>Udział w miesiącu</th>
             </tr>
@@ -1098,9 +1121,9 @@ function renderHistoryTable() {
   for (var k = 0; k < tableItems.length; k++) {
     var cat = tableItems[k].category || 'Mieszkanie';
     var tr = document.createElement('tr');
-    tr.innerHTML = '<td><strong>' + formatPeriodToPL(tableItems[k].month) + '</strong></td>' +
+    tr.innerHTML = '<td class="col-okres"><strong>' + formatPeriodToPL(tableItems[k].month) + '</strong></td>' +
                    '<td><span class="cat-badge cat-' + cat + '">' + cat + '</span></td>' +
-                   '<td>' + tableItems[k].name + '</td>' +
+                   '<td class="col-opis">' + tableItems[k].name + '</td>' +
                    '<td><strong>' + Number(tableItems[k].amount).toLocaleString('pl-PL') + ' PLN</strong></td>' +
                    '<td>' +
                      '<button type="button" class="edit-btn" onclick="startEditEntry(' + tableItems[k].id + ')">✏️ Edytuj</button>' +
@@ -1503,7 +1526,7 @@ function renderSelectedMonthDetails(period) {
     var pct = tot > 0 ? Math.round((Number(filtered[j].amount) / tot) * 100) : 0;
     var tr = document.createElement('tr');
     tr.innerHTML = '<td><span class="cat-badge cat-' + cat + '">' + cat + '</span></td>' +
-                   '<td><strong>' + filtered[j].name + '</strong></td>' +
+                   '<td class="col-opis"><strong>' + filtered[j].name + '</strong></td>' +
                    '<td>' + Number(filtered[j].amount).toLocaleString('pl-PL') + ' PLN</td>' +
                    '<td>' + pct + '% całości</td>';
     tbody.appendChild(tr);
