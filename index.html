@@ -6,6 +6,7 @@
   <title>Kalkulator Kosztów Przetrwania i Budżetu Domowego</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <!-- Skrypt Supabase do obsługi bazy i logowania -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -18,7 +19,7 @@
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(15, 23, 42, 0.7);
       backdrop-filter: blur(4px);
-      display: none; /* Domyślnie ukryty */
+      display: none; /* Domyślnie ukryty, pokazywany przez JS */
       align-items: center; justify-content: center;
       z-index: 1000;
     }
@@ -110,28 +111,27 @@
     .checkbox-box span { font-size: 0.85rem; font-weight: 600; color: #334155; }
 
     .excel-import-box { border: 2px dashed #93c5fd; background-color: #eff6ff; border-radius: 12px; padding: 12px; text-align: center; margin-bottom: 14px; cursor: pointer; transition: background-color 0.15s; }
-    .excel-import-box:hover { background-color: #dbeafe; }
+    .excel-import-box:hover { background-color: #dbeafe; border-radius: 12px; }
     .excel-import-box label { cursor: pointer; color: #1d4ed8; font-weight: 600; display: block; }
     .excel-import-box span.hint { font-size: 0.75rem; color: #64748b; }
 
     ul.cost-list { list-style: none; margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px; max-height: 240px; overflow-y: auto; padding-right: 4px; }
     li.cost-item { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid #f1f5f9; padding: 8px 12px; border-radius: 10px; font-size: 0.85rem; transition: background-color 0.15s; }
-    li.cost-item:hover { background: #f1f5f9; }
+    li.cost-item:hover { background: #f1f5f9; border-radius: 10px; }
     
     button.del-btn { background: none; border: none; color: #ef4444; font-weight: 700; cursor: pointer; padding: 4px 8px; font-size: 0.85rem; border-radius: 6px; transition: background-color 0.15s; }
-    button.del-btn:hover { background-color: #fee2e2; }
+    button.del-btn:hover { background-color: #fee2e2; border-radius: 6px; }
     button.edit-btn { background: none; border: none; color: #2563eb; font-weight: 700; cursor: pointer; padding: 4px 8px; font-size: 0.85rem; border-radius: 6px; transition: background-color 0.15s; margin-right: 4px; }
-    button.edit-btn:hover { background-color: #dbeafe; }
+    button.edit-btn:hover { background-color: #dbeafe; border-radius: 6px; }
     button.cancel-btn { background: #64748b; color: #fff; border: none; padding: 9px 14px; border-radius: 8px; cursor: pointer; font-weight: bold; white-space: nowrap; transition: background-color 0.15s; }
     button.cancel-btn:hover { background: #475569; }
-
     li.empty-msg { color: #94a3b8; font-size: 0.85rem; text-align: center; padding: 10px 0; border: 1px dashed #e2e8f0; border-radius: 10px; }
 
     .form-inline { display: flex; gap: 8px; }
     .form-inline input[type="text"] { flex: 1; min-width: 140px; }
     .form-inline input[type="number"] { width: 95px; }
     button.btn-add { background: #2563eb; color: #fff; border: none; padding: 9px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; white-space: nowrap; transition: background-color 0.15s; }
-    button.btn-add:hover { background: #1d4ed8; }
+    button.btn-add:hover { background: #1d4ed8; border-radius: 8px; }
 
     .sprint-card { background: #f0fdf4; border: 1px solid #86efac; border-radius: 14px; padding: 18px; margin-bottom: 16px; }
     .sprint-header { display: flex; justify-content: space-between; align-items: baseline; }
@@ -184,7 +184,8 @@
 <!-- WIDOK LOGOWANIA I REJESTRACJI (Popup) -->
 <div id="authScreen">
   <div class="auth-card">
-    <button id="closeAuthBtn" class="close-auth-btn" title="Zamknij">✕</button>
+    <!-- Przycisk zamykania dodany bezpośrednio tutaj z onclick przypisanym w HTML -->
+    <button id="closeAuthBtn" class="close-auth-btn" title="Zamknij" onclick="document.getElementById('authScreen').style.display='none'">✕</button>
     <h2>Zaloguj się do chmury</h2>
     <div id="authError" class="auth-error"></div>
     <input type="email" id="emailInput" class="auth-input" placeholder="Adres e-mail" required>
@@ -204,9 +205,9 @@
       <p class="subtitle">Wieloletni monitoring wydatków, uśrednianie rachunków i prognoza budżetowa.</p>
     </div>
     
-    <!-- Pasek autoryzacji (Gość / Użytkownik) -->
+    <!-- Pasek autoryzacji (Gość / Użytkownik) - onclick dodany w locie -->
     <div style="margin-top: 10px;">
-      <button id="showAuthBtn" class="btn-add" style="background-color: #0f172a;">Zaloguj / Zarejestruj</button>
+      <button id="showAuthBtn" class="btn-add" style="background-color: #0f172a;" onclick="document.getElementById('authScreen').style.display='flex'">Zaloguj / Zarejestruj</button>
       
       <div id="userNav" style="display: none; align-items: center; gap: 12px; background: #e2e8f0; padding: 8px 16px; border-radius: 10px;">
         <span id="userEmailDisplay" style="font-size: 0.85rem; font-weight: 600; color: #334155;"></span>
@@ -586,7 +587,12 @@
 const SUPABASE_URL = 'https://kbzspdwizcwpzlvytdzw.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_nPfkgQfKOapm-t9OqWZ4KA__KuU0jqB';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+var supabase = null;
+try {
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch (e) {
+  console.error("Supabase się nie załadowało:", e);
+}
 
 // ---------- STAN AUTORYZACJI I DANE ----------
 var isLoggedIn = false;
@@ -595,9 +601,11 @@ var historyLogs = [];
 
 // Funkcje Auth
 async function handleLogin() {
+  const errorEl = document.getElementById('authError');
+  if (!supabase) { errorEl.textContent = 'Błąd serwera. Wyłącz wtyczki blokujące reklamy.'; return; }
+
   const email = document.getElementById('emailInput').value;
   const password = document.getElementById('passwordInput').value;
-  const errorEl = document.getElementById('authError');
   errorEl.textContent = '';
   
   if(!email || !password) { errorEl.textContent = 'Wpisz email i hasło.'; return; }
@@ -611,9 +619,11 @@ async function handleLogin() {
 }
 
 async function handleRegister() {
+  const errorEl = document.getElementById('authError');
+  if (!supabase) { errorEl.textContent = 'Błąd serwera. Wyłącz wtyczki blokujące reklamy.'; return; }
+
   const email = document.getElementById('emailInput').value;
   const password = document.getElementById('passwordInput').value;
-  const errorEl = document.getElementById('authError');
   errorEl.textContent = '';
   
   if(!email || password.length < 6) { errorEl.textContent = 'Email i hasło (min. 6 znaków) są wymagane.'; return; }
@@ -632,12 +642,13 @@ async function handleRegister() {
 }
 
 async function handleLogout() {
-  await supabase.auth.signOut();
+  if (supabase) await supabase.auth.signOut();
   window.location.reload();
 }
 
 // Ładowanie z chmury Supabase
 async function loadCloudData() {
+  if (!supabase) return;
   const { data: mcData, error: mcErr } = await supabase.from('manual_costs').select('*');
   if(!mcErr && mcData) manualCosts = mcData;
 
@@ -1008,7 +1019,7 @@ async function deleteHistoryEntry(id) {
     cancelEditMode();
   }
   
-  if (isLoggedIn) {
+  if (isLoggedIn && supabase) {
     const { error } = await supabase.from('history_logs').delete().eq('id', id);
     if (error) {
       alert("Błąd podczas usuwania: " + error.message);
@@ -1177,7 +1188,7 @@ function renderCostList(list) {
       var btn = li.querySelector('.del-btn');
       if (btn) {
         btn.onclick = async function() {
-          if (isLoggedIn) {
+          if (isLoggedIn && supabase) {
             const { error } = await supabase.from('manual_costs').delete().eq('id', item.id);
             if (error) {
               alert("Błąd: " + error.message);
@@ -1201,7 +1212,7 @@ async function addCost() {
   var amount = parseFloat(aEl.value);
   if (name && !isNaN(amount) && amount > 0) {
     
-    if (isLoggedIn) {
+    if (isLoggedIn && supabase) {
       const { data, error } = await supabase.from('manual_costs').insert([{ name, amount }]).select();
       if (!error && data) {
         manualCosts.push(data[0]);
@@ -1264,7 +1275,7 @@ async function handleExcelUpload(e) {
       }
 
       if (newItems.length > 0) {
-        if (isLoggedIn) {
+        if (isLoggedIn && supabase) {
           const { data: inserted, error } = await supabase.from('manual_costs').insert(newItems).select();
           if (!error && inserted) {
             manualCosts = manualCosts.concat(inserted);
@@ -1366,32 +1377,33 @@ function renderSelectedMonthDetails(period) {
 }
 
 window.onload = async function() {
-  document.getElementById('showAuthBtn').onclick = function() {
-    document.getElementById('authScreen').style.display = 'flex';
-  };
-  document.getElementById('closeAuthBtn').onclick = function() {
-    document.getElementById('authScreen').style.display = 'none';
-  };
-
   document.getElementById('loginBtn').onclick = handleLogin;
   document.getElementById('registerBtn').onclick = handleRegister;
   document.getElementById('logoutBtn').onclick = handleLogout;
 
-  // Inicjalizacja sprawdzania sesji przy ładowaniu
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session) {
-    isLoggedIn = true;
-    document.getElementById('appContainer').style.display = 'block';
-    document.getElementById('showAuthBtn').style.display = 'none';
-    document.getElementById('userNav').style.display = 'flex';
-    document.getElementById('userEmailDisplay').textContent = session.user.email;
-    loadCloudData();
-  } else {
-    isLoggedIn = false;
-    document.getElementById('appContainer').style.display = 'block';
-    renderHistory();
-    calculateAll();
+  if (supabase) {
+    supabase.auth.onAuthStateChange(function(event, session) {
+      if (session) {
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'block';
+      }
+    });
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      isLoggedIn = true;
+      document.getElementById('showAuthBtn').style.display = 'none';
+      document.getElementById('userNav').style.display = 'flex';
+      document.getElementById('userEmailDisplay').textContent = session.user.email;
+      loadCloudData();
+    }
   }
+
+  // Uruchomienie aplikacji w trybie Gościa na sam start, 
+  // nawet jak Supabase padnie albo użytkownik niezalogowany
+  document.getElementById('appContainer').style.display = 'block';
+  renderHistory();
+  calculateAll();
 
   var mSelect = document.getElementById('histInputMonth');
   var yInput = document.getElementById('histInputYear');
@@ -1423,15 +1435,13 @@ window.onload = async function() {
         var p = selY + '-' + selM;
 
         if (editingEntryId !== null) {
-          if (isLoggedIn) {
+          if (isLoggedIn && supabase) {
             const { error } = await supabase.from('history_logs').update({
               month: p, year: selY, month_num: selM, category: selCat, name: n, amount: a
             }).eq('id', editingEntryId);
-            
             if (error) { alert("Błąd aktualizacji: " + error.message); return; }
           }
           
-          // Aktualizacja lokalnie
           for (var i = 0; i < historyLogs.length; i++) {
             if (historyLogs[i].id === editingEntryId) {
               historyLogs[i].month = p; historyLogs[i].year = selY; historyLogs[i].monthNum = selM;
@@ -1443,7 +1453,7 @@ window.onload = async function() {
           renderHistory();
           
         } else {
-          if (isLoggedIn) {
+          if (isLoggedIn && supabase) {
             const payload = { month: p, year: selY, month_num: selM, category: selCat, name: n, amount: a };
             const { data, error } = await supabase.from('history_logs').insert([payload]).select();
             
