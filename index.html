@@ -52,28 +52,41 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    .grid { display: flex; flex-direction: column; gap: 20px; }
-    .hero-sticky-wrapper { order: -1; position: sticky; top: 8px; z-index: 100; }
-    .col-inputs { order: 1; }
-    .col-results { order: 2; }
-
-    .metric-hero { background: #0f172a; color: #fff; border-radius: 14px; padding: 14px 18px; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.35); border: 1px solid #1e293b; }
-    .metric-hero-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-    .metric-hero .tag { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 700; }
-    .metric-hero .val { font-size: 1.65rem; font-weight: 800; color: #38bdf8; white-space: nowrap; }
-    .metric-hero .desc { display: none; }
-
-    @media (min-width: 960px) {
-      .grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 32px; align-items: start; }
-      .col-inputs { grid-column: 1; grid-row: 1 / span 3; }
-      .hero-sticky-wrapper { grid-column: 2; grid-row: 1; position: static; }
-      .col-results { grid-column: 2; grid-row: 2; }
-      .metric-hero { padding: 24px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-      .metric-hero-top { display: block; }
-      .metric-hero .val { font-size: 2.5rem; margin: 6px 0; }
-      .metric-hero .desc { display: block; font-size: 0.85rem; color: #cbd5e1; line-height: 1.4; margin-top: 6px; }
+    /* GŁÓWNY HERO (Pełny Budżet vs Planowany Koszt) */
+    .hero-top-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+    @media (min-width: 768px) {
+      .hero-top-row { grid-template-columns: 1fr 1fr; }
     }
     
+    .metric-hero {
+      border-radius: 16px; padding: 24px; 
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .metric-hero.dark { background: linear-gradient(135deg, #1e293b, #0f172a); color: #fff; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.2); border: none; }
+    .metric-hero.light { background: #ffffff; color: #0f172a; border: 2px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+    
+    .metric-hero-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .metric-hero .tag { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
+    .metric-hero.dark .tag { color: #94a3b8; }
+    .metric-hero.light .tag { color: #64748b; }
+    
+    .metric-hero .val { font-size: 2.5rem; font-weight: 800; white-space: nowrap; margin: 8px 0; }
+    .metric-hero.dark .val { color: #38bdf8; }
+    .metric-hero.light .val { color: #ef4444; }
+    
+    .metric-hero .desc { font-size: 0.85rem; line-height: 1.4; margin: 0; }
+    .metric-hero.dark .desc { color: #cbd5e1; }
+    .metric-hero.light .desc { color: #475569; }
+
+    .grid { display: flex; flex-direction: column; gap: 20px; }
+    @media (min-width: 960px) {
+      .grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 32px; align-items: start; }
+    }
     @media (min-width: 1400px) { 
       .inputs-subgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; } 
     }
@@ -105,23 +118,6 @@
     input[type="number"]:hover, input[type="text"]:hover, select:hover { border-color: #94a3b8; }
     input:focus, select:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
     .suffix { position: absolute; right: 10px; top: 10px; color: #94a3b8; font-weight: 600; font-size: 0.8rem; pointer-events: none; }
-
-    /* BANER PEŁNEGO BUDŻETU */
-    .total-income-banner {
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      border-radius: 12px;
-      padding: 16px;
-      color: #fff;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 16px;
-      margin-bottom: 8px;
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
-    }
-    .tib-text span { display: block; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; }
-    .tib-text p { font-size: 0.75rem; color: #cbd5e1; margin-top: 2px; }
-    .tib-val { font-size: 1.5rem; font-weight: 800; color: #38bdf8; white-space: nowrap; }
 
     /* STYLE SUWAKÓW */
     .slider-group { margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid #f1f5f9; }
@@ -266,19 +262,28 @@
 
   <!-- ZAKŁADKA 1 -->
   <div id="calculatorTab" class="tab-content active">
-    <div class="grid">
-      
-      <div class="hero-sticky-wrapper">
-        <div class="metric-hero">
-          <div class="metric-hero-top">
-            <span class="tag">Planowany Koszt Życia</span>
-            <div class="val"><span id="survivalTotal">0</span> PLN</div>
-          </div>
-          <p class="desc">Suma przypisana na suwakach: mieszkanie, jedzenie, transport i raty.</p>
+    
+    <!-- NOWY HERO NA GÓRZE (Pełny Budżet vs Koszt Życia) -->
+    <div class="hero-top-row">
+      <div class="metric-hero dark">
+        <div class="metric-hero-top">
+          <span class="tag">Pełny budżet domowy</span>
         </div>
-        <div id="alertBox" class="alert-box"></div>
+        <div class="val"><span id="totalIncomeDisplayHero">0</span> PLN</div>
+        <p class="desc" id="incomeBreakdownDisplayHero">Sama pensja netto</p>
       </div>
 
+      <div class="metric-hero light">
+        <div class="metric-hero-top">
+          <span class="tag">Planowany Koszt Życia (Potrzeby)</span>
+        </div>
+        <div class="val"><span id="survivalTotal">0</span> PLN</div>
+        <p class="desc">Suma suwaków: mieszkanie, jedzenie, transport, raty.</p>
+        <p class="desc" style="color: #ef4444; font-weight: 600; margin-top: 4px;" id="survivalPctDisplay">0% budżetu (Zalecane max 50%)</p>
+      </div>
+    </div>
+
+    <div class="grid">
       <div class="col-inputs">
         <div class="inputs-subgrid">
           
@@ -312,15 +317,6 @@
                 </div>
               </div>
 
-              <!-- Pasek podsumowania dochodu -->
-              <div class="total-income-banner">
-                <div class="tib-text">
-                  <span>Pełny budżet domowy</span>
-                  <p id="incomeBreakdownDisplay">Sama pensja netto</p>
-                </div>
-                <div class="tib-val" id="totalIncomeDisplay">0 PLN</div>
-              </div>
-
               <label for="currentSavings" style="margin-top:20px;">Ile masz już odłożone na "czarną godzinę"?</label>
               <div class="input-group">
                 <input type="number" id="currentSavings" placeholder="np. 5000" min="0" step="100">
@@ -331,7 +327,7 @@
                 <input type="checkbox" id="rushEmergencyFund">
                 <div class="goal-banner-text">
                   <strong>Szybka 6-miesięczna poduszka finansowa</strong>
-                  <p>Zaznaczona: 90% wolnych środków na poduszkę. Odznaczona: 80% do poduszki.</p>
+                  <p>Maksymalizuje oszczędności, tnąc zachcianki do zaledwie 10% budżetu.</p>
                 </div>
               </label>
             </div>
@@ -375,11 +371,12 @@
 
           <div class="subgrid-col">
             <div class="card">
-              <h2 style="margin-bottom:4px;">2. Planowane Koszty (Reguła 50/30/20)</h2>
-              
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <p style="font-size: 0.8rem; color: #64748b; margin: 0; max-width: 65%;">Przesuń suwaki, aby dostosować limity do swoich potrzeb.</p>
-                <button id="btnResetLimits" class="btn-register" style="width: auto; padding: 6px 12px; font-size: 0.8rem; margin: 0; border-radius: 8px; white-space: nowrap;">🔄 Reset</button>
+                <div>
+                  <h2 style="margin-bottom:4px;">2. Planowane Koszty (Reguła 50/30/20)</h2>
+                  <p style="font-size: 0.8rem; color: #64748b; margin: 0; max-width: 90%;">Przesuń suwaki, aby dostosować limity. Automatycznie reagują na Twój budżet.</p>
+                </div>
+                <button id="btnResetLimits" class="btn-register" style="width: auto; padding: 6px 12px; font-size: 0.85rem; margin: 0; border-radius: 8px; white-space: nowrap;">🔄 Reset</button>
               </div>
 
               <div class="slider-group">
@@ -388,7 +385,7 @@
                   <strong id="valHousing">0 PLN (0%)</strong>
                 </div>
                 <input type="range" id="sliderHousing" min="0" max="10000" step="50" value="0">
-                <div class="slider-info">Zalecane 30%: <span id="recHousing">0</span> PLN</div>
+                <div class="slider-info">Sugerowane 30% budżetu: <span id="recHousing">0</span> PLN</div>
               </div>
 
               <div class="slider-group">
@@ -397,7 +394,7 @@
                   <strong id="valFood">0 PLN (0%)</strong>
                 </div>
                 <input type="range" id="sliderFood" min="0" max="5000" step="50" value="0">
-                <div class="slider-info">Zalecane 15%: <span id="recFood">0</span> PLN</div>
+                <div class="slider-info">Sugerowane 15% budżetu: <span id="recFood">0</span> PLN</div>
               </div>
 
               <div class="slider-group">
@@ -406,7 +403,7 @@
                   <strong id="valTransport">0 PLN (0%)</strong>
                 </div>
                 <input type="range" id="sliderTransport" min="0" max="3000" step="50" value="0">
-                <div class="slider-info">Zalecane 10% (koszt auta: <span id="minTransport">0</span> PLN)</div>
+                <div class="slider-info">Sugerowane 5% (min. koszt dojazdów: <span id="minTransport">0</span> PLN)</div>
               </div>
 
               <div class="slider-group" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
@@ -415,7 +412,7 @@
                   <strong id="valOther">0 PLN (0%)</strong>
                 </div>
                 <input type="range" id="sliderOther" min="0" max="5000" step="50" value="0">
-                <div class="slider-info">Zalecane max 5%: <span id="recOther">0</span> PLN</div>
+                <div class="slider-info">Sugerowane 0-5%: <span id="recOther">0</span> PLN</div>
               </div>
             </div>
           </div>
@@ -439,9 +436,11 @@
           </div>
         </div>
 
+        <div id="alertBox" class="alert-box" style="margin-bottom: 16px;"></div>
+
         <div class="stat-badge-grid">
           <div class="stat-badge">
-            <span id="funBadgeLabel">Fun Money (20% luzu)</span>
+            <span id="funBadgeLabel">Zachcianki (30% budżetu)</span>
             <strong id="monthlyFunVal" style="color: #7c3aed;">0 PLN</strong>
           </div>
           <div class="stat-badge">
@@ -451,12 +450,12 @@
         </div>
 
         <div class="card">
-          <h2>Zaplanowany Podział Pieniędzy</h2>
+          <h2>Zaplanowany Podział Pieniędzy (100%)</h2>
           <div class="bar-group">
             <div>
               <div class="bar-header">
                 <span>Mieszkanie i Opłaty</span>
-                <strong id="barHousingVal">0 PLN</strong>
+                <strong id="barHousingVal">0 PLN (0%)</strong>
               </div>
               <div class="bar-bg"><div id="barHousing" class="bar-fill fill-slate" style="width: 0%;"></div></div>
             </div>
@@ -464,7 +463,7 @@
             <div>
               <div class="bar-header">
                 <span>Żywność i Chemia</span>
-                <strong id="barFoodVal">0 PLN</strong>
+                <strong id="barFoodVal">0 PLN (0%)</strong>
               </div>
               <div class="bar-bg"><div id="barFood" class="bar-fill fill-blue" style="width: 0%;"></div></div>
             </div>
@@ -472,23 +471,31 @@
             <div>
               <div class="bar-header">
                 <span>Transport</span>
-                <strong id="barTransportVal">0 PLN</strong>
+                <strong id="barTransportVal">0 PLN (0%)</strong>
               </div>
               <div class="bar-bg"><div id="barTransport" class="bar-fill fill-amber" style="width: 0%;"></div></div>
             </div>
 
             <div>
               <div class="bar-header">
-                <span style="color: #047857; font-weight: 700;" id="barSavingsTitle">Oszczędności / Inwestycje (80%)</span>
-                <strong style="color: #047857;" id="barSavingsVal">0 PLN</strong>
+                <span>Zobowiązania (Raty, Subskrypcje)</span>
+                <strong id="barOtherVal">0 PLN (0%)</strong>
+              </div>
+              <div class="bar-bg"><div id="barOther" class="bar-fill fill-slate" style="width: 0%; background: #94a3b8;"></div></div>
+            </div>
+
+            <div>
+              <div class="bar-header">
+                <span style="color: #047857; font-weight: 700;" id="barSavingsTitle">Oszczędności / Inwestycje (20%)</span>
+                <strong style="color: #047857;" id="barSavingsVal">0 PLN (0%)</strong>
               </div>
               <div class="bar-bg"><div id="barSavings" class="bar-fill fill-emerald" style="width: 0%;"></div></div>
             </div>
 
             <div>
               <div class="bar-header">
-                <span style="color: #7c3aed; font-weight: 700;" id="barFunTitle">Fun Money (20% wolnych środków)</span>
-                <strong style="color: #7c3aed;" id="barFunVal">0 PLN</strong>
+                <span style="color: #7c3aed; font-weight: 700;" id="barFunTitle">Zachcianki / Fun Money (30%)</span>
+                <strong style="color: #7c3aed;" id="barFunVal">0 PLN (0%)</strong>
               </div>
               <div class="bar-bg"><div id="barFun" class="bar-fill fill-purple" style="width: 0%;"></div></div>
             </div>
@@ -836,14 +843,15 @@ function updateSliderMinsAndLabels() {
   updateSliderValuesDisplay();
 }
 
+// Ustawia suwaki dokładnie w proporcji bazowej Needs: 50% (30% + 15% + 5% + 0%)
 function autoSetLimitsAndValues() {
   var totalInc = getTotalIncome();
   var commuteCost = calcCommuteMin();
 
   elHousing.value = Math.round(totalInc * 0.30);
   elFood.value = Math.round(totalInc * 0.15);
-  elTransport.value = Math.max(Math.round(totalInc * 0.10), commuteCost);
-  elOther.value = Math.round(totalInc * 0.05);
+  elTransport.value = Math.max(Math.round(totalInc * 0.05), commuteCost);
+  elOther.value = 0;
 
   updateSliderMinsAndLabels();
   calculateAll();
@@ -851,7 +859,7 @@ function autoSetLimitsAndValues() {
 
 function updateSliderValuesDisplay() {
   var totalInc = getTotalIncome();
-  var safeInc = Math.max(totalInc, 1); // Zapobieganie dzieleniu przez zero dla procentów
+  var safeInc = Math.max(totalInc, 1); 
   
   var hVal = parseInt(elHousing.value) || 0;
   var fVal = parseInt(elFood.value) || 0;
@@ -869,14 +877,15 @@ function calculateAll() {
   var baseInc = Math.max(0, parseFloat(document.getElementById('income').value) || 0);
   var benefitsInc = totalInc - baseInc;
 
-  document.getElementById('totalIncomeDisplay').textContent = totalInc.toLocaleString('pl-PL') + ' PLN';
+  // Główny baner
+  document.getElementById('totalIncomeDisplayHero').textContent = totalInc.toLocaleString('pl-PL');
   
-  var breakdownEl = document.getElementById('incomeBreakdownDisplay');
-  if(breakdownEl) {
+  var breakdownHeroEl = document.getElementById('incomeBreakdownDisplayHero');
+  if(breakdownHeroEl) {
     if(benefitsInc > 0) {
-      breakdownEl.textContent = baseInc.toLocaleString('pl-PL') + ' PLN pensji + ' + benefitsInc.toLocaleString('pl-PL') + ' PLN świadczeń';
+      breakdownHeroEl.textContent = baseInc.toLocaleString('pl-PL') + ' PLN pensji + ' + benefitsInc.toLocaleString('pl-PL') + ' PLN świadczeń';
     } else {
-      breakdownEl.textContent = 'Sama pensja (brak świadczeń)';
+      breakdownHeroEl.textContent = 'Sama pensja (brak świadczeń)';
     }
   }
 
@@ -891,24 +900,45 @@ function calculateAll() {
   var survival = housing + food + transport + other;
   var emergencyGoal = survival * 6;
 
+  // ----------------------------------------------------
+  // MATEMATYKA 50/30/20 (Suma dokładnie 100% z TotalInc)
+  // ----------------------------------------------------
   var free = Math.max(0, totalInc - survival);
-  var funMoney = Math.round(rush ? free * 0.10 : free * 0.20);
+  
+  // Fun money to domyślnie 30% całego dochodu, chyba że "Rush" to 10%
+  var funMoneyTargetPct = rush ? 0.10 : 0.30;
+  var funMoney = Math.round(totalInc * funMoneyTargetPct);
+  
+  // Zabezpieczenie: jeśli koszty przeżycia (suwaki) zjedzą za dużo, fun money maleje do reszty
+  if (funMoney > free) {
+    funMoney = free;
+  }
+  
+  // Oszczędności to wszystko to, co zostanie (domyślnie 20%)
   var savings = free - funMoney;
   var dailyFun = Math.round(funMoney / 30);
 
+  // Aktualizacja koloru procentów Planowanego Kosztu na górze
+  var safeInc = Math.max(totalInc, 1);
+  var survivalPct = Math.round((survival / safeInc) * 100);
+  var survPctEl = document.getElementById('survivalPctDisplay');
+  survPctEl.textContent = survivalPct + '% budżetu (Zalecane max 50%)';
+  if (survivalPct > 50) { survPctEl.style.color = '#ef4444'; } else { survPctEl.style.color = '#10b981'; }
+
+  // Ostrzeżenie o całkowitym deficycie (ponad 100%)
   var alertBox = document.getElementById('alertBox');
   if (alertBox) {
     if (totalInc > 0 && totalInc < survival) {
-      alertBox.textContent = 'Deficyt! Ustawione na suwakach koszty (' + survival + ' PLN) przekraczają Twój budżet (brak: ' + (survival - totalInc) + ' PLN).';
+      alertBox.textContent = 'Deficyt! Ustawione na suwakach koszty (' + survival + ' PLN) przekraczają Twój cały budżet (brak: ' + (survival - totalInc) + ' PLN).';
       alertBox.style.display = 'block';
     } else {
       alertBox.style.display = 'none';
     }
   }
 
-  document.getElementById('funBadgeLabel').textContent = rush ? 'Fun Money (10% luzu)' : 'Fun Money (20% luzu)';
-  document.getElementById('barFunTitle').textContent = rush ? 'Fun Money (10%)' : 'Fun Money (20%)';
-  document.getElementById('barSavingsTitle').textContent = rush ? 'Szybka Poduszka (90%)' : 'Oszczędności (80%)';
+  document.getElementById('funBadgeLabel').textContent = rush ? 'Zachcianki (10% budżetu)' : 'Zachcianki (30% budżetu)';
+  document.getElementById('barFunTitle').textContent = rush ? 'Zachcianki / Fun Money (10%)' : 'Zachcianki / Fun Money (30%)';
+  document.getElementById('barSavingsTitle').textContent = rush ? 'Szybka Poduszka (Maksymalizacja oszczędności)' : 'Oszczędności / Inwestycje (20%)';
 
   document.getElementById('survivalTotal').textContent = survival.toLocaleString('pl-PL');
   document.getElementById('monthlyFunVal').textContent = funMoney.toLocaleString('pl-PL') + ' PLN';
@@ -924,19 +954,28 @@ function calculateAll() {
   document.getElementById('sprintMonthsCount').textContent = remainingGoal === 0 ? 'Cel osiągnięty!' : (monthsToGoal + ' mies.');
   document.getElementById('emergencyProgressBar').style.width = progressPct + '%';
 
-  document.getElementById('barHousingVal').textContent = housing + ' PLN';
-  document.getElementById('barFoodVal').textContent = food + ' PLN';
-  document.getElementById('barTransportVal').textContent = transport + ' PLN';
-  document.getElementById('barSavingsVal').textContent = savings + ' PLN';
-  document.getElementById('barFunVal').textContent = funMoney + ' PLN';
+  // Obliczenia % do pasków 50/30/20 (Suma to 100%)
+  var hPct = Math.round((housing / safeInc) * 100);
+  var fPct = Math.round((food / safeInc) * 100);
+  var tPct = Math.round((transport / safeInc) * 100);
+  var oPct = Math.round((other / safeInc) * 100);
+  var sPct = Math.round((savings / safeInc) * 100);
+  var fmPct = Math.round((funMoney / safeInc) * 100);
 
-  var baseDenom = Math.max(totalInc, survival, 1);
+  document.getElementById('barHousingVal').textContent = housing + ' PLN (' + hPct + '%)';
+  document.getElementById('barFoodVal').textContent = food + ' PLN (' + fPct + '%)';
+  document.getElementById('barTransportVal').textContent = transport + ' PLN (' + tPct + '%)';
+  document.getElementById('barOtherVal').textContent = other + ' PLN (' + oPct + '%)';
+  document.getElementById('barSavingsVal').textContent = savings + ' PLN (' + sPct + '%)';
+  document.getElementById('barFunVal').textContent = funMoney + ' PLN (' + fmPct + '%)';
+
   var setBar = function(id, val) {
-    document.getElementById(id).style.width = totalInc > 0 ? (Math.min(100, (val / baseDenom) * 100) + '%') : '0%';
+    document.getElementById(id).style.width = totalInc > 0 ? (Math.min(100, (val / safeInc) * 100) + '%') : '0%';
   };
   setBar('barHousing', housing);
   setBar('barFood', food);
   setBar('barTransport', transport);
+  setBar('barOther', other);
   setBar('barSavings', savings);
   setBar('barFun', funMoney);
 }
