@@ -330,7 +330,9 @@
       margin-top: 12px;
     }
     .styled-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-    .styled-table th, .styled-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #e2e8f0; }
+    .styled-table th, .styled-table td { padding: 12px 14px; text-align: center; border-bottom: 1px solid #e2e8f0; }
+    .styled-table th:first-child, .styled-table td:first-child { text-align: left; } /* Okres do lewej */
+    .styled-table th:nth-child(3), .styled-table td:nth-child(3) { text-align: left; } /* Opis wydatku do lewej */
     .styled-table tr:last-child td { border-bottom: none; }
     .styled-table th { background: #f8fafc; color: #475569; font-weight: 600; }
     .styled-table tbody tr { transition: background-color 0.15s; }
@@ -828,7 +830,7 @@ var CATEGORY_COLORS = {
 };
 
 var pieChartInstance = null;
-var editingEntryId = null; // Przechowuje ID edytowanego wpisu
+var editingEntryId = null;
 
 function formatPeriodToPL(ym) {
   if (!ym || ym.indexOf('-') === -1) return ym;
@@ -1132,7 +1134,6 @@ function startEditEntry(id) {
   document.getElementById('cancelEditBtn').style.display = 'inline-block';
   document.getElementById('expenseFormCard').style.backgroundColor = '#fdf8f6';
 
-  // Przewiń płynnie do formularza na telefonie
   document.getElementById('expenseFormCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
@@ -1542,7 +1543,6 @@ window.onload = function() {
         var p = selY + '-' + selM;
 
         if (editingEntryId !== null) {
-          // Tryb edycji: aktualizuj istniejący wpis
           for (var i = 0; i < historyLogs.length; i++) {
             if (historyLogs[i].id === editingEntryId) {
               historyLogs[i].month = p;
@@ -1556,7 +1556,6 @@ window.onload = function() {
           }
           cancelEditMode();
         } else {
-          // Tryb dodawania nowego wpisu
           historyLogs.push({
             id: Date.now(),
             month: p,
