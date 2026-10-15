@@ -164,7 +164,6 @@
     .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
     .input-group { position: relative; margin-bottom: 12px; }
     
-    /* Ujednolicone i gładkie pola formularzy bez ostrych krawędzi */
     input[type="number"], input[type="text"], select {
       width: 100%;
       padding: 9px 32px 9px 12px;
@@ -258,10 +257,34 @@
       border-radius: 6px;
       transition: background-color 0.15s;
     }
-    button.del-btn:hover {
-      background-color: #fee2e2;
+    button.del-btn:hover { background-color: #fee2e2; border-radius: 6px; }
+
+    button.edit-btn {
+      background: none;
+      border: none;
+      color: #2563eb;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 4px 8px;
+      font-size: 0.85rem;
       border-radius: 6px;
+      transition: background-color 0.15s;
+      margin-right: 4px;
     }
+    button.edit-btn:hover { background-color: #dbeafe; border-radius: 6px; }
+
+    button.cancel-btn {
+      background: #64748b;
+      color: #fff;
+      border: none;
+      padding: 9px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      white-space: nowrap;
+      transition: background-color 0.15s;
+    }
+    button.cancel-btn:hover { background: #475569; }
 
     li.empty-msg { color: #94a3b8; font-size: 0.85rem; text-align: center; padding: 10px 0; border: 1px dashed #e2e8f0; border-radius: 10px; }
 
@@ -346,10 +369,7 @@
       box-shadow: 0 1px 2px rgba(0,0,0,0.03);
       transition: transform 0.15s, background-color 0.15s;
     }
-    .avg-chip:hover {
-      background: #f8fafc;
-      border-radius: 10px;
-    }
+    .avg-chip:hover { background: #f8fafc; border-radius: 10px; }
     .avg-chip strong {
       font-size: 1.05rem;
       font-weight: 800;
@@ -400,10 +420,7 @@
       cursor: pointer;
       transition: all 0.15s ease;
     }
-    .cat-legend-item:hover {
-      background: #f1f5f9;
-      border-radius: 10px;
-    }
+    .cat-legend-item:hover { background: #f1f5f9; border-radius: 10px; }
     .cat-legend-item.active-cat {
       background: #eff6ff;
       border-color: #93c5fd;
@@ -440,7 +457,6 @@
   <div id="calculatorTab" class="tab-content active">
     <div class="grid">
       
-      <!-- PRZYKLEJONY CZARNY PASEK NA TELEFONIE / GÓRNY PRAWY KAFEL NA KOMPUTERZE -->
       <div class="hero-sticky-wrapper">
         <div class="metric-hero">
           <div class="metric-hero-top">
@@ -452,7 +468,6 @@
         <div id="alertBox" class="alert-box"></div>
       </div>
 
-      <!-- LEWA KOLUMNA (Formularze) -->
       <div class="col-inputs">
         <div class="inputs-subgrid">
           <div class="card">
@@ -548,7 +563,6 @@
         </div>
       </div>
 
-      <!-- PRAWA KOLUMNA (Pozostałe wyniki i paski) -->
       <div class="col-results">
         <div class="sprint-card" id="sprintCard">
           <div class="sprint-header">
@@ -624,14 +638,13 @@
   <!-- ZAKŁADKA 2: DZIENNIK RACHUNKÓW -->
   <div id="historyTab" class="tab-content">
     
-    <!-- GÓRNA SEKCJA: Po lewej Dodawanie + Średnie koszty, a obok po prawej Diagram Kołowy -->
     <div class="history-top-grid">
       
       <div class="history-left-stack">
-        <!-- Kompaktowe dodawanie wydatku -->
-        <div class="card card-compact">
-          <h2 style="margin-bottom: 6px;">Dodaj rzeczywiste wydatki</h2>
-          <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 12px;">
+        <!-- Formularz dodawania / edycji wydatku -->
+        <div class="card card-compact" id="expenseFormCard" style="transition: background-color 0.2s;">
+          <h2 id="formTitle" style="margin-bottom: 6px;">Dodaj rzeczywiste wydatki</h2>
+          <p id="formSubtitle" style="font-size: 0.8rem; color: #64748b; margin-bottom: 12px;">
             Wybierz miesiąc, kategorię (Mieszkanie, Jedzenie, Dziecko), wpisz opis oraz kwotę.
           </p>
 
@@ -649,10 +662,10 @@
             <input type="text" id="histName" placeholder="Opis (np. Prąd, Biedronka)">
             <input type="number" id="histAmount" placeholder="Kwota" min="0">
             <button type="button" class="btn-add" id="addHistBtn">Zapisz</button>
+            <button type="button" class="cancel-btn" id="cancelEditBtn" style="display: none;">Anuluj</button>
           </div>
         </div>
 
-        <!-- Kompaktowe podsumowanie średnich kosztów z powiększoną czcionką -->
         <div class="card average-card">
           <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
             <div>
@@ -665,7 +678,6 @@
         </div>
       </div>
 
-      <!-- Diagram kołowy obok na górze -->
       <div class="card chart-card-side">
         <div>
           <h2 style="margin-bottom: 4px;">Podział wg kategorii</h2>
@@ -683,7 +695,6 @@
 
     </div>
 
-    <!-- DOLNA SEKCJA: Tabela wpisów w Dzienniku z filtrem kategorii -->
     <div class="card" style="margin-bottom: 0;">
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
         <h2>Wpisy w Dzienniku</h2>
@@ -817,6 +828,7 @@ var CATEGORY_COLORS = {
 };
 
 var pieChartInstance = null;
+var editingEntryId = null; // Przechowuje ID edytowanego wpisu
 
 function formatPeriodToPL(ym) {
   if (!ym || ym.indexOf('-') === -1) return ym;
@@ -1088,9 +1100,56 @@ function renderHistoryTable() {
                    '<td><span class="cat-badge cat-' + cat + '">' + cat + '</span></td>' +
                    '<td>' + tableItems[k].name + '</td>' +
                    '<td><strong>' + Number(tableItems[k].amount).toLocaleString('pl-PL') + ' PLN</strong></td>' +
-                   '<td><button type="button" class="del-btn" onclick="deleteHistoryEntry(' + tableItems[k].id + ')">✕ Usuń</button></td>';
+                   '<td>' +
+                     '<button type="button" class="edit-btn" onclick="startEditEntry(' + tableItems[k].id + ')">✏️ Edytuj</button>' +
+                     '<button type="button" class="del-btn" onclick="deleteHistoryEntry(' + tableItems[k].id + ')">✕ Usuń</button>' +
+                   '</td>';
     tbody.appendChild(tr);
   }
+}
+
+function startEditEntry(id) {
+  var entry = null;
+  for (var i = 0; i < historyLogs.length; i++) {
+    if (historyLogs[i].id === id) {
+      entry = historyLogs[i];
+      break;
+    }
+  }
+  if (!entry) return;
+
+  editingEntryId = id;
+
+  document.getElementById('histInputMonth').value = entry.monthNum || entry.month.split('-')[1];
+  document.getElementById('histInputYear').value = entry.year || entry.month.split('-')[0];
+  document.getElementById('histCategory').value = entry.category || 'Mieszkanie';
+  document.getElementById('histName').value = entry.name;
+  document.getElementById('histAmount').value = entry.amount;
+
+  document.getElementById('formTitle').textContent = 'Edytujesz wybrane wydatki';
+  document.getElementById('formSubtitle').textContent = 'Zmień dane i kliknij "Zapisz zmiany" lub anuluj edycję.';
+  document.getElementById('addHistBtn').textContent = 'Zapisz zmiany';
+  document.getElementById('cancelEditBtn').style.display = 'inline-block';
+  document.getElementById('expenseFormCard').style.backgroundColor = '#fdf8f6';
+
+  // Przewiń płynnie do formularza na telefonie
+  document.getElementById('expenseFormCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function cancelEditMode() {
+  editingEntryId = null;
+  document.getElementById('formTitle').textContent = 'Dodaj rzeczywiste wydatki';
+  document.getElementById('formSubtitle').textContent = 'Wybierz miesiąc, kategorię (Mieszkanie, Jedzenie, Dziecko), wpisz opis oraz kwotę.';
+  document.getElementById('addHistBtn').textContent = 'Zapisz';
+  document.getElementById('cancelEditBtn').style.display = 'none';
+  document.getElementById('expenseFormCard').style.backgroundColor = '#ffffff';
+
+  document.getElementById('histName').value = '';
+  document.getElementById('histAmount').value = '';
+
+  var d = new Date();
+  document.getElementById('histInputMonth').value = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1);
+  document.getElementById('histInputYear').value = d.getFullYear();
 }
 
 function renderHistory() {
@@ -1122,6 +1181,9 @@ function renderHistory() {
 }
 
 function deleteHistoryEntry(id) {
+  if (editingEntryId === id) {
+    cancelEditMode();
+  }
   historyLogs = historyLogs.filter(function(e) { return e.id !== id; });
   renderHistory();
 }
@@ -1478,20 +1540,43 @@ window.onload = function() {
 
       if (selM && selY && n && !isNaN(a) && a > 0) {
         var p = selY + '-' + selM;
-        historyLogs.push({
-          id: Date.now(),
-          month: p,
-          year: selY,
-          monthNum: selM,
-          category: selCat,
-          name: n,
-          amount: a
-        });
-        document.getElementById('histName').value = '';
-        document.getElementById('histAmount').value = '';
+
+        if (editingEntryId !== null) {
+          // Tryb edycji: aktualizuj istniejący wpis
+          for (var i = 0; i < historyLogs.length; i++) {
+            if (historyLogs[i].id === editingEntryId) {
+              historyLogs[i].month = p;
+              historyLogs[i].year = selY;
+              historyLogs[i].monthNum = selM;
+              historyLogs[i].category = selCat;
+              historyLogs[i].name = n;
+              historyLogs[i].amount = a;
+              break;
+            }
+          }
+          cancelEditMode();
+        } else {
+          // Tryb dodawania nowego wpisu
+          historyLogs.push({
+            id: Date.now(),
+            month: p,
+            year: selY,
+            monthNum: selM,
+            category: selCat,
+            name: n,
+            amount: a
+          });
+          document.getElementById('histName').value = '';
+          document.getElementById('histAmount').value = '';
+        }
         renderHistory();
       }
     };
+  }
+
+  var cancelEditBtn = document.getElementById('cancelEditBtn');
+  if (cancelEditBtn) {
+    cancelEditBtn.onclick = cancelEditMode;
   }
 
   var addBtn = document.getElementById('addCostBtn');
