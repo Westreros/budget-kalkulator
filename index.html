@@ -350,6 +350,7 @@
       </div>
 
       <div class="col-results">
+        
         <div class="sprint-card" id="sprintCard">
           <div class="sprint-header">
             <span style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: #166534;">Cel: 6-miesięczna Poduszka</span>
@@ -621,32 +622,56 @@ var supabase = null;
 var isLoggedIn = false;
 var historyLogs = [];
 
-// Zabezpieczenie przed brakiem biblioteki (np. gdy zablokuje ją agresywny AdBlock)
+// Obejście dla trybu Incognito, który blokuje localStorage
+var memoryStorage = {
+  items: {},
+  getItem: function(k) { return this.items[k] || null; },
+  setItem: function(k, v) { this.items[k] = v; },
+  removeItem: function(k) { delete this.items[k]; }
+};
+
+var safeStorage;
 try {
-  if (window.supabase) {
-    var origin = window.location.origin;
-    // Sprawdzamy czy testujesz lokalnie z pliku na dysku lub na surowym github.io
-    var isLocalOrGithub = origin === 'file://' || origin === 'null' || origin.includes('github.io');
-    
-    // Używamy Vercel proxy tylko na serwerach Vercela, inaczej ładujemy oryginalny link
-    var supabaseUrl = isLocalOrGithub 
-      ? 'https://kbzspdwizcwpzlvytdzw.supabase.co' 
-      : origin + '/baza';
-      
-    var supabaseKey = 'sb_publishable_nPfkgQfKOapm-t9OqWZ4KA__KuU0jqB';
-    supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-  }
-} catch (e) {
-  console.error("Nie udało się połączyć z Supabase:", e);
+  window.localStorage.setItem('__test__', '1');
+  window.localStorage.removeItem('__test__');
+  safeStorage = window.localStorage;
+} catch(e) {
+  safeStorage = memoryStorage;
 }
 
-// Funkcje Auth z zabezpieczeniem na wypadek braku połączenia
+try {
+  if (window.supabase) {
+    var isVercel = window.location.href.includes('vercel.app');
+    
+    // Używamy bezpiecznego proxy (omijającego AdBlock) tylko po wgraniu na Vercel
+    var supabaseUrl = isVercel 
+      ? window.location.origin + '/baza' 
+      : 'https://kbzspdwizcwpzlvytdzw.supabase.co';
+      
+    var supabaseKey = 'sb_publishable_nPfkgQfKOapm-t9OqWZ4KA__KuU0jqB';
+    
+    supabase = window.supabase.createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        storage: safeStorage,
+        persistSession: safeStorage !== memoryStorage
+      }
+    });
+  }
+} catch (e) {
+  console.error("Błąd inicjalizacji Supabase:", e);
+}
+
+// Funkcje Auth
 async function handleLogin() {
   const errorEl = document.getElementById('authError');
   errorEl.textContent = '';
   
+  if (!window.supabase) {
+    errorEl.textContent = 'Skrypt logowania zablokowany! Twój bloker reklam/prywatności całkowicie zablokował biblioteki strony.';
+    return;
+  }
   if (!supabase) { 
-    errorEl.textContent = 'Błąd: Połączenie z bazą zablokowane. Sprawdź ustawienia prywatności/AdBlocka.'; 
+    errorEl.textContent = 'Błąd krytyczny: Skrypt nie wystartował. Odśwież stronę.'; 
     return; 
   }
   
@@ -658,7 +683,7 @@ async function handleLogin() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) { errorEl.textContent = 'Błąd logowania: ' + error.message; } else { window.location.reload(); }
   } catch (err) {
-    errorEl.textContent = 'Wystąpił błąd sieci. Spróbuj użyć innej przeglądarki.';
+    errorEl.textContent = 'Wystąpił błąd sieci.';
   }
 }
 
@@ -666,8 +691,12 @@ async function handleRegister() {
   const errorEl = document.getElementById('authError');
   errorEl.textContent = '';
   
+  if (!window.supabase) {
+    errorEl.textContent = 'Skrypt logowania zablokowany! Twój bloker reklam/prywatności całkowicie zablokował biblioteki strony.';
+    return;
+  }
   if (!supabase) { 
-    errorEl.textContent = 'Błąd: Połączenie z bazą zablokowane. Sprawdź ustawienia prywatności/AdBlocka.'; 
+    errorEl.textContent = 'Błąd krytyczny: Skrypt nie wystartował. Odśwież stronę.'; 
     return; 
   }
 
@@ -683,7 +712,7 @@ async function handleRegister() {
       }
     }
   } catch (err) {
-    errorEl.textContent = 'Wystąpił błąd sieci. Spróbuj użyć innej przeglądarki.';
+    errorEl.textContent = 'Wystąpił błąd sieci.';
   }
 }
 
@@ -749,7 +778,7 @@ function calculateAll() {
   var currentSavings = Math.max(0, parseFloat(document.getElementById('currentSavings').value) || 0);
   var rush = document.getElementById('rushEmergencyFund').checked;
 
-  // Matematyka sztywna (50/20/30) dla idealnego modelu
+  // Matematyka sztywna (50/20/30)
   var housing = Math.round(totalInc * 0.30);
   var food = Math.round(totalInc * 0.15);
   var transport = Math.round(totalInc * 0.05);
@@ -760,11 +789,10 @@ function calculateAll() {
 
   var funMoneyTargetPct = rush ? 0.10 : 0.20;
   var funMoney = Math.round(totalInc * funMoneyTargetPct);
-  var savings = totalInc - survival - funMoney; // Wypełnia resztę do 100%
+  var savings = totalInc - survival - funMoney; 
   
   var dailyFun = Math.round(funMoney / 30);
 
-  // Aktualizacja kafelka Idealne Koszty
   var safeInc = Math.max(totalInc, 1); 
 
   document.getElementById('sliderHousing').max = safeInc;
