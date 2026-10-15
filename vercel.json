@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/core-lib.js",
+      "destination": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    },
+    {
       "source": "/baza/:path*",
       "destination": "https://kbzspdwizcwpzlvytdzw.supabase.co/:path*"
     }
