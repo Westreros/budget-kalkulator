@@ -36,6 +36,7 @@
     .btn-register:hover { background: #e2e8f0; }
     .auth-error { color: #ef4444; font-size: 0.85rem; margin-bottom: 16px; min-height: 20px; }
 
+    /* Tryb Offline Ostrzeżenie */
     #offlineWarning { display: none; background: #fef08a; color: #854d0e; padding: 12px 20px; text-align: center; font-size: 0.9rem; font-weight: 700; border-radius: 12px; margin-bottom: 20px; border: 1px solid #fde047; }
 
     @media (min-width: 1024px) { body { padding: 28px 40px; } }
@@ -77,7 +78,6 @@
       .inputs-subgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; } 
     }
     
-    /* Grupowanie w kolumny rozwiązuje problem pustych przestrzeni w siatce (Masonry-style) */
     .subgrid-col { display: flex; flex-direction: column; gap: 20px; width: 100%; }
     .subgrid-col .card { margin-bottom: 0; }
 
@@ -93,7 +93,6 @@
       width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; outline: none; background-color: #fff; transition: border-color 0.15s, box-shadow 0.15s; appearance: none; -webkit-appearance: none; -moz-appearance: none;
     }
     
-    /* Brak strzałek przy walutach */
     input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     input[type="number"] { -moz-appearance: textfield; }
     .input-group input[type="number"], .input-group input[type="text"] { padding-right: 42px; }
@@ -107,6 +106,23 @@
     input:focus, select:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
     .suffix { position: absolute; right: 10px; top: 10px; color: #94a3b8; font-weight: 600; font-size: 0.8rem; pointer-events: none; }
 
+    /* BANER PEŁNEGO BUDŻETU */
+    .total-income-banner {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border-radius: 12px;
+      padding: 16px;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      margin-bottom: 8px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    }
+    .tib-text span { display: block; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; }
+    .tib-text p { font-size: 0.75rem; color: #cbd5e1; margin-top: 2px; }
+    .tib-val { font-size: 1.5rem; font-weight: 800; color: #38bdf8; white-space: nowrap; }
+
     /* STYLE SUWAKÓW */
     .slider-group { margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid #f1f5f9; }
     .slider-group:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
@@ -114,15 +130,9 @@
     .slider-header span { font-weight: 600; color: #334155; font-size: 0.9rem; }
     .slider-header strong { font-size: 1.1rem; color: #2563eb; font-weight: 800; background: #eff6ff; padding: 2px 8px; border-radius: 6px; }
     
-    input[type="range"] {
-      -webkit-appearance: none; width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; outline: none; transition: background 0.15s; margin: 8px 0;
-    }
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #2563eb; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: transform 0.1s;
-    }
-    input[type="range"]::-moz-range-thumb {
-      width: 20px; height: 20px; border: none; border-radius: 50%; background: #2563eb; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: transform 0.1s;
-    }
+    input[type="range"] { -webkit-appearance: none; width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; outline: none; transition: background 0.15s; margin: 8px 0; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #2563eb; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: transform 0.1s; }
+    input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border: none; border-radius: 50%; background: #2563eb; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: transform 0.1s; }
     input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
     input[type="range"]::-moz-range-thumb:hover { transform: scale(1.15); }
     .slider-info { font-size: 0.75rem; color: #64748b; margin-top: 4px; display: flex; justify-content: space-between; }
@@ -202,6 +212,11 @@
     .cat-legend-item.active-cat { background: #eff6ff; border-color: #93c5fd; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15); border-radius: 10px; }
 
     .forecast-card { background: #fdf4ff; border: 1px solid #f0abfc; border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+    
+    .excel-import-box { border: 2px dashed #93c5fd; background-color: #eff6ff; border-radius: 12px; padding: 12px; text-align: center; margin-bottom: 14px; cursor: pointer; transition: background-color 0.15s; }
+    .excel-import-box:hover { background-color: #dbeafe; border-radius: 12px; }
+    .excel-import-box label { cursor: pointer; color: #1d4ed8; font-weight: 600; display: block; }
+    .excel-import-box span.hint { font-size: 0.75rem; color: #64748b; }
   </style>
 </head>
 <body>
@@ -269,15 +284,44 @@
           
           <div class="subgrid-col">
             <div class="card">
-              <h2>1. Dochody i Oszczędności</h2>
+              <h2>1. Dochody i Świadczenia</h2>
               
-              <label for="income">Twój miesięczny dochód netto (na rękę)</label>
+              <label for="income">Twój miesięczny dochód netto (pensja na rękę)</label>
               <div class="input-group">
                 <input type="number" id="income" placeholder="np. 7000" min="0" step="100">
                 <span class="suffix">PLN</span>
               </div>
 
-              <label for="currentSavings" style="margin-top:14px;">Ile masz już odłożone na "czarną godzinę"?</label>
+              <div style="margin-top: 16px; border-top: 1px dashed #cbd5e1; padding-top: 16px;">
+                <label style="font-weight: 700; color: #1e293b; margin-bottom: 8px;">Świadczenia rodzinne (wybierz liczbę dzieci):</label>
+                <div class="input-row">
+                  <div>
+                    <label for="kids800">800+ (800 zł)</label>
+                    <input type="number" id="kids800" placeholder="0" min="0" max="10">
+                  </div>
+                  <div>
+                    <label for="kidsActiveHome">Aktywnie w domu (500 zł)</label>
+                    <input type="number" id="kidsActiveHome" placeholder="0" min="0" max="10">
+                  </div>
+                </div>
+                <div class="input-row">
+                  <div>
+                    <label for="kidsActiveWork">Aktywni w pracy (1500 zł)</label>
+                    <input type="number" id="kidsActiveWork" placeholder="0" min="0" max="10">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pasek podsumowania dochodu -->
+              <div class="total-income-banner">
+                <div class="tib-text">
+                  <span>Pełny budżet domowy</span>
+                  <p id="incomeBreakdownDisplay">Sama pensja netto</p>
+                </div>
+                <div class="tib-val" id="totalIncomeDisplay">0 PLN</div>
+              </div>
+
+              <label for="currentSavings" style="margin-top:20px;">Ile masz już odłożone na "czarną godzinę"?</label>
               <div class="input-group">
                 <input type="number" id="currentSavings" placeholder="np. 5000" min="0" step="100">
                 <span class="suffix">PLN</span>
@@ -293,25 +337,7 @@
             </div>
 
             <div class="card">
-              <h2>3. Ustawienia bazy dla suwaków (Wielkość rodziny)</h2>
-              <div class="input-row">
-                <div>
-                  <label for="adultsCount">Liczba dorosłych</label>
-                  <input type="number" id="adultsCount" placeholder="np. 2" min="1">
-                </div>
-                <div>
-                  <label for="kidsCount">Liczba dzieci</label>
-                  <input type="number" id="kidsCount" placeholder="np. 1" min="0">
-                </div>
-              </div>
-              <label class="checkbox-box">
-                <input type="checkbox" id="include800Plus" checked>
-                <span>Uwzględnij 800+ na każde dziecko (obniża suwak jedzenia)</span>
-              </label>
-            </div>
-
-            <div class="card">
-              <h2>4. Baza suwaka transportu (Dojazdy autem)</h2>
+              <h2>3. Baza suwaka transportu (Dojazdy autem)</h2>
               <div class="input-row">
                 <div>
                   <label for="commuteKm">Km w jedną stronę</label>
@@ -350,7 +376,7 @@
           <div class="subgrid-col">
             <div class="card">
               <h2 style="margin-bottom:4px;">2. Planowane Koszty (Reguła 50/30/20)</h2>
-              <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 16px;">Przesuń suwaki, aby dostosować limity. System automatycznie proponuje optymalny podział.</p>
+              <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 16px;">Przesuń suwaki, aby dostosować limity. System automatycznie proponuje optymalny podział oparty na Twoim pełnym budżecie.</p>
 
               <button id="btnResetLimits" class="btn-register" style="width: auto; padding: 6px 14px; font-size: 0.8rem; margin-bottom: 16px; border-radius: 8px;">🔄 Resetuj do zalecanych proporcji</button>
 
@@ -369,7 +395,7 @@
                   <strong id="valFood">0 PLN</strong>
                 </div>
                 <input type="range" id="sliderFood" min="0" max="5000" step="50" value="0">
-                <div class="slider-info">Zalecane 15% (min. OECD: <span id="minFood">0</span> PLN)</div>
+                <div class="slider-info">Zalecane 15%: <span id="recFood">0</span> PLN</div>
               </div>
 
               <div class="slider-group">
@@ -499,6 +525,12 @@
             <button type="button" class="btn-add" id="addHistBtn">Zapisz</button>
             <button type="button" class="cancel-btn" id="cancelEditBtn" style="display: none;">Anuluj</button>
           </div>
+          
+          <div class="excel-import-box" style="margin-top: 14px; margin-bottom: 0;">
+            <label for="excelFile">Masz starsze dane? Wczytaj plik Excel (.xlsx, .xls, .csv)</label>
+            <span class="hint">Wrzuci wyciąg od razu do aktualnie wybranego miesiąca</span>
+            <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" style="display: none;">
+          </div>
         </div>
 
         <div class="card average-card">
@@ -591,7 +623,7 @@
         <span id="forecastBasisTag" style="font-size: 0.75rem; background: #fae8ff; color: #a21caf; padding: 4px 10px; border-radius: 20px; font-weight: 700;"></span>
       </div>
       <p style="font-size: 0.85rem; color: #701a75; margin-bottom: 14px;">
-        Tutaj widzisz brutalną prawdę: system pobrał Twoje faktyczne średnie z Dziennika i zderzył je z Twoim dochodem.
+        Tutaj widzisz brutalną prawdę: system pobrał Twoje faktyczne średnie z Dziennika i zderzył je z Twoim całkowitym dochodem.
       </p>
 
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
@@ -762,14 +794,13 @@ function appSwitchTab(tabId, btn) {
   if (tabId === 'reportTab') renderReportTab();
 }
 
-function calcOecdFood() {
-  var adults = Math.max(1, parseInt(document.getElementById('adultsCount').value) || 1);
-  var kids = Math.max(0, parseInt(document.getElementById('kidsCount').value) || 0);
-  var has800 = document.getElementById('include800Plus').checked;
-  var baseFood = 950;
-  var oecd = 1.0 + (adults - 1) * 0.5 + kids * 0.3;
-  var foodGross = Math.round(baseFood * oecd);
-  return Math.max(0, foodGross - ((has800 && kids > 0) ? (kids * 800) : 0));
+// Wyliczenie łącznego budżetu (Pensja + Świadczenia)
+function getTotalIncome() {
+  var base = Math.max(0, parseFloat(document.getElementById('income').value) || 0);
+  var k800 = Math.max(0, parseInt(document.getElementById('kids800').value) || 0);
+  var kHome = Math.max(0, parseInt(document.getElementById('kidsActiveHome').value) || 0);
+  var kWork = Math.max(0, parseInt(document.getElementById('kidsActiveWork').value) || 0);
+  return base + (k800 * 800) + (kHome * 500) + (kWork * 1500);
 }
 
 function calcCommuteMin() {
@@ -782,38 +813,35 @@ function calcCommuteMin() {
 }
 
 function updateSliderMinsAndLabels() {
-  var income = Math.max(0, parseFloat(document.getElementById('income').value) || 0);
-  var foodNet = calcOecdFood();
+  var totalInc = getTotalIncome();
   var commuteCost = calcCommuteMin();
 
-  elFood.min = foodNet;
+  elFood.min = 0;
   elTransport.min = commuteCost;
   
-  elHousing.max = Math.max(income, 5000);
-  elFood.max = Math.max(income, 4000);
-  elTransport.max = Math.max(income, 3000);
-  elOther.max = Math.max(income, 3000);
+  elHousing.max = Math.max(totalInc, 5000);
+  elFood.max = Math.max(totalInc, 4000);
+  elTransport.max = Math.max(totalInc, 3000);
+  elOther.max = Math.max(totalInc, 3000);
 
-  if (parseInt(elFood.value) < foodNet) elFood.value = foodNet;
   if (parseInt(elTransport.value) < commuteCost) elTransport.value = commuteCost;
 
-  document.getElementById('recHousing').textContent = Math.round(income * 0.30);
-  document.getElementById('minFood').textContent = foodNet;
+  document.getElementById('recHousing').textContent = Math.round(totalInc * 0.30);
+  document.getElementById('recFood').textContent = Math.round(totalInc * 0.15);
   document.getElementById('minTransport').textContent = commuteCost;
-  document.getElementById('recOther').textContent = Math.round(income * 0.05);
+  document.getElementById('recOther').textContent = Math.round(totalInc * 0.05);
 
   updateSliderValuesDisplay();
 }
 
 function autoSetLimitsAndValues() {
-  var income = Math.max(0, parseFloat(document.getElementById('income').value) || 0);
-  var foodNet = calcOecdFood();
+  var totalInc = getTotalIncome();
   var commuteCost = calcCommuteMin();
 
-  elHousing.value = Math.round(income * 0.30);
-  elFood.value = Math.max(Math.round(income * 0.15), foodNet);
-  elTransport.value = Math.max(Math.round(income * 0.10), commuteCost);
-  elOther.value = Math.round(income * 0.05);
+  elHousing.value = Math.round(totalInc * 0.30);
+  elFood.value = Math.round(totalInc * 0.15);
+  elTransport.value = Math.max(Math.round(totalInc * 0.10), commuteCost);
+  elOther.value = Math.round(totalInc * 0.05);
 
   updateSliderMinsAndLabels();
   calculateAll();
@@ -827,7 +855,21 @@ function updateSliderValuesDisplay() {
 }
 
 function calculateAll() {
-  var income = Math.max(0, parseFloat(document.getElementById('income').value) || 0);
+  var totalInc = getTotalIncome();
+  var baseInc = Math.max(0, parseFloat(document.getElementById('income').value) || 0);
+  var benefitsInc = totalInc - baseInc;
+
+  document.getElementById('totalIncomeDisplay').textContent = totalInc.toLocaleString('pl-PL') + ' PLN';
+  
+  var breakdownEl = document.getElementById('incomeBreakdownDisplay');
+  if(breakdownEl) {
+    if(benefitsInc > 0) {
+      breakdownEl.textContent = baseInc.toLocaleString('pl-PL') + ' PLN pensji + ' + benefitsInc.toLocaleString('pl-PL') + ' PLN świadczeń';
+    } else {
+      breakdownEl.textContent = 'Sama pensja (brak świadczeń)';
+    }
+  }
+
   var currentSavings = Math.max(0, parseFloat(document.getElementById('currentSavings').value) || 0);
   var rush = document.getElementById('rushEmergencyFund').checked;
 
@@ -839,15 +881,15 @@ function calculateAll() {
   var survival = housing + food + transport + other;
   var emergencyGoal = survival * 6;
 
-  var free = Math.max(0, income - survival);
+  var free = Math.max(0, totalInc - survival);
   var funMoney = Math.round(rush ? free * 0.10 : free * 0.20);
   var savings = free - funMoney;
   var dailyFun = Math.round(funMoney / 30);
 
   var alertBox = document.getElementById('alertBox');
   if (alertBox) {
-    if (income > 0 && income < survival) {
-      alertBox.textContent = 'Deficyt! Ustawione na suwakach koszty (' + survival + ' PLN) przekraczają Twój dochód (brak: ' + (survival - income) + ' PLN).';
+    if (totalInc > 0 && totalInc < survival) {
+      alertBox.textContent = 'Deficyt! Ustawione na suwakach koszty (' + survival + ' PLN) przekraczają Twój budżet (brak: ' + (survival - totalInc) + ' PLN).';
       alertBox.style.display = 'block';
     } else {
       alertBox.style.display = 'none';
@@ -878,9 +920,9 @@ function calculateAll() {
   document.getElementById('barSavingsVal').textContent = savings + ' PLN';
   document.getElementById('barFunVal').textContent = funMoney + ' PLN';
 
-  var baseDenom = Math.max(income, survival, 1);
+  var baseDenom = Math.max(totalInc, survival, 1);
   var setBar = function(id, val) {
-    document.getElementById(id).style.width = income > 0 ? (Math.min(100, (val / baseDenom) * 100) + '%') : '0%';
+    document.getElementById(id).style.width = totalInc > 0 ? (Math.min(100, (val / baseDenom) * 100) + '%') : '0%';
   };
   setBar('barHousing', housing);
   setBar('barFood', food);
@@ -915,17 +957,6 @@ function updateHistoryFilterDropdowns() {
     mOpt.textContent = MONTH_NAMES_PL[m]; fMonth.appendChild(mOpt);
   }
   fMonth.value = curMonth || 'ALL';
-}
-
-function toggleCategoryFilter(catName) {
-  var fCatEl = document.getElementById('histFilterCategory');
-  if (!fCatEl) return;
-  if (fCatEl.value === catName) {
-    fCatEl.value = 'ALL';
-  } else {
-    fCatEl.value = catName;
-  }
-  renderHistoryTable();
 }
 
 function updateCategoryChart(periodItems) {
@@ -1069,16 +1100,61 @@ async function deleteHistoryEntry(id) {
   renderHistory();
 }
 
+async function handleExcelUpload(e) {
+  var file = e.target.files[0]; if (!file) return;
+  var reader = new FileReader();
+  reader.onload = async function(evt) {
+    try {
+      var data = new Uint8Array(evt.target.result); var workbook = XLSX.read(data, { type: 'array' });
+      var worksheet = workbook.Sheets[workbook.SheetNames[0]]; var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      
+      var newItems = [];
+      var curMonth = document.getElementById('histInputMonth').value;
+      var curYear = document.getElementById('histInputYear').value;
+      var p = curYear + '-' + curMonth;
+
+      for (var r = 0; r < jsonData.length; r++) {
+        var row = jsonData[r]; if (!row || row.length < 2) continue;
+        var nameCandidate = null; var amountCandidate = null;
+        for (var c = 0; c < row.length; c++) {
+          var cell = row[c]; if (cell == null) continue;
+          var strVal = String(cell).trim();
+          var cleanedNum = parseFloat(strVal.replace(/\s+/g, '').replace('zł', '').replace('PLN', '').replace(',', '.'));
+          if (!isNaN(cleanedNum) && cleanedNum > 0 && amountCandidate === null) amountCandidate = cleanedNum;
+          else if (isNaN(Number(strVal)) && strVal.length > 1 && nameCandidate === null) nameCandidate = strVal;
+        }
+        if (nameCandidate && amountCandidate !== null) {
+          var low = nameCandidate.toLowerCase();
+          if (low !== 'nazwa' && low !== 'kategoria' && low !== 'kwota' && low !== 'opis') {
+            newItems.push({ month: p, year: curYear, month_num: curMonth, category: 'Inne', name: nameCandidate, amount: amountCandidate });
+          }
+        }
+      }
+
+      if (newItems.length > 0) {
+        if (isLoggedIn && !isOfflineMode) {
+          const { data: inserted, error } = await supabase.from('history_logs').insert(newItems).select();
+          if (!error && inserted) { historyLogs = historyLogs.concat(inserted); alert('Wgrano ' + inserted.length + ' rachunków z Excela do chmury!'); renderHistory(); }
+        } else {
+          for(let i=0; i<newItems.length; i++) { newItems[i].id = Date.now() + i; newItems[i].monthNum = newItems[i].month_num; }
+          historyLogs = historyLogs.concat(newItems); alert('Wgrano ' + newItems.length + ' rachunków (Tryb Offline).'); renderHistory();
+        }
+      } else { alert('Nie rozpoznałem kwot ani opisów. Sprawdź plik.'); }
+    } catch (err) { alert('Błąd odczytu pliku.'); }
+    e.target.value = '';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
 function renderReportTab() {
-  var incEl = document.getElementById('income');
-  var income = Math.max(0, parseFloat(incEl ? incEl.value : 0) || 0);
+  var totalInc = getTotalIncome();
   var rush = document.getElementById('rushEmergencyFund').checked;
 
   var avgs = getAveragedCostsFromHistory();
   document.getElementById('forecastBasisTag').textContent = avgs.length > 0 ? ('Baza: Twoja historia i uśrednione koszty') : 'Baza: Pusto (Dodaj wpisy w Dzienniku)';
 
   var realSurvival = avgs.reduce((acc, curr) => acc + curr.amount, 0);
-  var realFree = Math.max(0, income - realSurvival);
+  var realFree = Math.max(0, totalInc - realSurvival);
   var realFun = Math.round(rush ? realFree * 0.10 : realFree * 0.20);
   var realSavings = realFree - realFun;
 
@@ -1136,7 +1212,6 @@ window.onload = async function() {
       loadCloudData();
     }
   } else {
-    // Ładowanie z przeglądarki jeśli Adblock
     try { historyLogs = JSON.parse(localStorage.getItem('my_history_logs_offline') || '[]'); } catch(e){}
   }
 
@@ -1148,23 +1223,16 @@ window.onload = async function() {
     var d = new Date(); mSelect.value = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1); yInput.value = d.getFullYear();
   }
 
-  // Używamy zdarzenia 'input' by suwaki reagowały natychmiast na zmianę wpisywanej kwoty w locie
   [elHousing, elFood, elTransport, elOther].forEach(el => {
     el.addEventListener('input', () => { updateSliderValuesDisplay(); calculateAll(); });
   });
 
-  ['income', 'adultsCount', 'kidsCount', 'commuteKm', 'commuteDays', 'carFuelUsage', 'fuelPrice'].forEach(id => {
-    document.getElementById(id).addEventListener('input', () => { updateSliderMinsAndLabels(); calculateAll(); });
+  ['income', 'kids800', 'kidsActiveHome', 'kidsActiveWork', 'commuteKm', 'commuteDays', 'carFuelUsage', 'fuelPrice'].forEach(id => {
+    var el = document.getElementById(id);
+    if(el) el.addEventListener('input', () => { updateSliderMinsAndLabels(); calculateAll(); });
   });
-  
-  // Zdarzenie change dla checkboxa 800+
-  document.getElementById('include800Plus').addEventListener('change', () => { updateSliderMinsAndLabels(); calculateAll(); });
 
-  ['rushEmergencyFund'].forEach(id => {
-    document.getElementById(id).addEventListener('change', calculateAll);
-  });
-  
-  ['currentSavings'].forEach(id => {
+  ['rushEmergencyFund', 'currentSavings'].forEach(id => {
     document.getElementById(id).addEventListener('input', calculateAll);
   });
 
@@ -1197,6 +1265,7 @@ window.onload = async function() {
   };
 
   document.getElementById('cancelEditBtn').onclick = cancelEditMode;
+  document.getElementById('excelFile').onchange = handleExcelUpload;
 
   ['histFilterYear', 'histFilterMonth', 'histFilterCategory', 'histSortOrder'].forEach(id => {
     document.getElementById(id).onchange = renderHistoryTable;
