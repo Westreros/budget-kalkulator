@@ -6,7 +6,10 @@
   <title>Budżetnik - Twój Plan 50/20/30</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Pobieranie bazy danych przez Twój bezpieczny tunel na Vercelu (Niewidoczne dla AdBlocka!) -->
+  <script src="/core-lib.js"></script>
+  
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: #f1f5f9; color: #0f172a; padding: 20px 16px; }
@@ -617,12 +620,12 @@
 </div>
 
 <script>
-// ---------- KONFIGURACJA SUPABASE (Z VERCEL REVERSE PROXY I ZABEZPIECZENIAMI) ----------
+// ---------- PANCERNA KONFIGURACJA BAZY DANYCH ----------
 var supabase = null;
 var isLoggedIn = false;
 var historyLogs = [];
 
-// Obejście dla trybu Incognito, który blokuje localStorage
+// Obejście dla trybu Incognito (Wirtualna pamięć RAM gdy przeglądarka blokuje zapis)
 var memoryStorage = {
   items: {},
   getItem: function(k) { return this.items[k] || null; },
@@ -639,39 +642,42 @@ try {
   safeStorage = memoryStorage;
 }
 
-try {
-  if (window.supabase) {
-    var isVercel = window.location.href.includes('vercel.app');
-    
-    // Używamy bezpiecznego proxy (omijającego AdBlock) tylko po wgraniu na Vercel
-    var supabaseUrl = isVercel 
-      ? window.location.origin + '/baza' 
-      : 'https://kbzspdwizcwpzlvytdzw.supabase.co';
+function initSupabase() {
+  try {
+    if (window.supabase) {
+      var origin = window.location.origin;
+      var isLocalOrGithub = origin === 'file://' || origin === 'null' || origin.includes('github.io') || origin.includes('127.0.0.1') || origin.includes('localhost');
       
-    var supabaseKey = 'sb_publishable_nPfkgQfKOapm-t9OqWZ4KA__KuU0jqB';
-    
-    supabase = window.supabase.createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        storage: safeStorage,
-        persistSession: safeStorage !== memoryStorage
-      }
-    });
+      // Na Vercelu (i własnych domenach) wszystko idzie przez niewidzialny dla AdBlocka tunel /baza
+      var supabaseUrl = isLocalOrGithub 
+        ? 'https://kbzspdwizcwpzlvytdzw.supabase.co' 
+        : origin + '/baza';
+        
+      var supabaseKey = 'sb_publishable_nPfkgQfKOapm-t9OqWZ4KA__KuU0jqB';
+      
+      supabase = window.supabase.createClient(supabaseUrl, supabaseKey, {
+        auth: {
+          storage: safeStorage,
+          persistSession: safeStorage !== memoryStorage
+        }
+      });
+      return true;
+    }
+  } catch (e) {
+    console.error("Błąd inicjalizacji:", e);
   }
-} catch (e) {
-  console.error("Błąd inicjalizacji Supabase:", e);
+  return false;
 }
 
 // Funkcje Auth
 async function handleLogin() {
   const errorEl = document.getElementById('authError');
-  errorEl.textContent = '';
+  errorEl.style.color = '#ef4444';
+  errorEl.textContent = 'Łączenie...';
   
-  if (!window.supabase) {
-    errorEl.textContent = 'Skrypt logowania zablokowany! Twój bloker reklam/prywatności całkowicie zablokował biblioteki strony.';
-    return;
-  }
+  if (!supabase) initSupabase();
   if (!supabase) { 
-    errorEl.textContent = 'Błąd krytyczny: Skrypt nie wystartował. Odśwież stronę.'; 
+    errorEl.textContent = 'Trwa ładowanie zabezpieczeń... Kliknij ponownie za sekundę.'; 
     return; 
   }
   
@@ -683,20 +689,18 @@ async function handleLogin() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) { errorEl.textContent = 'Błąd logowania: ' + error.message; } else { window.location.reload(); }
   } catch (err) {
-    errorEl.textContent = 'Wystąpił błąd sieci.';
+    errorEl.textContent = 'Błąd połączenia z serwerem. Upewnij się, że masz plik vercel.json.';
   }
 }
 
 async function handleRegister() {
   const errorEl = document.getElementById('authError');
-  errorEl.textContent = '';
+  errorEl.style.color = '#ef4444';
+  errorEl.textContent = 'Rejestrowanie...';
   
-  if (!window.supabase) {
-    errorEl.textContent = 'Skrypt logowania zablokowany! Twój bloker reklam/prywatności całkowicie zablokował biblioteki strony.';
-    return;
-  }
+  if (!supabase) initSupabase();
   if (!supabase) { 
-    errorEl.textContent = 'Błąd krytyczny: Skrypt nie wystartował. Odśwież stronę.'; 
+    errorEl.textContent = 'Trwa ładowanie zabezpieczeń... Kliknij ponownie za sekundę.'; 
     return; 
   }
 
@@ -708,11 +712,11 @@ async function handleRegister() {
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) { errorEl.textContent = 'Błąd rejestracji: ' + error.message; } else {
       if (data.session) { window.location.reload(); } else {
-        errorEl.style.color = '#10b981'; errorEl.textContent = 'Konto utworzone pomyślnie! Zaloguj się.';
+        errorEl.style.color = '#10b981'; errorEl.textContent = 'Konto utworzone pomyślnie! Możesz się zalogować.';
       }
     }
   } catch (err) {
-    errorEl.textContent = 'Wystąpił błąd sieci.';
+    errorEl.textContent = 'Błąd połączenia z serwerem. Upewnij się, że masz plik vercel.json.';
   }
 }
 
@@ -727,6 +731,28 @@ async function loadCloudData() {
   if(!hlErr && hlData) { historyLogs = hlData; }
   renderHistory();
   calculateAll(); 
+}
+
+async function setupAuthListeners() {
+  if (!supabase) return;
+  supabase.auth.onAuthStateChange(function(event, session) {
+    if (session) { document.getElementById('authScreen').style.display = 'none'; document.getElementById('appContainer').style.display = 'block'; }
+  });
+  
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      isLoggedIn = true;
+      document.getElementById('showAuthBtn').style.display = 'none';
+      document.getElementById('userNav').style.display = 'flex';
+      document.getElementById('userEmailDisplay').textContent = session.user.email;
+      loadCloudData();
+    } else {
+      try { historyLogs = JSON.parse(safeStorage.getItem('my_history_logs_offline') || '[]'); } catch(e){}
+    }
+  } catch(err) {
+    try { historyLogs = JSON.parse(safeStorage.getItem('my_history_logs_offline') || '[]'); } catch(e){}
+  }
 }
 
 // -------------------------------------------
@@ -829,7 +855,6 @@ function calculateAll() {
   document.getElementById('sprintMonthsCount').textContent = remainingGoal === 0 ? 'Cel osiągnięty!' : (monthsToGoal + ' mies.');
   document.getElementById('emergencyProgressBar').style.width = progressPct + '%';
 
-  // Obliczenia % do pasków na dole
   var hPct = Math.round((housing / safeInc) * 100);
   var fPct = Math.round((food / safeInc) * 100);
   var tPct = Math.round((transport / safeInc) * 100);
@@ -997,7 +1022,7 @@ function getAveragedCostsFromHistory() {
 
 function renderHistory() {
   if (!isLoggedIn) {
-    localStorage.setItem('my_history_logs_offline', JSON.stringify(historyLogs));
+    try { safeStorage.setItem('my_history_logs_offline', JSON.stringify(historyLogs)); } catch(e){}
   }
   updateHistoryFilterDropdowns(); renderHistoryTable();
   
@@ -1126,29 +1151,18 @@ window.onload = async function() {
   document.getElementById('registerBtn').onclick = handleRegister;
   document.getElementById('logoutBtn').onclick = handleLogout;
 
-  // Bezpieczne sprawdzanie sesji, tylko jeśli Supabase jest załadowane
-  if (supabase) {
-    supabase.auth.onAuthStateChange(function(event, session) {
-      if (session) { document.getElementById('authScreen').style.display = 'none'; document.getElementById('appContainer').style.display = 'block'; }
-    });
-    
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        isLoggedIn = true;
-        document.getElementById('showAuthBtn').style.display = 'none';
-        document.getElementById('userNav').style.display = 'flex';
-        document.getElementById('userEmailDisplay').textContent = session.user.email;
-        loadCloudData();
-      } else {
-        try { historyLogs = JSON.parse(localStorage.getItem('my_history_logs_offline') || '[]'); } catch(e){}
-      }
-    } catch(err) {
-      try { historyLogs = JSON.parse(localStorage.getItem('my_history_logs_offline') || '[]'); } catch(e){}
-    }
+  // Próbujemy odpalić bazę z tunelu Vercela (/core-lib.js)
+  if (!initSupabase()) {
+    // Koło ratunkowe: jeśli otwierasz plik lokalnie z dysku (bez Vercela), dociągamy bibliotekę w tle
+    var fallbackScript = document.createElement('script');
+    fallbackScript.src = 'https://unpkg.com/@supabase/supabase-js@2';
+    fallbackScript.onload = async function() {
+      initSupabase();
+      await setupAuthListeners();
+    };
+    document.head.appendChild(fallbackScript);
   } else {
-    // Tryb Gościa - wczytywanie z lokalnej przeglądarki jeśli baza jest offline
-    try { historyLogs = JSON.parse(localStorage.getItem('my_history_logs_offline') || '[]'); } catch(e){}
+    await setupAuthListeners();
   }
 
   document.getElementById('appContainer').style.display = 'block';
@@ -1202,7 +1216,7 @@ window.onload = async function() {
   ['histFilterYear', 'histFilterMonth', 'histFilterCategory', 'histSortOrder'].forEach(id => {
     document.getElementById(id).onchange = renderHistoryTable;
   });
-  document.getElementById('selectReportPeriod').onchange = function() { renderSelectedMonthDetails(this.value); };
+  document.getElementById('selectReportPeriod').onchange = function() { renderReportTab(); };
 
   renderHistory();
   calculateAll(); 
