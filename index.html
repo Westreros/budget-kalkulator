@@ -376,23 +376,25 @@
           <div class="subgrid-col">
             <div class="card">
               <h2 style="margin-bottom:4px;">2. Planowane Koszty (Reguła 50/30/20)</h2>
-              <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 16px;">Przesuń suwaki, aby dostosować limity. System automatycznie proponuje optymalny podział oparty na Twoim pełnym budżecie.</p>
-
-              <button id="btnResetLimits" class="btn-register" style="width: auto; padding: 6px 14px; font-size: 0.8rem; margin-bottom: 16px; border-radius: 8px;">🔄 Resetuj do zalecanych proporcji</button>
+              
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <p style="font-size: 0.8rem; color: #64748b; margin: 0; max-width: 65%;">Przesuń suwaki, aby dostosować limity do swoich potrzeb.</p>
+                <button id="btnResetLimits" class="btn-register" style="width: auto; padding: 6px 12px; font-size: 0.8rem; margin: 0; border-radius: 8px; white-space: nowrap;">🔄 Reset</button>
+              </div>
 
               <div class="slider-group">
                 <div class="slider-header">
                   <span>Mieszkanie i Rachunki</span>
-                  <strong id="valHousing">0 PLN</strong>
+                  <strong id="valHousing">0 PLN (0%)</strong>
                 </div>
                 <input type="range" id="sliderHousing" min="0" max="10000" step="50" value="0">
-                <div class="slider-info">Limit 30%: <span id="recHousing">0</span> PLN</div>
+                <div class="slider-info">Zalecane 30%: <span id="recHousing">0</span> PLN</div>
               </div>
 
               <div class="slider-group">
                 <div class="slider-header">
                   <span>Żywność i Chemia</span>
-                  <strong id="valFood">0 PLN</strong>
+                  <strong id="valFood">0 PLN (0%)</strong>
                 </div>
                 <input type="range" id="sliderFood" min="0" max="5000" step="50" value="0">
                 <div class="slider-info">Zalecane 15%: <span id="recFood">0</span> PLN</div>
@@ -401,7 +403,7 @@
               <div class="slider-group">
                 <div class="slider-header">
                   <span>Transport i Dojazdy</span>
-                  <strong id="valTransport">0 PLN</strong>
+                  <strong id="valTransport">0 PLN (0%)</strong>
                 </div>
                 <input type="range" id="sliderTransport" min="0" max="3000" step="50" value="0">
                 <div class="slider-info">Zalecane 10% (koszt auta: <span id="minTransport">0</span> PLN)</div>
@@ -410,7 +412,7 @@
               <div class="slider-group" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
                 <div class="slider-header">
                   <span>Zobowiązania (Raty, Subskrypcje)</span>
-                  <strong id="valOther">0 PLN</strong>
+                  <strong id="valOther">0 PLN (0%)</strong>
                 </div>
                 <input type="range" id="sliderOther" min="0" max="5000" step="50" value="0">
                 <div class="slider-info">Zalecane max 5%: <span id="recOther">0</span> PLN</div>
@@ -848,10 +850,18 @@ function autoSetLimitsAndValues() {
 }
 
 function updateSliderValuesDisplay() {
-  document.getElementById('valHousing').textContent = elHousing.value + ' PLN';
-  document.getElementById('valFood').textContent = elFood.value + ' PLN';
-  document.getElementById('valTransport').textContent = elTransport.value + ' PLN';
-  document.getElementById('valOther').textContent = elOther.value + ' PLN';
+  var totalInc = getTotalIncome();
+  var safeInc = Math.max(totalInc, 1); // Zapobieganie dzieleniu przez zero dla procentów
+  
+  var hVal = parseInt(elHousing.value) || 0;
+  var fVal = parseInt(elFood.value) || 0;
+  var tVal = parseInt(elTransport.value) || 0;
+  var oVal = parseInt(elOther.value) || 0;
+
+  document.getElementById('valHousing').textContent = hVal + ' PLN (' + Math.round((hVal / safeInc) * 100) + '%)';
+  document.getElementById('valFood').textContent = fVal + ' PLN (' + Math.round((fVal / safeInc) * 100) + '%)';
+  document.getElementById('valTransport').textContent = tVal + ' PLN (' + Math.round((tVal / safeInc) * 100) + '%)';
+  document.getElementById('valOther').textContent = oVal + ' PLN (' + Math.round((oVal / safeInc) * 100) + '%)';
 }
 
 function calculateAll() {
@@ -1227,7 +1237,14 @@ window.onload = async function() {
     el.addEventListener('input', () => { updateSliderValuesDisplay(); calculateAll(); });
   });
 
-  ['income', 'kids800', 'kidsActiveHome', 'kidsActiveWork', 'commuteKm', 'commuteDays', 'carFuelUsage', 'fuelPrice'].forEach(id => {
+  // Reagowanie na budżet - automatycznie przestawia suwaki na 50/30/20
+  ['income', 'kids800', 'kidsActiveHome', 'kidsActiveWork'].forEach(id => {
+    var el = document.getElementById(id);
+    if(el) el.addEventListener('input', () => { autoSetLimitsAndValues(); });
+  });
+
+  // Reagowanie tylko na koszty transportu (bez resetowania całości)
+  ['commuteKm', 'commuteDays', 'carFuelUsage', 'fuelPrice'].forEach(id => {
     var el = document.getElementById(id);
     if(el) el.addEventListener('input', () => { updateSliderMinsAndLabels(); calculateAll(); });
   });
