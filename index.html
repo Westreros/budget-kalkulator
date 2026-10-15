@@ -163,8 +163,31 @@
     label { display: block; font-size: 0.85rem; font-weight: 500; color: #475569; margin-bottom: 4px; }
     .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
     .input-group { position: relative; margin-bottom: 12px; }
+    
+    /* Ujednolicone i gładkie pola formularzy bez ostrych krawędzi */
     input[type="number"], input[type="text"], select {
-      width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; outline: none; background: #fff; transition: border-color 0.15s, box-shadow 0.15s;
+      width: 100%;
+      padding: 9px 32px 9px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      outline: none;
+      background-color: #fff;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 16px;
+    }
+    input[type="number"]:not(select), input[type="text"]:not(select) {
+      background-image: none;
+      padding-right: 12px;
+    }
+    input[type="number"]:hover, input[type="text"]:hover, select:hover {
+      border-color: #94a3b8;
     }
     input:focus, select:focus {
       border-color: #2563eb;
@@ -243,8 +266,8 @@
     li.empty-msg { color: #94a3b8; font-size: 0.85rem; text-align: center; padding: 10px 0; border: 1px dashed #e2e8f0; border-radius: 10px; }
 
     .form-inline { display: flex; gap: 8px; }
-    .form-inline input[type="text"] { flex: 1; min-width: 150px; }
-    .form-inline input[type="number"] { width: 110px; }
+    .form-inline input[type="text"] { flex: 1; min-width: 140px; }
+    .form-inline input[type="number"] { width: 95px; }
     button.btn-add { background: #2563eb; color: #fff; border: none; padding: 9px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; white-space: nowrap; transition: background-color 0.15s; }
     button.btn-add:hover { background: #1d4ed8; border-radius: 8px; }
 
@@ -616,7 +639,7 @@
             <select id="histInputMonth" style="width: 130px; font-weight: 600;"></select>
             <input type="number" id="histInputYear" style="width: 85px; font-weight: 600;" min="2000" max="2100">
             
-            <select id="histCategory" style="width: 150px; font-weight: 600; color: #1e40af;">
+            <select id="histCategory" style="width: 140px; font-weight: 600; color: #1e40af;">
               <option value="Mieszkanie">1. Mieszkanie</option>
               <option value="Jedzenie">2. Jedzenie</option>
               <option value="Dziecko">3. Dziecko</option>
