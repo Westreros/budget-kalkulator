@@ -6,46 +6,44 @@
   <title>Kalkulator Kosztów Przetrwania i Budżetu Domowego</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <!-- Skrypt Supabase do obsługi bazy i logowania -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: #f1f5f9; color: #0f172a; padding: 20px 16px; }
     
-    .container { width: 100%; max-width: 1800px; margin: 0 auto; display: none; /* Ukryte do momentu logowania */ }
+    .container { width: 100%; max-width: 1800px; margin: 0 auto; }
     
-    /* PANEL LOGOWANIA */
+    /* MODAL LOGOWANIA I REJESTRACJI */
     #authScreen {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: #f8fafc;
-      display: flex; align-items: center; justify-content: center;
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(4px);
+      display: none; /* Domyślnie ukryty */
+      align-items: center; justify-content: center;
       z-index: 1000;
     }
     .auth-card {
-      background: #fff; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-      width: 100%; max-width: 400px; text-align: center; border: 1px solid #e2e8f0;
+      background: #fff; padding: 40px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      width: 100%; max-width: 400px; text-align: center; border: 1px solid #e2e8f0; position: relative;
     }
+    .close-auth-btn {
+      position: absolute; top: 12px; right: 16px; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #94a3b8; padding: 4px; transition: color 0.15s;
+    }
+    .close-auth-btn:hover { color: #0f172a; }
     .auth-card h2 { justify-content: center; font-size: 1.5rem; margin-bottom: 24px; color: #0f172a; }
-    .auth-input {
-      width: 100%; padding: 12px; margin-bottom: 16px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 1rem;
-    }
-    .auth-btn {
-      width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 12px; transition: 0.2s;
-    }
+    .auth-input { width: 100%; padding: 12px; margin-bottom: 16px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 1rem; }
+    .auth-btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 12px; transition: 0.2s; }
     .btn-login { background: #2563eb; color: #fff; }
     .btn-login:hover { background: #1d4ed8; }
     .btn-register { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
     .btn-register:hover { background: #e2e8f0; }
     .auth-error { color: #ef4444; font-size: 0.85rem; margin-bottom: 16px; min-height: 20px; }
 
-    /* Wylogowanie */
-    .user-nav { display: flex; justify-content: space-between; align-items: center; background: #e2e8f0; padding: 10px 20px; border-radius: 12px; margin-bottom: 24px; font-size: 0.9rem; font-weight: 600; color: #334155; }
-    .logout-btn { background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer; }
-
     @media (min-width: 1024px) { body { padding: 28px 40px; } }
-    header { margin-bottom: 18px; text-align: left; display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 10px; }
+    
+    header { margin-bottom: 18px; text-align: left; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; }
     h1 { font-size: 1.85rem; font-weight: 800; color: #0f172a; }
-    p.subtitle { color: #64748b; font-size: 0.95rem; }
+    p.subtitle { color: #64748b; font-size: 0.95rem; margin-top: 4px; }
 
     .nav-tabs { display: flex; gap: 10px; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; overflow-x: auto; }
     .tab-btn { background: none; border: 1px solid transparent; padding: 10px 20px; font-size: 0.95rem; font-weight: 600; color: #64748b; cursor: pointer; border-radius: 10px; transition: all 0.2s ease; white-space: nowrap; }
@@ -165,7 +163,7 @@
     .average-card { background: #eff6ff; border: 2px solid #93c5fd; border-radius: 16px; padding: 18px 20px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
     .avg-grand-val { font-size: 1.85rem; font-weight: 900; color: #1d4ed8; background: #ffffff; padding: 6px 16px; border-radius: 12px; border: 1px solid #bfdbfe; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.08); white-space: nowrap; }
     .avg-chip { background: #ffffff; border: 1px solid #93c5fd; padding: 8px 14px; border-radius: 10px; font-size: 0.95rem; font-weight: 600; color: #1e3a8a; box-shadow: 0 1px 2px rgba(0,0,0,0.03); transition: transform 0.15s, background-color 0.15s; }
-    .avg-chip:hover { background: #f8fafc; }
+    .avg-chip:hover { background: #f8fafc; border-radius: 10px; }
     .avg-chip strong { font-size: 1.05rem; font-weight: 800; color: #1d4ed8; margin-left: 4px; }
 
     .cat-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
@@ -175,38 +173,45 @@
     .chart-box { position: relative; max-width: 210px; margin: 0 auto; padding: 4px 0; }
     .cat-legend-list { margin-top: 12px; border-top: 1px solid #e2e8f0; padding-top: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; }
     .cat-legend-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; transition: all 0.15s ease; }
-    .cat-legend-item:hover { background: #f1f5f9; }
-    .cat-legend-item.active-cat { background: #eff6ff; border-color: #93c5fd; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15); }
+    .cat-legend-item:hover { background: #f1f5f9; border-radius: 10px; }
+    .cat-legend-item.active-cat { background: #eff6ff; border-color: #93c5fd; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15); border-radius: 10px; }
 
     .forecast-card { background: #fdf4ff; border: 1px solid #f0abfc; border-radius: 16px; padding: 24px; margin-bottom: 24px; }
   </style>
 </head>
 <body>
 
-<!-- WIDOK LOGOWANIA I REJESTRACJI -->
+<!-- WIDOK LOGOWANIA I REJESTRACJI (Popup) -->
 <div id="authScreen">
   <div class="auth-card">
-    <h2>Witaj w Kalkulatorze Budżetu</h2>
+    <button id="closeAuthBtn" class="close-auth-btn" title="Zamknij">✕</button>
+    <h2>Zaloguj się do chmury</h2>
     <div id="authError" class="auth-error"></div>
     <input type="email" id="emailInput" class="auth-input" placeholder="Adres e-mail" required>
     <input type="password" id="passwordInput" class="auth-input" placeholder="Hasło (min. 6 znaków)" required>
     <button id="loginBtn" class="auth-btn btn-login">Zaloguj się</button>
     <button id="registerBtn" class="auth-btn btn-register">Utwórz nowe konto</button>
-    <p style="font-size: 0.8rem; color: #64748b; margin-top: 10px;">Dane są bezpiecznie zapisywane w chmurze.</p>
+    <p style="font-size: 0.8rem; color: #64748b; margin-top: 10px;">Zalogowanie gwarantuje bezpieczny zapis danych po odświeżeniu strony.</p>
   </div>
 </div>
 
 <!-- GŁÓWNA APLIKACJA -->
 <div class="container" id="appContainer">
-  <div class="user-nav">
-    <span id="userEmailDisplay">Zalogowano jako: </span>
-    <button class="logout-btn" id="logoutBtn">Wyloguj się</button>
-  </div>
-
+  
   <header>
     <div>
       <h1>Kalkulator Kosztów Przetrwania i Budżetu</h1>
       <p class="subtitle">Wieloletni monitoring wydatków, uśrednianie rachunków i prognoza budżetowa.</p>
+    </div>
+    
+    <!-- Pasek autoryzacji (Gość / Użytkownik) -->
+    <div style="margin-top: 10px;">
+      <button id="showAuthBtn" class="btn-add" style="background-color: #0f172a;">Zaloguj / Zarejestruj</button>
+      
+      <div id="userNav" style="display: none; align-items: center; gap: 12px; background: #e2e8f0; padding: 8px 16px; border-radius: 10px;">
+        <span id="userEmailDisplay" style="font-size: 0.85rem; font-weight: 600; color: #334155;"></span>
+        <button id="logoutBtn" style="background: none; border: none; color: #ef4444; font-weight: bold; cursor: pointer; font-size: 0.85rem;">Wyloguj</button>
+      </div>
     </div>
   </header>
 
@@ -404,7 +409,6 @@
     <div class="history-top-grid">
       
       <div class="history-left-stack">
-        <!-- Formularz dodawania / edycji wydatku -->
         <div class="card card-compact" id="expenseFormCard" style="transition: background-color 0.2s;">
           <h2 id="formTitle" style="margin-bottom: 6px;">Dodaj rzeczywiste wydatki</h2>
           <p id="formSubtitle" style="font-size: 0.8rem; color: #64748b; margin-bottom: 12px;">
@@ -584,6 +588,11 @@ const SUPABASE_KEY = 'sb_publishable_nPfkgQfKOapm-t9OqWZ4KA__KuU0jqB';
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// ---------- STAN AUTORYZACJI I DANE ----------
+var isLoggedIn = false;
+var manualCosts = [];
+var historyLogs = [];
+
 // Funkcje Auth
 async function handleLogin() {
   const email = document.getElementById('emailInput').value;
@@ -593,9 +602,11 @@ async function handleLogin() {
   
   if(!email || !password) { errorEl.textContent = 'Wpisz email i hasło.'; return; }
 
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
     errorEl.textContent = 'Błąd logowania: ' + error.message;
+  } else {
+    window.location.reload();
   }
 }
 
@@ -611,13 +622,30 @@ async function handleRegister() {
   if (error) {
     errorEl.textContent = 'Błąd rejestracji: ' + error.message;
   } else {
-    errorEl.style.color = '#10b981';
-    errorEl.textContent = 'Konto utworzone! Możesz się teraz zalogować (lub potwierdź email, jeśli Supabase tego wymaga).';
+    if (data.session) {
+      window.location.reload();
+    } else {
+      errorEl.style.color = '#10b981';
+      errorEl.textContent = 'Konto utworzone pomyślnie! Kliknij Zaloguj się.';
+    }
   }
 }
 
 async function handleLogout() {
   await supabase.auth.signOut();
+  window.location.reload();
+}
+
+// Ładowanie z chmury Supabase
+async function loadCloudData() {
+  const { data: mcData, error: mcErr } = await supabase.from('manual_costs').select('*');
+  if(!mcErr && mcData) manualCosts = mcData;
+
+  const { data: hlData, error: hlErr } = await supabase.from('history_logs').select('*');
+  if(!hlErr && hlData) historyLogs = hlData;
+
+  renderHistory();
+  calculateAll();
 }
 
 // -------------------------------------------
@@ -638,21 +666,6 @@ var CATEGORY_COLORS = {
 
 var pieChartInstance = null;
 var editingEntryId = null;
-
-var manualCosts = [];
-var historyLogs = [];
-
-// Ładowanie z chmury Supabase
-async function loadCloudData() {
-  const { data: mcData, error: mcErr } = await supabase.from('manual_costs').select('*');
-  if(!mcErr && mcData) manualCosts = mcData;
-
-  const { data: hlData, error: hlErr } = await supabase.from('history_logs').select('*');
-  if(!hlErr && hlData) historyLogs = hlData;
-
-  renderHistory();
-  calculateAll();
-}
 
 function formatPeriodToPL(ym) {
   if (!ym || ym.indexOf('-') === -1) return ym;
@@ -995,11 +1008,16 @@ async function deleteHistoryEntry(id) {
     cancelEditMode();
   }
   
-  const { error } = await supabase.from('history_logs').delete().eq('id', id);
-  if (!error) {
-    historyLogs = historyLogs.filter(function(e) { return e.id !== id; });
-    renderHistory();
+  if (isLoggedIn) {
+    const { error } = await supabase.from('history_logs').delete().eq('id', id);
+    if (error) {
+      alert("Błąd podczas usuwania: " + error.message);
+      return;
+    }
   }
+
+  historyLogs = historyLogs.filter(function(e) { return e.id !== id; });
+  renderHistory();
 }
 
 function computeBudget(fixedList, income, rushActive) {
@@ -1159,11 +1177,15 @@ function renderCostList(list) {
       var btn = li.querySelector('.del-btn');
       if (btn) {
         btn.onclick = async function() {
-          const { error } = await supabase.from('manual_costs').delete().eq('id', item.id);
-          if (!error) {
-            manualCosts = manualCosts.filter(function(c) { return c.id !== item.id; });
-            calculateAll();
+          if (isLoggedIn) {
+            const { error } = await supabase.from('manual_costs').delete().eq('id', item.id);
+            if (error) {
+              alert("Błąd: " + error.message);
+              return;
+            }
           }
+          manualCosts = manualCosts.filter(function(c) { return c.id !== item.id; });
+          calculateAll();
         };
       }
       ul.appendChild(li);
@@ -1179,9 +1201,19 @@ async function addCost() {
   var amount = parseFloat(aEl.value);
   if (name && !isNaN(amount) && amount > 0) {
     
-    const { data, error } = await supabase.from('manual_costs').insert([{ name, amount }]).select();
-    if (!error && data) {
-      manualCosts.push(data[0]);
+    if (isLoggedIn) {
+      const { data, error } = await supabase.from('manual_costs').insert([{ name, amount }]).select();
+      if (!error && data) {
+        manualCosts.push(data[0]);
+        nEl.value = '';
+        aEl.value = '';
+        calculateAll();
+        nEl.focus();
+      } else {
+        alert("Błąd zapisu w chmurze.");
+      }
+    } else {
+      manualCosts.push({ id: Date.now(), name: name, amount: amount });
       nEl.value = '';
       aEl.value = '';
       calculateAll();
@@ -1232,10 +1264,17 @@ async function handleExcelUpload(e) {
       }
 
       if (newItems.length > 0) {
-        const { data: inserted, error } = await supabase.from('manual_costs').insert(newItems).select();
-        if (!error && inserted) {
-          manualCosts = manualCosts.concat(inserted);
-          alert('Pomyślnie zaimportowano ' + inserted.length + ' pozycji stałych do chmury!');
+        if (isLoggedIn) {
+          const { data: inserted, error } = await supabase.from('manual_costs').insert(newItems).select();
+          if (!error && inserted) {
+            manualCosts = manualCosts.concat(inserted);
+            alert('Pomyślnie zaimportowano ' + inserted.length + ' pozycji stałych do chmury!');
+            calculateAll();
+          }
+        } else {
+          for(let i=0; i<newItems.length; i++) newItems[i].id = Date.now() + i;
+          manualCosts = manualCosts.concat(newItems);
+          alert('Pomyślnie zaimportowano ' + newItems.length + ' pozycji tymczasowo!');
           calculateAll();
         }
       } else {
@@ -1326,23 +1365,33 @@ function renderSelectedMonthDetails(period) {
   }
 }
 
-// INICJALIZACJA FORMULARZY I ZDARZEŃ
-window.onload = function() {
+window.onload = async function() {
+  document.getElementById('showAuthBtn').onclick = function() {
+    document.getElementById('authScreen').style.display = 'flex';
+  };
+  document.getElementById('closeAuthBtn').onclick = function() {
+    document.getElementById('authScreen').style.display = 'none';
+  };
+
   document.getElementById('loginBtn').onclick = handleLogin;
   document.getElementById('registerBtn').onclick = handleRegister;
   document.getElementById('logoutBtn').onclick = handleLogout;
 
-  supabase.auth.onAuthStateChange(function(event, session) {
-    if (session) {
-      document.getElementById('authScreen').style.display = 'none';
-      document.getElementById('appContainer').style.display = 'block';
-      document.getElementById('userEmailDisplay').textContent = 'Zalogowano jako: ' + session.user.email;
-      loadCloudData();
-    } else {
-      document.getElementById('authScreen').style.display = 'flex';
-      document.getElementById('appContainer').style.display = 'none';
-    }
-  });
+  // Inicjalizacja sprawdzania sesji przy ładowaniu
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    isLoggedIn = true;
+    document.getElementById('appContainer').style.display = 'block';
+    document.getElementById('showAuthBtn').style.display = 'none';
+    document.getElementById('userNav').style.display = 'flex';
+    document.getElementById('userEmailDisplay').textContent = session.user.email;
+    loadCloudData();
+  } else {
+    isLoggedIn = false;
+    document.getElementById('appContainer').style.display = 'block';
+    renderHistory();
+    calculateAll();
+  }
 
   var mSelect = document.getElementById('histInputMonth');
   var yInput = document.getElementById('histInputYear');
@@ -1374,27 +1423,38 @@ window.onload = function() {
         var p = selY + '-' + selM;
 
         if (editingEntryId !== null) {
-          const { error } = await supabase.from('history_logs').update({
-            month: p, year: selY, month_num: selM, category: selCat, name: n, amount: a
-          }).eq('id', editingEntryId);
-
-          if (!error) {
-            for (var i = 0; i < historyLogs.length; i++) {
-              if (historyLogs[i].id === editingEntryId) {
-                historyLogs[i].month = p; historyLogs[i].year = selY; historyLogs[i].monthNum = selM;
-                historyLogs[i].category = selCat; historyLogs[i].name = n; historyLogs[i].amount = a;
-                break;
-              }
-            }
-            cancelEditMode();
-            renderHistory();
+          if (isLoggedIn) {
+            const { error } = await supabase.from('history_logs').update({
+              month: p, year: selY, month_num: selM, category: selCat, name: n, amount: a
+            }).eq('id', editingEntryId);
+            
+            if (error) { alert("Błąd aktualizacji: " + error.message); return; }
           }
-        } else {
-          const payload = { month: p, year: selY, month_num: selM, category: selCat, name: n, amount: a };
-          const { data, error } = await supabase.from('history_logs').insert([payload]).select();
           
-          if (!error && data) {
-            historyLogs.push(data[0]);
+          // Aktualizacja lokalnie
+          for (var i = 0; i < historyLogs.length; i++) {
+            if (historyLogs[i].id === editingEntryId) {
+              historyLogs[i].month = p; historyLogs[i].year = selY; historyLogs[i].monthNum = selM;
+              historyLogs[i].category = selCat; historyLogs[i].name = n; historyLogs[i].amount = a;
+              break;
+            }
+          }
+          cancelEditMode();
+          renderHistory();
+          
+        } else {
+          if (isLoggedIn) {
+            const payload = { month: p, year: selY, month_num: selM, category: selCat, name: n, amount: a };
+            const { data, error } = await supabase.from('history_logs').insert([payload]).select();
+            
+            if (!error && data) {
+              historyLogs.push(data[0]);
+              document.getElementById('histName').value = '';
+              document.getElementById('histAmount').value = '';
+              renderHistory();
+            }
+          } else {
+            historyLogs.push({ id: Date.now(), month: p, year: selY, monthNum: selM, category: selCat, name: n, amount: a });
             document.getElementById('histName').value = '';
             document.getElementById('histAmount').value = '';
             renderHistory();
