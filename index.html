@@ -217,6 +217,13 @@
     .cat-legend-item.active-cat { background: #eff6ff; border-color: var(--primary); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1); }
 
     .forecast-card { background: linear-gradient(135deg, #faf5ff, #fdf4ff); border: 1px solid #f0abfc; border-radius: 24px; padding: 28px; margin-bottom: 28px; box-shadow: 0 4px 15px rgba(217, 70, 239, 0.05); }
+    
+    /* ZMIENIONE STYLE KART "CO-JESLI" (TAB 3) */
+    .metric-box-tab3 { background: #fff; padding: 20px; border-radius: 16px; border: 1px solid #f5d0fe; box-shadow: 0 4px 10px rgba(0,0,0,0.02); display: flex; flex-direction: column; }
+    .metric-box-tab3 .comparison-bar { margin-top: auto; padding-top: 12px; border-top: 1px solid #fdf4ff; display: flex; justify-content: space-between; align-items: center; }
+    .metric-box-tab3 .comparison-bar span { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+    .metric-box-tab3 .diff-badge { padding: 4px 8px; border-radius: 8px; font-weight: 800; font-size: 0.75rem; letter-spacing: 0.02em; }
+
     .excel-import-box { border: 2px dashed #93c5fd; background-color: #eff6ff; border-radius: 16px; padding: 16px; text-align: center; margin-top: 16px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px; }
     .excel-import-box:hover { background-color: #dbeafe; border-color: var(--primary); transform: translateY(-2px); }
     .excel-import-box label { cursor: pointer; color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 8px; font-size: 1rem; }
@@ -307,7 +314,7 @@
           <div class="subgrid-col">
             <div class="card">
               <h2><i data-lucide="coins"></i> 1. Dochody i Świadczenia</h2>
-              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; font-weight: 500;">Wpisane dane automatycznie zapisują się w Twoim profilu.</p>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; font-weight: 500;">Wpisane dane automatycznie zapisują się w Twoim profilu po zalogowaniu.</p>
               
               <label for="income">Pensja netto (na rękę)</label>
               <div class="input-group">
@@ -575,26 +582,50 @@
         <span id="forecastBasisTag" style="font-size: 0.75rem; background: #fae8ff; color: #a21caf; padding: 6px 14px; border-radius: 50px; font-weight: 800; text-transform: uppercase;">Zderzenie Danych</span>
       </div>
       <p style="font-size: 0.95rem; color: #701a75; margin-bottom: 24px; font-weight: 500; line-height: 1.5;">
-        Zestawiamy Twój miesięczny dochód z wpisanymi <strong>prawdziwymi średnimi</strong> z Dziennika Wydatków. Zobacz, ile na prawdę Ci zostaje, pomijając idealistyczne plany.
+        Zestawiamy Twój miesięczny dochód z wpisanymi <strong>prawdziwymi średnimi</strong> z Dziennika Wydatków. Zobacz, czy trzymasz się swoich założeń.
       </p>
 
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;">
-        <div style="background: #fff; padding: 20px; border-radius: 16px; border: 1px solid #f5d0fe; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+        
+        <!-- CARD 1: Przetrwanie -->
+        <div class="metric-box-tab3">
           <span style="font-size: 0.8rem; color: #86198f; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 6px;"><i data-lucide="flame" style="width:16px;"></i> Koszty przetrwania</span>
           <strong id="forecastSurvivalVal" style="font-size: 1.6rem; color: #4a044e; display: block; margin-top: 8px; font-weight: 900;">0 PLN</strong>
+          <div class="comparison-bar">
+             <span>Plan idealny: <strong id="idealSurvivalVal" style="color: var(--text-main);">0 PLN</strong></span>
+             <span id="diffSurvivalBadge" class="diff-badge">0 PLN</span>
+          </div>
         </div>
-        <div style="background: #fff; padding: 20px; border-radius: 16px; border: 1px solid #f5d0fe; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+
+        <!-- CARD 2: Oszczędności -->
+        <div class="metric-box-tab3">
           <span style="font-size: 0.8rem; color: #86198f; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 6px;"><i data-lucide="trending-up" style="width:16px;"></i> Realnie Zaoszczędzisz</span>
           <strong id="forecastSavingsVal" style="font-size: 1.6rem; color: var(--success); display: block; margin-top: 8px; font-weight: 900;">0 PLN</strong>
+          <div class="comparison-bar">
+             <span>Plan idealny: <strong id="idealSavingsVal" style="color: var(--text-main);">0 PLN</strong></span>
+             <span id="diffSavingsBadge" class="diff-badge">0 PLN</span>
+          </div>
         </div>
-        <div style="background: #fff; padding: 20px; border-radius: 16px; border: 1px solid #f5d0fe; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+
+        <!-- CARD 3: Fun Money -->
+        <div class="metric-box-tab3">
           <span style="font-size: 0.8rem; color: #86198f; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 6px;"><i data-lucide="party-popper" style="width:16px;"></i> Realne Fun Money</span>
           <strong id="forecastFunVal" style="font-size: 1.6rem; color: #9333ea; display: block; margin-top: 8px; font-weight: 900;">0 PLN</strong>
+          <div class="comparison-bar">
+             <span>Plan idealny: <strong id="idealFunVal" style="color: var(--text-main);">0 PLN</strong></span>
+             <span id="diffFunBadge" class="diff-badge">0 PLN</span>
+          </div>
         </div>
-        <div style="background: #fff; padding: 20px; border-radius: 16px; border: 1px solid #f5d0fe; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+
+        <!-- CARD 4: Dzienny Luz -->
+        <div class="metric-box-tab3">
           <span style="font-size: 0.8rem; color: #86198f; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 6px;"><i data-lucide="coffee" style="width:16px;"></i> Dzienny Luz</span>
           <strong id="forecastDailyFunVal" style="font-size: 1.6rem; color: var(--primary); display: block; margin-top: 8px; font-weight: 900;">0 PLN / dzień</strong>
+          <div class="comparison-bar">
+             <span>Z Planu: <strong id="idealDailyFunVal" style="color: var(--text-main);">0 PLN</strong></span>
+          </div>
         </div>
+
       </div>
     </div>
 
@@ -754,7 +785,6 @@ function triggerSettingsSave() {
     clearTimeout(settingsSaveTimeout);
     settingsSaveTimeout = setTimeout(saveSettingsToCloud, 1000);
   } else {
-    // Tryb Gościa - Zapis do LocalStorage
     const s = {
       income: document.getElementById('income').value, kids800: document.getElementById('kids800').value,
       kidsActiveHome: document.getElementById('kidsActiveHome').value, kidsActiveWork: document.getElementById('kidsActiveWork').value,
@@ -947,11 +977,7 @@ function updateHistoryFilterDropdowns() {
   var curYear = fYear.value; var curMonth = fMonth.value;
 
   var yearsMap = {};
-  for (var i = 0; i < historyLogs.length; i++) { 
-    // Zabezpieczenie na wypadek null/undefined
-    if(historyLogs[i].year) { yearsMap[historyLogs[i].year] = true; } 
-    else if (historyLogs[i].month) { yearsMap[historyLogs[i].month.split('-')[0]] = true; }
-  }
+  for (var i = 0; i < historyLogs.length; i++) { yearsMap[historyLogs[i].year || historyLogs[i].month.split('-')[0]] = true; }
   var uniqueYears = Object.keys(yearsMap).sort().reverse();
 
   fYear.innerHTML = '<option value="ALL">Wszystkie lata</option>';
@@ -1002,8 +1028,7 @@ function updateNoSpendDaysBadge() {
   var curMonthStr = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1);
   var currentPeriod = curYear + '-' + curMonthStr;
   
-  var daysPassedInMonth = d.getDate();
-  
+  var daysPassedInMonth = d.getDate(); 
   var currentMonthEntries = historyLogs.filter(e => e.month === currentPeriod);
   var uniqueExpenseDates = new Set();
   
@@ -1015,9 +1040,7 @@ function updateNoSpendDaysBadge() {
   if(noSpendDays < 0) noSpendDays = 0;
   
   var badgeEl = document.getElementById('noSpendBadgeVal');
-  if(badgeEl) {
-    badgeEl.innerHTML = noSpendDays + ' Dni <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">bez wydatków</span>';
-  }
+  if(badgeEl) { badgeEl.innerHTML = noSpendDays + ' Dni <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">bez wydatków</span>'; }
 }
 
 function renderHistoryTable() {
@@ -1027,16 +1050,12 @@ function renderHistoryTable() {
   var fYear = document.getElementById('histFilterYear').value; var fMonth = document.getElementById('histFilterMonth').value;
   var fCat = document.getElementById('histFilterCategory').value; var sortOrder = document.getElementById('histSortOrder').value;
 
-  // SUPER BEZPIECZNE FILTROWANIE DATY
   var periodItems = historyLogs.filter(e => {
-    // Odczytywanie roku (jako string, bez względu czy przyszło int z bazy)
-    var eYear = String(e.year || (e.month ? e.month.split('-')[0] : ''));
-    // Odczytywanie miesiąca (kompatybilne z month_num, monthNum i analizą pola month)
-    var eMonth = String(e.month_num || e.monthNum || (e.month ? e.month.split('-')[1] : ''));
-    
-    return (fYear === 'ALL' || eYear === String(fYear)) && (fMonth === 'ALL' || eMonth === String(fMonth));
+    var itemYear = String(e.year || e.month.split('-')[0]);
+    var itemMonth = String(e.month_num || e.monthNum || e.month.split('-')[1]);
+    return (fYear === 'ALL' || itemYear === fYear) && (fMonth === 'ALL' || itemMonth === fMonth);
   });
-  
+
   updateCategoryChart(periodItems);
 
   var tableItems = periodItems.filter(e => fCat==='ALL' || e.category===fCat);
@@ -1047,9 +1066,7 @@ function renderHistoryTable() {
 
   if (tableItems.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><i data-lucide="receipt"></i><strong>Brak wydatków na liście</strong>Zanotuj swój pierwszy wydatek u góry.</div></td></tr>'; 
-    setTimeout(() => lucide.createIcons(), 10); 
-    updateNoSpendDaysBadge(); 
-    return;
+    setTimeout(() => lucide.createIcons(), 10); return;
   }
 
   for (var k = 0; k < tableItems.length; k++) {
@@ -1067,7 +1084,6 @@ function renderHistoryTable() {
                    '</td>';
     tbody.appendChild(tr);
   }
-  
   setTimeout(() => lucide.createIcons(), 10);
   updateNoSpendDaysBadge();
 }
@@ -1080,9 +1096,9 @@ function startEditEntry(id) {
   if(entry.exact_date) {
     document.getElementById('histInputDate').value = entry.exact_date;
   } else {
-    var mNum = entry.month_num || entry.monthNum || entry.month.split('-')[1];
-    var mYear = entry.year || entry.month.split('-')[0];
-    document.getElementById('histInputDate').value = mYear + '-' + mNum + '-01';
+    var itemMonth = entry.month_num || entry.monthNum || entry.month.split('-')[1];
+    var itemYear = entry.year || entry.month.split('-')[0];
+    document.getElementById('histInputDate').value = itemYear + '-' + itemMonth + '-01';
   }
   
   document.getElementById('histCategory').value = entry.category; document.getElementById('histName').value = entry.name; document.getElementById('histAmount').value = entry.amount;
@@ -1101,7 +1117,7 @@ function cancelEditMode() {
   document.getElementById('cancelEditBtn').style.display = 'none';
   document.getElementById('expenseFormCard').style.backgroundColor = '#ffffff';
   document.getElementById('histName').value = ''; document.getElementById('histAmount').value = '';
-  document.getElementById('histInputDate').valueAsDate = new Date(); // Domyślnie dzisiaj
+  document.getElementById('histInputDate').valueAsDate = new Date();
   lucide.createIcons();
 }
 
@@ -1156,7 +1172,7 @@ async function handleExcelUpload(e) {
       var pYear = d.getFullYear();
       var pMonth = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1);
       var p = pYear + '-' + pMonth;
-      var exactD = pYear + '-' + pMonth + '-' + (d.getDate() < 10 ? '0' : '') + d.getDate();
+      var exactD = pYear + '-' + pMonth + '-' + (d.getDate() < 10 ? '0' : '') + d.getDate(); 
 
       for (var r = 0; r < jsonData.length; r++) {
         var row = jsonData[r]; if (!row || row.length < 2) continue;
@@ -1181,7 +1197,7 @@ async function handleExcelUpload(e) {
           const { data: inserted, error } = await supabase.from('history_logs').insert(newItems).select();
           if (!error && inserted) { historyLogs = historyLogs.concat(inserted); alert('Wgrano ' + inserted.length + ' rachunków z Excela do chmury!'); renderHistory(); }
         } else {
-          for(let i=0; i<newItems.length; i++) { newItems[i].id = Date.now() + i; newItems[i].month_num = newItems[i].month_num; }
+          for(let i=0; i<newItems.length; i++) { newItems[i].id = Date.now() + i; newItems[i].monthNum = newItems[i].month_num; }
           historyLogs = historyLogs.concat(newItems); alert('Wgrano ' + newItems.length + ' rachunków (Tryb Gościa).'); renderHistory();
         }
       } else { alert('Nie rozpoznałem kwot ani opisów. Sprawdź plik.'); }
@@ -1191,18 +1207,72 @@ async function handleExcelUpload(e) {
   reader.readAsArrayBuffer(file);
 }
 
+// NOWA WERSJA OBLICZANIA RÓŻNIC (TAB 3)
 function renderReportTab() {
   var totalInc = getTotalIncome(); var rush = document.getElementById('rushEmergencyFund').checked;
+  
+  // 1. OBLICZANIE WARTOŚCI RZECZYWISTYCH
   var avgs = getAveragedCostsFromHistory();
-  var realSurvival = avgs.reduce((acc, curr) => acc + curr.amount, 0); var realFree = Math.max(0, totalInc - realSurvival);
-  var realFunTarget = rush ? 0.10 : 0.20; var realFun = Math.round(totalInc * realFunTarget);
-  if (realFun > realFree) realFun = realFree; var realSavings = realFree - realFun;
+  var realSurvival = avgs.reduce((acc, curr) => acc + curr.amount, 0); 
+  var realFree = Math.max(0, totalInc - realSurvival);
+  var realFunTarget = rush ? 0.10 : 0.20; 
+  var realFun = Math.round(totalInc * realFunTarget);
+  if (realFun > realFree) realFun = realFree; 
+  var realSavings = realFree - realFun;
 
+  // 2. OBLICZANIE WARTOŚCI IDEALNYCH Z PLANU (50% na koszty, reszta podzielona)
+  var idealSurvival = Math.round(totalInc * 0.50);
+  var idealFun = Math.round(totalInc * realFunTarget);
+  var idealSavings = totalInc - idealSurvival - idealFun;
+
+  // RENDEROWANIE GŁÓWNYCH WARTOŚCI
   document.getElementById('forecastSurvivalVal').textContent = realSurvival.toLocaleString('pl-PL') + ' PLN';
   document.getElementById('forecastSavingsVal').textContent = realSavings.toLocaleString('pl-PL') + ' PLN';
   document.getElementById('forecastFunVal').textContent = realFun.toLocaleString('pl-PL') + ' PLN';
   document.getElementById('forecastDailyFunVal').textContent = Math.round(realFun / 30) + ' PLN / dzień';
 
+  // RENDEROWANIE WARTOŚCI IDEALNYCH (W małych paskach podsumowania)
+  document.getElementById('idealSurvivalVal').textContent = idealSurvival.toLocaleString('pl-PL') + ' PLN';
+  document.getElementById('idealSavingsVal').textContent = idealSavings.toLocaleString('pl-PL') + ' PLN';
+  document.getElementById('idealFunVal').textContent = idealFun.toLocaleString('pl-PL') + ' PLN';
+  document.getElementById('idealDailyFunVal').textContent = Math.round(idealFun / 30) + ' PLN';
+
+  // --- LOGIKA KOLOROWANIA BADGE'ÓW RÓŻNICY ---
+  // Przetrwanie: Im MNIEJ, tym lepiej.
+  var diffSurv = realSurvival - idealSurvival;
+  var badgeSurv = document.getElementById('diffSurvivalBadge');
+  if (diffSurv > 0) {
+    badgeSurv.textContent = '+' + diffSurv.toLocaleString('pl-PL') + ' PLN';
+    badgeSurv.style.background = '#fee2e2'; badgeSurv.style.color = 'var(--danger)'; // Czerwony - Przekroczenie planu
+  } else {
+    badgeSurv.textContent = diffSurv.toLocaleString('pl-PL') + ' PLN';
+    badgeSurv.style.background = '#dcfce7'; badgeSurv.style.color = 'var(--success)'; // Zielony - Zaoszczędzono na życiu
+  }
+
+  // Oszczędności: Im WIĘCEJ, tym lepiej.
+  var diffSav = realSavings - idealSavings;
+  var badgeSav = document.getElementById('diffSavingsBadge');
+  if (diffSav >= 0) {
+    badgeSav.textContent = '+' + diffSav.toLocaleString('pl-PL') + ' PLN';
+    badgeSav.style.background = '#dcfce7'; badgeSav.style.color = 'var(--success)'; // Zielony - Oszczędzasz więcej niż plan zakładał!
+  } else {
+    badgeSav.textContent = diffSav.toLocaleString('pl-PL') + ' PLN';
+    badgeSav.style.background = '#fee2e2'; badgeSav.style.color = 'var(--danger)'; // Czerwony - Oszczędności topnieją
+  }
+
+  // Fun Money: Jeśli Fun Money rzeczywiste jest Mniejsze od idealnego, to znaczy że wysokie rachunki zjadły nam budżet na rozrywkę (Smutne)
+  var diffFun = realFun - idealFun;
+  var badgeFun = document.getElementById('diffFunBadge');
+  if (diffFun < 0) {
+    badgeFun.textContent = diffFun.toLocaleString('pl-PL') + ' PLN';
+    badgeFun.style.background = '#fee2e2'; badgeFun.style.color = 'var(--danger)'; // Czerwony - Utrata kasy na luz
+  } else {
+    badgeFun.textContent = diffFun.toLocaleString('pl-PL') + ' PLN';
+    badgeFun.style.background = '#f1f5f9'; badgeFun.style.color = 'var(--text-muted)'; // Szary - Zgodnie z planem
+  }
+
+
+  // RESZTA WIDOKU MIESIĘCY
   var sel = document.getElementById('selectReportPeriod'); var curSel = sel.value;
   var uniquePeriods = [...new Set(historyLogs.map(e => e.month))].sort().reverse(); sel.innerHTML = '';
 
@@ -1269,14 +1339,14 @@ window.onload = async function() {
           if (error) { alert("Błąd: " + error.message); return; }
         }
         var entry = historyLogs.find(e => e.id === editingEntryId);
-        if(entry) { entry.month=p; entry.year=selY; entry.month_num=selM; entry.monthNum=selM; entry.exact_date=dateVal; entry.category=selCat; entry.name=n; entry.amount=a; }
+        if(entry) { entry.month=p; entry.year=selY; entry.monthNum=selM; entry.exact_date=dateVal; entry.category=selCat; entry.name=n; entry.amount=a; }
         cancelEditMode(); renderHistory();
       } else {
         if (isLoggedIn && supabase) {
           const { data, error } = await supabase.from('history_logs').insert([{ month: p, year: selY, month_num: selM, exact_date: dateVal, category: selCat, name: n, amount: a }]).select();
           if (!error && data) { historyLogs.push(data[0]); document.getElementById('histName').value = ''; document.getElementById('histAmount').value = ''; renderHistory(); }
         } else {
-          historyLogs.push({ id: Date.now(), month: p, year: selY, month_num: selM, exact_date: dateVal, category: selCat, name: n, amount: a });
+          historyLogs.push({ id: Date.now(), month: p, year: selY, monthNum: selM, exact_date: dateVal, category: selCat, name: n, amount: a });
           document.getElementById('histName').value = ''; document.getElementById('histAmount').value = ''; renderHistory();
         }
       }
