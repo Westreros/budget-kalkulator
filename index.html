@@ -62,15 +62,57 @@
     .btn-logout { background: #f8fafc; border: 1.5px solid var(--border); color: var(--text-muted); padding: 10px 20px; border-radius: 50px; font-weight: 700; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
     .btn-logout:hover { background: #fee2e2; color: var(--danger); border-color: #fca5a5; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.15); }
 
-    /* ZAKŁADKI */
+    /* ZAKŁADKI (WIDOK DESKTOP DOMYŚLNY) */
     .nav-tabs { display: flex; gap: 12px; margin-bottom: 28px; border-bottom: 2px solid var(--border); padding-bottom: 12px; overflow-x: auto; scrollbar-width: none; }
     .nav-tabs::-webkit-scrollbar { display: none; }
-    .tab-btn { background: none; border: 1px solid transparent; padding: 12px 24px; font-size: 1rem; font-weight: 700; color: var(--text-muted); cursor: pointer; border-radius: 14px; transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+    .tab-btn { background: none; border: 1px solid transparent; padding: 12px 24px; font-size: 1rem; font-weight: 700; color: var(--text-muted); cursor: pointer; border-radius: 14px; transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .tab-btn:hover { color: var(--text-main); background: #f1f5f9; }
     .tab-btn.active { color: var(--primary); background: var(--card-bg); border-color: #bfdbfe; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1); }
     .tab-content { display: none; animation: fadeIn 0.3s ease; }
     .tab-content.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* --- DOLNY PASEK NAWIGACJI DLA TELEFONÓW (MOBILE-FIRST UI) --- */
+    @media (max-width: 768px) {
+      body { 
+        padding-bottom: 90px; /* Dodajemy miejsce na dole strony, by pasek nie zasłaniał treści */
+      } 
+      .nav-tabs {
+        position: fixed; 
+        bottom: 0; 
+        left: 0; 
+        width: 100%;
+        margin: 0; 
+        /* Env variable chroni przed najechaniem na dolny pasek (notch/home indicator) na nowych iPhone'ach */
+        padding: 12px 8px calc(12px + env(safe-area-inset-bottom, 0px));
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px); /* Efekt matowego szkła */
+        border-top: 1px solid rgba(226, 232, 240, 0.8); 
+        border-bottom: none;
+        justify-content: space-around; 
+        gap: 4px; 
+        z-index: 999;
+        box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.05);
+      }
+      .tab-btn {
+        flex-direction: column; 
+        font-size: 0.7rem; 
+        padding: 8px 4px; 
+        border-radius: 12px;
+        width: 33%; 
+        gap: 6px; 
+        white-space: normal; 
+        text-align: center; 
+        border: none !important; 
+        box-shadow: none !important; 
+        background: transparent !important;
+        line-height: 1.1;
+      }
+      .tab-btn i, .tab-btn svg { width: 22px; height: 22px; }
+      .tab-btn.active { color: var(--primary); }
+      .tab-btn.active svg { stroke-width: 2.5px; } /* Aktywna ikona staje się grubsza */
+    }
+    /* --------------------------------------------------------------- */
 
     /* KARTY */
     .card { background: var(--card-bg); border: 1px solid rgba(226, 232, 240, 0.6); border-radius: 24px; padding: 24px; box-shadow: var(--card-shadow); transition: box-shadow 0.3s ease; margin-bottom: 24px; }
@@ -279,9 +321,9 @@
   </header>
 
   <nav class="nav-tabs">
-    <button type="button" class="tab-btn active" onclick="appSwitchTab('calculatorTab', this)"><i data-lucide="calculator"></i> Planer i Budżet</button>
-    <button type="button" class="tab-btn" onclick="appSwitchTab('historyTab', this)"><i data-lucide="book-open-check"></i> Dziennik Rachunków</button>
-    <button type="button" class="tab-btn" onclick="appSwitchTab('reportTab', this)"><i data-lucide="bar-chart-3"></i> Analiza z Rzeczywistości</button>
+    <button type="button" class="tab-btn active" onclick="appSwitchTab('calculatorTab', this)"><i data-lucide="calculator"></i> <span class="tab-text">Planer i Budżet</span></button>
+    <button type="button" class="tab-btn" onclick="appSwitchTab('historyTab', this)"><i data-lucide="book-open-check"></i> <span class="tab-text">Dziennik</span></button>
+    <button type="button" class="tab-btn" onclick="appSwitchTab('reportTab', this)"><i data-lucide="bar-chart-3"></i> <span class="tab-text">Analiza</span></button>
   </nav>
 
   <!-- ZAKŁADKA 1 -->
@@ -1297,18 +1339,11 @@ function renderReportTab() {
   });
 }
 
-// -------------------------------------------
-// START APLIKACJI
-// -------------------------------------------
 window.onload = async function() {
   
-  // SZYBKI ODCZYT CACHE - Zanim baza się wczyta, wyświetlamy liczby z pamięci (brak migania na 0)
   try {
     const raw = safeStorage.getItem('walletwise_settings');
-    if(raw) {
-      applySettings(JSON.parse(raw));
-      calculateAll(); 
-    }
+    if(raw) { applySettings(JSON.parse(raw)); calculateAll(); }
   } catch(e) {}
 
   document.getElementById('loginBtn').onclick = handleLogin;
@@ -1324,7 +1359,6 @@ window.onload = async function() {
   document.getElementById('appContainer').style.display = 'block';
   document.getElementById('histInputDate').valueAsDate = new Date();
 
-  // Nasłuchiwanie zmian dla pól zapisywanych (Wysyła je do Cloud oraz LocalStorage)
   ['income', 'kids800', 'kidsActiveHome', 'kidsActiveWork', 'currentSavings'].forEach(id => {
     var el = document.getElementById(id);
     if(el) el.addEventListener('input', triggerSettingsSave);
@@ -1373,7 +1407,6 @@ window.onload = async function() {
   });
   document.getElementById('selectReportPeriod').onchange = function() { renderReportTab(); };
 
-  // Wymuszamy ostatnie przeliczenie by kafelki załadowały się na start
   calculateAll(); 
 };
 </script>
