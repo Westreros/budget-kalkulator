@@ -207,12 +207,6 @@
     .history-left-stack { display: flex; flex-direction: column; gap: 24px; }
     @media (min-width: 1024px) { .history-top-grid { grid-template-columns: 1.25fr 0.75fr; } }
 
-    .average-card { background: linear-gradient(to bottom right, #eff6ff, #ffffff); border: 1px solid #bfdbfe; border-radius: 20px; padding: 24px; flex: 1; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.05); }
-    .avg-grand-val { font-size: 2rem; font-weight: 900; color: var(--primary); background: #ffffff; padding: 8px 20px; border-radius: 16px; border: 2px solid #bfdbfe; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1); white-space: nowrap; }
-    .avg-chip { background: #ffffff; border: 1px solid #bfdbfe; padding: 10px 16px; border-radius: 12px; font-size: 1rem; font-weight: 600; color: #1e3a8a; box-shadow: 0 2px 6px rgba(0,0,0,0.02); transition: all 0.2s; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .avg-chip:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1); border-color: #93c5fd; }
-    .avg-chip strong { font-size: 1.15rem; font-weight: 900; color: var(--primary); }
-
     .chart-card-side { display: flex; flex-direction: column; justify-content: flex-start; }
     .chart-box { position: relative; max-width: 220px; margin: 0 auto; padding: 10px 0; }
     .cat-legend-list { margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 16px; display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem; }
@@ -361,7 +355,6 @@
           </div>
 
           <div class="subgrid-col">
-            <!-- CZYSTY EKRAN: MAPA ZAMIAST SUWAKÓW -->
             <div class="card">
               <h2><i data-lucide="pie-chart"></i> 2. Idealny Budżet (50/20/30)</h2>
               <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; font-weight: 500;">
@@ -400,7 +393,6 @@
       </div>
 
       <div class="col-results">
-        
         <div class="sprint-card" id="sprintCard">
           <div class="sprint-header">
             <span><i data-lucide="target" style="width: 18px;"></i> Cel: 6-mc Poduszka</span>
@@ -426,7 +418,6 @@
             <strong id="dailyFunVal" style="color: var(--primary);">0 PLN/dzień</strong>
           </div>
         </div>
-
       </div>
 
     </div>
@@ -435,58 +426,61 @@
   <!-- ZAKŁADKA 2: DZIENNIK RACHUNKÓW -->
   <div id="historyTab" class="tab-content">
     
+    <!-- PRZENIESIONE NA GÓRĘ: STATYSTYKI -->
+    <div class="stat-badge-grid" style="margin-bottom: 24px;">
+      <div class="stat-badge" style="border: 2px solid #fdba74; background: linear-gradient(135deg, #fffbeb, #fff);">
+        <span style="color: #ea580c;"><i data-lucide="flame" style="width: 16px;"></i> Passa w tym miesiącu</span>
+        <div class="streak-fire" id="noSpendBadgeVal">0 Dni <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">bez wydatków</span></div>
+      </div>
+      <div class="stat-badge">
+        <span><i data-lucide="activity" style="width: 16px;"></i> Rzeczywista Średnia / Mc</span>
+        <strong id="avgGrandTotal" style="color: var(--primary);">0 PLN</strong>
+      </div>
+    </div>
+
     <div class="history-top-grid">
-      
       <div class="history-left-stack">
         
-        <!-- ZAAWANSOWANY FORMULARZ Z KOSZYKIEM -->
+        <!-- W PEŁNI WYRÓWNANY FORMULARZ Z KOSZYKIEM -->
         <div class="card card-compact" id="expenseFormCard" style="transition: background-color 0.3s;">
           <h2 id="formTitle" style="margin-bottom: 6px;"><i data-lucide="pen-tool"></i> Dodaj wydatek</h2>
           <p id="formSubtitle" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; font-weight: 500;">
-            Masz długi paragon z marketu? Użyj przycisku "Rozbij paragon", by dokładnie przypisać kwoty!
+            Masz długi paragon z marketu? Użyj opcji podziału, by dokładnie przypisać kwoty.
           </p>
 
-          <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px;">
-            <input type="date" id="histInputDate" style="width: 150px; font-weight: 700; cursor: pointer;" title="Data wydatku">
-            <input type="text" id="histName" placeholder="Nazwa sklepu (np. Biedronka, Opłaty)" style="flex: 1; min-width: 200px;">
-          </div>
-          
-          <div id="splitItemsContainer" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
-            <!-- Pierwsza kategoria -->
-            <div class="split-item" style="display: flex; gap: 12px; align-items: center;">
-              <select class="split-category" style="width: 160px; font-weight: 700; color: var(--primary);">
-                <option value="Mieszkanie">1. Mieszkanie</option>
-                <option value="Jedzenie" selected>2. Jedzenie</option>
-                <option value="Dziecko">3. Dziecko</option>
-                <option value="Inne">4. Inne</option>
-              </select>
-              <input type="number" class="split-amount" placeholder="Kwota (PLN)" min="0" style="width: 120px;">
-              <button type="button" class="del-btn remove-split-btn" style="display:none;" onclick="this.parentElement.remove()"><i data-lucide="minus"></i></button>
+          <div id="expenseFormWrapper" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px;">
+            <!-- GŁÓWNA LINIA W JEDNYM RZĘDZIE -->
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+              <input type="date" id="histInputDate" style="width: 140px; font-weight: 700; cursor: pointer;" title="Data wydatku">
+              <input type="text" id="histName" placeholder="Nazwa sklepu (np. Biedronka, Opłaty)" style="flex: 1; min-width: 150px;">
+              
+              <!-- Pierwsza kategoria (display: contents sprawia, że jest traktowana jako część tego samego elastycznego wiersza) -->
+              <div class="split-item" style="display: contents;">
+                <select class="split-category" style="width: 160px; font-weight: 700; color: var(--primary);">
+                  <option value="Mieszkanie">1. Mieszkanie</option>
+                  <option value="Jedzenie" selected>2. Jedzenie</option>
+                  <option value="Dziecko">3. Dziecko</option>
+                  <option value="Inne">4. Inne</option>
+                </select>
+                <input type="number" class="split-amount" placeholder="Kwota" min="0" style="width: 120px;">
+              </div>
+
+              <button type="button" class="btn-add" id="addHistBtn"><i data-lucide="plus-circle" style="width:18px;"></i> Zapisz</button>
+              <button type="button" class="cancel-btn" id="cancelEditBtn" style="display: none;"><i data-lucide="x-circle" style="width:18px;"></i></button>
+            </div>
+
+            <!-- KONTENER NA DODATKOWE ROZBICIA (Pod spodem) -->
+            <div id="splitItemsContainer" style="display: flex; flex-direction: column; gap: 12px;">
+              <!-- Dynamiczne rzędy ładują się tutaj -->
             </div>
           </div>
 
           <button type="button" class="cancel-btn" id="addSplitBtn" style="font-size: 0.8rem; padding: 6px 12px; margin-bottom: 16px; display: inline-flex;"><i data-lucide="split" style="width:14px;"></i> Rozbij paragon na kolejną kategorię</button>
-
-          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button type="button" class="btn-add" id="addHistBtn"><i data-lucide="plus-circle" style="width:18px;"></i> Zapisz rachunek</button>
-            <button type="button" class="cancel-btn" id="cancelEditBtn" style="display: none;"><i data-lucide="x-circle" style="width:18px;"></i> Anuluj</button>
-          </div>
           
           <div class="excel-import-box">
             <label for="excelFile"><i data-lucide="file-spreadsheet"></i> Masz starsze dane? Wczytaj plik Excel (.xlsx, .csv)</label>
             <span class="hint">Tymczasowo wrzuca wydatki w dzisiejszy dzień. Uporządkuj je później.</span>
             <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" style="display: none;">
-          </div>
-        </div>
-
-        <div class="stat-badge-grid" style="margin-bottom: 0;">
-          <div class="stat-badge" style="border: 2px solid #fdba74; background: linear-gradient(135deg, #fffbeb, #fff);">
-            <span style="color: #ea580c;"><i data-lucide="flame" style="width: 16px;"></i> Passa w tym miesiącu</span>
-            <div class="streak-fire" id="noSpendBadgeVal">0 Dni <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">bez wydatków</span></div>
-          </div>
-          <div class="stat-badge">
-            <span><i data-lucide="activity" style="width: 16px;"></i> Rzeczywista Średnia / Mc</span>
-            <strong id="avgGrandTotal" style="color: var(--primary);">0 PLN</strong>
           </div>
         </div>
 
@@ -563,7 +557,6 @@
 
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
         
-        <!-- CARD 1: Przetrwanie -->
         <div class="metric-box-tab3">
           <span style="font-size: 0.8rem; color: #86198f; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 6px;"><i data-lucide="flame" style="width:16px;"></i> Koszty przetrwania</span>
           <strong id="forecastSurvivalVal" style="font-size: 1.6rem; color: #4a044e; display: block; margin-top: 8px; font-weight: 900;">0 PLN</strong>
@@ -573,7 +566,6 @@
           </div>
         </div>
 
-        <!-- CARD 2: Oszczędności -->
         <div class="metric-box-tab3">
           <span style="font-size: 0.8rem; color: #86198f; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 6px;"><i data-lucide="trending-up" style="width:16px;"></i> Realnie Zaoszczędzisz</span>
           <strong id="forecastSavingsVal" style="font-size: 1.6rem; color: var(--success); display: block; margin-top: 8px; font-weight: 900;">0 PLN</strong>
@@ -583,7 +575,6 @@
           </div>
         </div>
 
-        <!-- CARD 3: Fun Money -->
         <div class="metric-box-tab3">
           <span style="font-size: 0.8rem; color: #86198f; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 6px;"><i data-lucide="party-popper" style="width:16px;"></i> Realne Fun Money</span>
           <strong id="forecastFunVal" style="font-size: 1.6rem; color: #9333ea; display: block; margin-top: 8px; font-weight: 900;">0 PLN</strong>
@@ -593,7 +584,6 @@
           </div>
         </div>
 
-        <!-- CARD 4: Dzienny Luz -->
         <div class="metric-box-tab3">
           <span style="font-size: 0.8rem; color: #86198f; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 6px;"><i data-lucide="coffee" style="width:16px;"></i> Dzienny Luz</span>
           <strong id="forecastDailyFunVal" style="font-size: 1.6rem; color: var(--primary); display: block; margin-top: 8px; font-weight: 900;">0 PLN / dzień</strong>
@@ -1064,19 +1054,10 @@ function resetExpenseForm() {
   document.getElementById('histName').value = '';
   document.getElementById('histInputDate').valueAsDate = new Date();
   
-  var container = document.getElementById('splitItemsContainer');
-  container.innerHTML = `
-    <div class="split-item" style="display: flex; gap: 12px; align-items: center;">
-      <select class="split-category" style="width: 160px; font-weight: 700; color: var(--primary);">
-        <option value="Mieszkanie">1. Mieszkanie</option>
-        <option value="Jedzenie" selected>2. Jedzenie</option>
-        <option value="Dziecko">3. Dziecko</option>
-        <option value="Inne">4. Inne</option>
-      </select>
-      <input type="number" class="split-amount" placeholder="Kwota (PLN)" min="0" style="width: 120px;">
-      <button type="button" class="del-btn remove-split-btn" style="display:none;" onclick="this.parentElement.remove()"><i data-lucide="minus"></i></button>
-    </div>
-  `;
+  document.getElementById('splitItemsContainer').innerHTML = ''; 
+  document.querySelector('.split-category').value = 'Jedzenie';
+  document.querySelector('.split-amount').value = '';
+  
   document.getElementById('addSplitBtn').style.display = 'inline-flex';
   lucide.createIcons();
 }
@@ -1099,11 +1080,10 @@ function startEditEntry(id) {
   document.querySelector('.split-category').value = entry.category;
   document.querySelector('.split-amount').value = entry.amount;
   
-  // W trybie edycji ukrywamy dodawanie kolejnych kategorii paragonu
   document.getElementById('addSplitBtn').style.display = 'none';
 
   document.getElementById('formTitle').innerHTML = '<i data-lucide="pencil" style="color:var(--primary)"></i> Edytujesz wydatek';
-  document.getElementById('addHistBtn').innerHTML = '<i data-lucide="save" style="width:18px;"></i> Zapisz zmiany';
+  document.getElementById('addHistBtn').innerHTML = '<i data-lucide="save" style="width:18px;"></i> Zapisz';
   document.getElementById('cancelEditBtn').style.display = 'inline-flex';
   document.getElementById('expenseFormCard').style.backgroundColor = '#fdf8f6';
   document.getElementById('expenseFormCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -1113,7 +1093,7 @@ function startEditEntry(id) {
 function cancelEditMode() {
   editingEntryId = null;
   document.getElementById('formTitle').innerHTML = '<i data-lucide="pen-tool"></i> Dodaj wydatek';
-  document.getElementById('addHistBtn').innerHTML = '<i data-lucide="plus-circle" style="width:18px;"></i> Zapisz rachunek'; 
+  document.getElementById('addHistBtn').innerHTML = '<i data-lucide="plus-circle" style="width:18px;"></i> Zapisz'; 
   document.getElementById('cancelEditBtn').style.display = 'none';
   document.getElementById('expenseFormCard').style.backgroundColor = '#ffffff';
   resetExpenseForm();
@@ -1134,14 +1114,9 @@ function renderHistory() {
   updateHistoryFilterDropdowns(); renderHistoryTable();
   
   var avgs = getAveragedCostsFromHistory();
-  var disp = document.getElementById('averagedListDisplay'); disp.innerHTML = ''; var totAvg = 0;
-  if (avgs.length === 0) { disp.innerHTML = '<span style="color:var(--text-muted); font-size:0.95rem; font-weight:500;">Dodaj wydatek, by wyświetlić podsumowanie.</span>'; }
-
-  for (var i = 0; i < avgs.length; i++) {
-    totAvg += avgs[i].amount;
-    var chip = document.createElement('div'); chip.className = 'avg-chip';
-    chip.innerHTML = '<span>' + avgs[i].rawName + ' <span style="font-size:0.8rem; color:var(--text-muted); font-weight:500;">(' + avgs[i].count + ' mc)</span></span> <strong>' + avgs[i].amount.toLocaleString('pl-PL') + ' PLN</strong>';
-    disp.appendChild(chip);
+  var totAvg = 0;
+  if (avgs.length > 0) {
+    for (var i = 0; i < avgs.length; i++) { totAvg += avgs[i].amount; }
   }
   document.getElementById('avgGrandTotal').textContent = totAvg.toLocaleString('pl-PL') + ' PLN / mc';
 }
@@ -1312,27 +1287,26 @@ window.onload = async function() {
   var rushEl = document.getElementById('rushEmergencyFund');
   if(rushEl) { rushEl.addEventListener('change', triggerSettingsSave); }
 
-  // LOGIKA DODAWANIA KOLEJNYCH PÓL PARAGONU
   document.getElementById('addSplitBtn').onclick = function() {
     var container = document.getElementById('splitItemsContainer');
     var row = document.createElement('div');
     row.className = 'split-item';
-    row.style.cssText = 'display: flex; gap: 12px; align-items: center; animation: fadeIn 0.2s;';
+    row.style.cssText = 'display: flex; gap: 12px; align-items: center; flex-wrap: wrap; animation: fadeIn 0.2s;';
     row.innerHTML = `
+      <div style="flex: 1; min-width: 10px;"></div>
       <select class="split-category" style="width: 160px; font-weight: 700; color: var(--primary);">
         <option value="Mieszkanie">1. Mieszkanie</option>
         <option value="Jedzenie">2. Jedzenie</option>
         <option value="Dziecko">3. Dziecko</option>
         <option value="Inne" selected>4. Inne</option>
       </select>
-      <input type="number" class="split-amount" placeholder="Kwota (PLN)" min="0" style="width: 120px;">
-      <button type="button" class="del-btn remove-split-btn" onclick="this.parentElement.remove()"><i data-lucide="minus" style="width:16px;"></i></button>
+      <input type="number" class="split-amount" placeholder="Kwota" min="0" style="width: 120px;">
+      <button type="button" class="del-btn remove-split-btn" style="width: 44px; padding: 0; height: 44px;" onclick="this.parentElement.remove()"><i data-lucide="minus"></i></button>
     `;
     container.appendChild(row);
     lucide.createIcons();
   };
 
-  // ZAPISYWANIE PARAGONU DO BAZY
   document.getElementById('addHistBtn').onclick = async function() {
     var dateVal = document.getElementById('histInputDate').value; 
     var n = document.getElementById('histName').value.trim(); 
@@ -1356,7 +1330,6 @@ window.onload = async function() {
     var p = selY + '-' + selM;
 
     if (editingEntryId !== null) {
-      // Tryb edycji obsługuje jeden wiersz
       var first = validItemsToSave[0];
       if (isLoggedIn && supabase) {
         const { error } = await supabase.from('history_logs').update({ month: p, year: selY, month_num: selM, exact_date: dateVal, category: first.cat, name: n, amount: first.amt }).eq('id', editingEntryId);
@@ -1366,7 +1339,6 @@ window.onload = async function() {
       if(entry) { entry.month=p; entry.year=selY; entry.monthNum=selM; entry.exact_date=dateVal; entry.category=first.cat; entry.name=n; entry.amount=first.amt; }
       cancelEditMode(); renderHistory();
     } else {
-      // Tryb nowego zapisu - wspiera rozbicie paragonu
       var newRecords = [];
       validItemsToSave.forEach(item => {
         newRecords.push({ month: p, year: selY, month_num: selM, exact_date: dateVal, category: item.cat, name: n, amount: item.amt });
