@@ -218,7 +218,6 @@
 
     .forecast-card { background: linear-gradient(135deg, #faf5ff, #fdf4ff); border: 1px solid #f0abfc; border-radius: 24px; padding: 28px; margin-bottom: 28px; box-shadow: 0 4px 15px rgba(217, 70, 239, 0.05); }
     
-    /* ZMIENIONE STYLE KART "CO-JESLI" (TAB 3) */
     .metric-box-tab3 { background: #fff; padding: 20px; border-radius: 16px; border: 1px solid #f5d0fe; box-shadow: 0 4px 10px rgba(0,0,0,0.02); display: flex; flex-direction: column; }
     .metric-box-tab3 .comparison-bar { margin-top: auto; padding-top: 12px; border-top: 1px solid #fdf4ff; display: flex; justify-content: space-between; align-items: center; }
     .metric-box-tab3 .comparison-bar span { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
@@ -756,7 +755,11 @@ async function handleRegister() {
   } catch (err) { errorEl.style.color = 'var(--danger)'; errorEl.textContent = 'Błąd połączenia z serwerem.'; }
 }
 
-async function handleLogout() { if (supabase) await supabase.auth.signOut(); window.location.reload(); }
+async function handleLogout() { 
+  try { safeStorage.removeItem('walletwise_settings'); } catch(e){} // CZYŚCIMY DANE LOKALNE!
+  if (supabase) await supabase.auth.signOut(); 
+  window.location.reload(); 
+}
 
 async function loadCloudData() {
   if (!supabase) return;
@@ -772,11 +775,11 @@ var settingsSaveTimeout;
 
 function applySettings(s) {
   if(!s) return;
-  if(s.income !== undefined && s.income !== '') document.getElementById('income').value = s.income;
-  if(s.kids800 !== undefined && s.kids800 !== '') document.getElementById('kids800').value = s.kids800;
-  if(s.kidsActiveHome !== undefined && s.kidsActiveHome !== '') document.getElementById('kidsActiveHome').value = s.kidsActiveHome;
-  if(s.kidsActiveWork !== undefined && s.kidsActiveWork !== '') document.getElementById('kidsActiveWork').value = s.kidsActiveWork;
-  if(s.currentSavings !== undefined && s.currentSavings !== '') document.getElementById('currentSavings').value = s.currentSavings;
+  if(s.income !== undefined) document.getElementById('income').value = s.income;
+  if(s.kids800 !== undefined) document.getElementById('kids800').value = s.kids800;
+  if(s.kidsActiveHome !== undefined) document.getElementById('kidsActiveHome').value = s.kidsActiveHome;
+  if(s.kidsActiveWork !== undefined) document.getElementById('kidsActiveWork').value = s.kidsActiveWork;
+  if(s.currentSavings !== undefined) document.getElementById('currentSavings').value = s.currentSavings;
   if(s.rushEmergencyFund !== undefined) document.getElementById('rushEmergencyFund').checked = s.rushEmergencyFund;
 }
 
@@ -791,19 +794,24 @@ function triggerSettingsSave() {
     rushEmergencyFund: document.getElementById('rushEmergencyFund').checked
   };
   
-  // ZAPIS LOKALNY - NATYCHMIASTOWY (Błyskawicznie chroni dane przed odświeżeniem)
-  try { safeStorage.setItem('walletwise_settings', JSON.stringify(s)); } catch(e){}
+  if (isLoggedIn) {
+    // JESTEŚ ZALOGOWANY - natychmiast wrzucamy do Cache na wypadek odświeżenia
+    try { safeStorage.setItem('walletwise_settings', JSON.stringify(s)); } catch(e){}
 
-  var syncIcon = document.getElementById('cloudSyncStatus');
-  if(isLoggedIn && supabase) {
-    if(syncIcon) { 
-      syncIcon.style.display = 'flex'; 
-      syncIcon.innerHTML = '<i data-lucide="loader" class="lucide-spin" style="width:14px; color: var(--text-muted);"></i> Zapisuję...'; 
-      syncIcon.style.color = 'var(--text-muted)'; 
-      lucide.createIcons(); 
+    if (supabase) {
+      var syncIcon = document.getElementById('cloudSyncStatus');
+      if(syncIcon) { 
+        syncIcon.style.display = 'flex'; 
+        syncIcon.innerHTML = '<i data-lucide="loader" class="lucide-spin" style="width:14px; color: var(--text-muted);"></i> Zapisuję...'; 
+        syncIcon.style.color = 'var(--text-muted)'; 
+        lucide.createIcons(); 
+      }
+      clearTimeout(settingsSaveTimeout);
+      settingsSaveTimeout = setTimeout(saveSettingsToCloud, 1000);
     }
-    clearTimeout(settingsSaveTimeout);
-    settingsSaveTimeout = setTimeout(saveSettingsToCloud, 1000);
+  } else {
+    // JESTEŚ GOŚCIEM - Nic nie zapisujemy na stałe, formularze zresetują się po F5
+    try { safeStorage.removeItem('walletwise_settings'); } catch(e){}
   }
 }
 
@@ -855,33 +863,26 @@ async function setupAuthListeners() {
       const avatarEl = document.getElementById('userAvatarInitials');
       if (avatarEl) avatarEl.textContent = initials;
       
-      // ZACIĄGANIE DANYCH (Dual Load)
-      const meta = session.user.user_metadata;
-      let cloudSettings = meta?.budget_settings;
-      let localSettings = null;
-      try { localSettings = JSON.parse(safeStorage.getItem('walletwise_settings')); } catch(e){}
-      
+      // ZACIĄGANIE DANYCH
+      const cloudSettings = session.user.user_metadata?.budget_settings;
       if (cloudSettings) {
         applySettings(cloudSettings);
         try { safeStorage.setItem('walletwise_settings', JSON.stringify(cloudSettings)); } catch(e){}
-      } else if (localSettings) {
-        applySettings(localSettings);
-        triggerSettingsSave(); 
-      }
-      
+      } 
+      calculateAll();
       loadCloudData();
     } else {
-      // Offline / Niezalogowany
-      try { historyLogs = JSON.parse(safeStorage.getItem('my_history_logs_offline') || '[]'); } catch(e){}
-      let localSettings = null;
-      try { localSettings = JSON.parse(safeStorage.getItem('walletwise_settings')); } catch(e){}
-      if(localSettings) applySettings(localSettings);
+      // OFFLINE / GOŚĆ
+      isLoggedIn = false;
+      try { safeStorage.removeItem('walletwise_settings'); } catch(e){} // Upewniamy się, że nie ma resztek
+      applySettings({ income: '', kids800: '', kidsActiveHome: '', kidsActiveWork: '', currentSavings: '', rushEmergencyFund: false });
+      calculateAll();
     }
   } catch(err) {
-    try { historyLogs = JSON.parse(safeStorage.getItem('my_history_logs_offline') || '[]'); } catch(e){}
-    let localSettings = null;
-    try { localSettings = JSON.parse(safeStorage.getItem('walletwise_settings')); } catch(e){}
-    if(localSettings) applySettings(localSettings);
+    isLoggedIn = false;
+    try { safeStorage.removeItem('walletwise_settings'); } catch(e){}
+    applySettings({ income: '', kids800: '', kidsActiveHome: '', kidsActiveWork: '', currentSavings: '', rushEmergencyFund: false });
+    calculateAll();
   }
 }
 
@@ -1142,7 +1143,6 @@ function getAveragedCostsFromHistory() {
 }
 
 function renderHistory() {
-  if (!isLoggedIn) { try { safeStorage.setItem('my_history_logs_offline', JSON.stringify(historyLogs)); } catch(e){} }
   updateHistoryFilterDropdowns(); renderHistoryTable();
   
   var avgs = getAveragedCostsFromHistory();
@@ -1297,7 +1297,20 @@ function renderReportTab() {
   });
 }
 
+// -------------------------------------------
+// START APLIKACJI
+// -------------------------------------------
 window.onload = async function() {
+  
+  // SZYBKI ODCZYT CACHE - Zanim baza się wczyta, wyświetlamy liczby z pamięci (brak migania na 0)
+  try {
+    const raw = safeStorage.getItem('walletwise_settings');
+    if(raw) {
+      applySettings(JSON.parse(raw));
+      calculateAll(); 
+    }
+  } catch(e) {}
+
   document.getElementById('loginBtn').onclick = handleLogin;
   document.getElementById('registerBtn').onclick = handleRegister;
   document.getElementById('logoutBtn').onclick = handleLogout;
@@ -1311,6 +1324,7 @@ window.onload = async function() {
   document.getElementById('appContainer').style.display = 'block';
   document.getElementById('histInputDate').valueAsDate = new Date();
 
+  // Nasłuchiwanie zmian dla pól zapisywanych (Wysyła je do Cloud oraz LocalStorage)
   ['income', 'kids800', 'kidsActiveHome', 'kidsActiveWork', 'currentSavings'].forEach(id => {
     var el = document.getElementById(id);
     if(el) el.addEventListener('input', triggerSettingsSave);
@@ -1359,7 +1373,7 @@ window.onload = async function() {
   });
   document.getElementById('selectReportPeriod').onchange = function() { renderReportTab(); };
 
-  // Uruchamiamy obliczenia na start, upewniając się że UI zareaguje (nawet jeśli auth się ładuje z opóźnieniem)
+  // Wymuszamy ostatnie przeliczenie by kafelki załadowały się na start
   calculateAll(); 
 };
 </script>
