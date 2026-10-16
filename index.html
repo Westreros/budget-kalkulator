@@ -307,7 +307,7 @@
           <div class="subgrid-col">
             <div class="card">
               <h2><i data-lucide="coins"></i> 1. Dochody i Świadczenia</h2>
-              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; font-weight: 500;">Wpisane dane automatycznie zapisują się w Twoim profilu po zalogowaniu.</p>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; font-weight: 500;">Wpisane dane automatycznie zapisują się w Twoim profilu.</p>
               
               <label for="income">Pensja netto (na rękę)</label>
               <div class="input-group">
@@ -474,7 +474,6 @@
           </p>
 
           <div class="form-inline">
-            <!-- NOWY PRECYZYJNY KALENDARZ -->
             <input type="date" id="histInputDate" style="width: 150px; font-weight: 700; cursor: pointer;">
             
             <select id="histCategory" style="width: 160px; font-weight: 700; color: var(--primary);">
@@ -948,7 +947,11 @@ function updateHistoryFilterDropdowns() {
   var curYear = fYear.value; var curMonth = fMonth.value;
 
   var yearsMap = {};
-  for (var i = 0; i < historyLogs.length; i++) { yearsMap[historyLogs[i].year || historyLogs[i].month.split('-')[0]] = true; }
+  for (var i = 0; i < historyLogs.length; i++) { 
+    // Zabezpieczenie na wypadek null/undefined
+    if(historyLogs[i].year) { yearsMap[historyLogs[i].year] = true; } 
+    else if (historyLogs[i].month) { yearsMap[historyLogs[i].month.split('-')[0]] = true; }
+  }
   var uniqueYears = Object.keys(yearsMap).sort().reverse();
 
   fYear.innerHTML = '<option value="ALL">Wszystkie lata</option>';
@@ -999,13 +1002,11 @@ function updateNoSpendDaysBadge() {
   var curMonthStr = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1);
   var currentPeriod = curYear + '-' + curMonthStr;
   
-  var daysPassedInMonth = d.getDate(); // np. 16 dzień miesiąca
+  var daysPassedInMonth = d.getDate();
   
-  // Szukamy wpisów w obecnym miesiącu
   var currentMonthEntries = historyLogs.filter(e => e.month === currentPeriod);
-  
-  // Zbieramy unikalne daty, w których był jakikolwiek wydatek
   var uniqueExpenseDates = new Set();
+  
   currentMonthEntries.forEach(e => {
     if(e.exact_date) uniqueExpenseDates.add(e.exact_date);
   });
@@ -1026,7 +1027,16 @@ function renderHistoryTable() {
   var fYear = document.getElementById('histFilterYear').value; var fMonth = document.getElementById('histFilterMonth').value;
   var fCat = document.getElementById('histFilterCategory').value; var sortOrder = document.getElementById('histSortOrder').value;
 
-  var periodItems = historyLogs.filter(e => (fYear==='ALL' || e.year===fYear) && (fMonth==='ALL' || e.monthNum===fMonth));
+  // SUPER BEZPIECZNE FILTROWANIE DATY
+  var periodItems = historyLogs.filter(e => {
+    // Odczytywanie roku (jako string, bez względu czy przyszło int z bazy)
+    var eYear = String(e.year || (e.month ? e.month.split('-')[0] : ''));
+    // Odczytywanie miesiąca (kompatybilne z month_num, monthNum i analizą pola month)
+    var eMonth = String(e.month_num || e.monthNum || (e.month ? e.month.split('-')[1] : ''));
+    
+    return (fYear === 'ALL' || eYear === String(fYear)) && (fMonth === 'ALL' || eMonth === String(fMonth));
+  });
+  
   updateCategoryChart(periodItems);
 
   var tableItems = periodItems.filter(e => fCat==='ALL' || e.category===fCat);
@@ -1037,12 +1047,13 @@ function renderHistoryTable() {
 
   if (tableItems.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><i data-lucide="receipt"></i><strong>Brak wydatków na liście</strong>Zanotuj swój pierwszy wydatek u góry.</div></td></tr>'; 
-    setTimeout(() => lucide.createIcons(), 10); return;
+    setTimeout(() => lucide.createIcons(), 10); 
+    updateNoSpendDaysBadge(); 
+    return;
   }
 
   for (var k = 0; k < tableItems.length; k++) {
     var cat = tableItems[k].category || 'Mieszkanie';
-    // Format daty - wspiera starsze wpisy bez dokładnej daty
     var displayDate = tableItems[k].exact_date ? tableItems[k].exact_date : formatPeriodToPL(tableItems[k].month);
     
     var tr = document.createElement('tr');
@@ -1056,6 +1067,7 @@ function renderHistoryTable() {
                    '</td>';
     tbody.appendChild(tr);
   }
+  
   setTimeout(() => lucide.createIcons(), 10);
   updateNoSpendDaysBadge();
 }
@@ -1068,8 +1080,9 @@ function startEditEntry(id) {
   if(entry.exact_date) {
     document.getElementById('histInputDate').value = entry.exact_date;
   } else {
-    // Jeśli to stary wpis bez daty, wymuszamy 1 dzień miesiąca
-    document.getElementById('histInputDate').value = entry.year + '-' + entry.monthNum + '-01';
+    var mNum = entry.month_num || entry.monthNum || entry.month.split('-')[1];
+    var mYear = entry.year || entry.month.split('-')[0];
+    document.getElementById('histInputDate').value = mYear + '-' + mNum + '-01';
   }
   
   document.getElementById('histCategory').value = entry.category; document.getElementById('histName').value = entry.name; document.getElementById('histAmount').value = entry.amount;
@@ -1143,7 +1156,7 @@ async function handleExcelUpload(e) {
       var pYear = d.getFullYear();
       var pMonth = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1);
       var p = pYear + '-' + pMonth;
-      var exactD = pYear + '-' + pMonth + '-' + (d.getDate() < 10 ? '0' : '') + d.getDate(); // Dziś
+      var exactD = pYear + '-' + pMonth + '-' + (d.getDate() < 10 ? '0' : '') + d.getDate();
 
       for (var r = 0; r < jsonData.length; r++) {
         var row = jsonData[r]; if (!row || row.length < 2) continue;
@@ -1168,7 +1181,7 @@ async function handleExcelUpload(e) {
           const { data: inserted, error } = await supabase.from('history_logs').insert(newItems).select();
           if (!error && inserted) { historyLogs = historyLogs.concat(inserted); alert('Wgrano ' + inserted.length + ' rachunków z Excela do chmury!'); renderHistory(); }
         } else {
-          for(let i=0; i<newItems.length; i++) { newItems[i].id = Date.now() + i; newItems[i].monthNum = newItems[i].month_num; }
+          for(let i=0; i<newItems.length; i++) { newItems[i].id = Date.now() + i; newItems[i].month_num = newItems[i].month_num; }
           historyLogs = historyLogs.concat(newItems); alert('Wgrano ' + newItems.length + ' rachunków (Tryb Gościa).'); renderHistory();
         }
       } else { alert('Nie rozpoznałem kwot ani opisów. Sprawdź plik.'); }
@@ -1230,10 +1243,8 @@ window.onload = async function() {
 
   document.getElementById('appContainer').style.display = 'block';
 
-  // Ustawienie domyślnej daty w formularzu na dzisiaj
   document.getElementById('histInputDate').valueAsDate = new Date();
 
-  // Nasłuchiwanie zmian dla pól zapisywanych do profilu użytkownika
   ['income', 'kids800', 'kidsActiveHome', 'kidsActiveWork', 'currentSavings'].forEach(id => {
     var el = document.getElementById(id);
     if(el) el.addEventListener('input', triggerSettingsSave);
@@ -1242,13 +1253,12 @@ window.onload = async function() {
   if(rushEl) { rushEl.addEventListener('change', triggerSettingsSave); }
 
   document.getElementById('addHistBtn').onclick = async function() {
-    var dateVal = document.getElementById('histInputDate').value; // YYYY-MM-DD
+    var dateVal = document.getElementById('histInputDate').value; 
     var selCat = document.getElementById('histCategory').value; 
     var n = document.getElementById('histName').value.trim(); 
     var a = parseFloat(document.getElementById('histAmount').value);
 
     if (dateVal && n && !isNaN(a) && a > 0) {
-      // Wyciągnięcie miesiąca i roku z daty do starych zmiennych
       var selY = dateVal.split('-')[0];
       var selM = dateVal.split('-')[1];
       var p = selY + '-' + selM;
@@ -1259,14 +1269,14 @@ window.onload = async function() {
           if (error) { alert("Błąd: " + error.message); return; }
         }
         var entry = historyLogs.find(e => e.id === editingEntryId);
-        if(entry) { entry.month=p; entry.year=selY; entry.monthNum=selM; entry.exact_date=dateVal; entry.category=selCat; entry.name=n; entry.amount=a; }
+        if(entry) { entry.month=p; entry.year=selY; entry.month_num=selM; entry.monthNum=selM; entry.exact_date=dateVal; entry.category=selCat; entry.name=n; entry.amount=a; }
         cancelEditMode(); renderHistory();
       } else {
         if (isLoggedIn && supabase) {
           const { data, error } = await supabase.from('history_logs').insert([{ month: p, year: selY, month_num: selM, exact_date: dateVal, category: selCat, name: n, amount: a }]).select();
           if (!error && data) { historyLogs.push(data[0]); document.getElementById('histName').value = ''; document.getElementById('histAmount').value = ''; renderHistory(); }
         } else {
-          historyLogs.push({ id: Date.now(), month: p, year: selY, monthNum: selM, exact_date: dateVal, category: selCat, name: n, amount: a });
+          historyLogs.push({ id: Date.now(), month: p, year: selY, month_num: selM, exact_date: dateVal, category: selCat, name: n, amount: a });
           document.getElementById('histName').value = ''; document.getElementById('histAmount').value = ''; renderHistory();
         }
       }
