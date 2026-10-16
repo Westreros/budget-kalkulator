@@ -269,7 +269,7 @@
       </button>
       
       <div id="userNav" style="display: none; align-items: center; gap: 16px;">
-        <span id="cloudSyncStatus" style="font-size: 0.75rem; color: var(--success); font-weight: 700; display: none; align-items: center; gap: 4px;"><i data-lucide="check-circle-2" style="width: 14px;"></i> Zapisano w chmurze</span>
+        <span id="cloudSyncStatus" style="font-size: 0.75rem; color: var(--success); font-weight: 700; display: none; align-items: center; gap: 4px;"></span>
         <div class="user-profile-badge">
           <div class="user-avatar" id="userAvatarInitials">U</div>
           <span id="userEmailDisplay" class="user-name"></span>
@@ -314,7 +314,7 @@
           <div class="subgrid-col">
             <div class="card">
               <h2><i data-lucide="coins"></i> 1. Dochody i Świadczenia</h2>
-              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; font-weight: 500;">Wpisane dane automatycznie zapisują się w Twoim profilu po zalogowaniu.</p>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; font-weight: 500;">Pola poniżej zapisują się od razu podczas pisania!</p>
               
               <label for="income">Pensja netto (na rękę)</label>
               <div class="input-group">
@@ -665,7 +665,7 @@
 <script>
 lucide.createIcons();
 
-// ---------- PANCERNA KONFIGURACJA BAZY DANYCH ----------
+// ---------- BAZA I PAMIĘĆ ----------
 var supabase = null;
 var isLoggedIn = false;
 var historyLogs = [];
@@ -691,18 +691,11 @@ function initSupabase() {
     if (window.supabase) {
       var origin = window.location.origin;
       var isLocalOrGithub = origin === 'file://' || origin === 'null' || origin.includes('github.io') || origin.includes('127.0.0.1') || origin.includes('localhost');
-      
-      var supabaseUrl = isLocalOrGithub 
-        ? 'https://kbzspdwizcwpzlvytdzw.supabase.co' 
-        : origin + '/baza';
-        
+      var supabaseUrl = isLocalOrGithub ? 'https://kbzspdwizcwpzlvytdzw.supabase.co' : origin + '/baza';
       var supabaseKey = 'sb_publishable_nPfkgQfKOapm-t9OqWZ4KA__KuU0jqB';
       
       supabase = window.supabase.createClient(supabaseUrl, supabaseKey, {
-        auth: {
-          storage: safeStorage,
-          persistSession: safeStorage !== memoryStorage
-        }
+        auth: { storage: safeStorage, persistSession: safeStorage !== memoryStorage }
       });
       return true;
     }
@@ -773,24 +766,44 @@ async function loadCloudData() {
 }
 
 // -------------------------------------------
-// ZAPISYWANIE PENSJI I USTAWIEŃ W CHMURZE
+// PODWÓJNY ZAPIS (LOCALSTORAGE + CLOUD)
 // -------------------------------------------
 var settingsSaveTimeout;
 
+function applySettings(s) {
+  if(!s) return;
+  if(s.income !== undefined && s.income !== '') document.getElementById('income').value = s.income;
+  if(s.kids800 !== undefined && s.kids800 !== '') document.getElementById('kids800').value = s.kids800;
+  if(s.kidsActiveHome !== undefined && s.kidsActiveHome !== '') document.getElementById('kidsActiveHome').value = s.kidsActiveHome;
+  if(s.kidsActiveWork !== undefined && s.kidsActiveWork !== '') document.getElementById('kidsActiveWork').value = s.kidsActiveWork;
+  if(s.currentSavings !== undefined && s.currentSavings !== '') document.getElementById('currentSavings').value = s.currentSavings;
+  if(s.rushEmergencyFund !== undefined) document.getElementById('rushEmergencyFund').checked = s.rushEmergencyFund;
+}
+
 function triggerSettingsSave() {
   calculateAll();
+  const s = {
+    income: document.getElementById('income').value,
+    kids800: document.getElementById('kids800').value,
+    kidsActiveHome: document.getElementById('kidsActiveHome').value,
+    kidsActiveWork: document.getElementById('kidsActiveWork').value,
+    currentSavings: document.getElementById('currentSavings').value,
+    rushEmergencyFund: document.getElementById('rushEmergencyFund').checked
+  };
+  
+  // ZAPIS LOKALNY - NATYCHMIASTOWY (Błyskawicznie chroni dane przed odświeżeniem)
+  try { safeStorage.setItem('walletwise_settings', JSON.stringify(s)); } catch(e){}
+
   var syncIcon = document.getElementById('cloudSyncStatus');
   if(isLoggedIn && supabase) {
-    if(syncIcon) { syncIcon.style.display = 'flex'; syncIcon.innerHTML = '<i data-lucide="loader" class="lucide-spin" style="width:14px; color: var(--text-muted);"></i> Zapisuję...'; syncIcon.style.color = 'var(--text-muted)'; lucide.createIcons(); }
+    if(syncIcon) { 
+      syncIcon.style.display = 'flex'; 
+      syncIcon.innerHTML = '<i data-lucide="loader" class="lucide-spin" style="width:14px; color: var(--text-muted);"></i> Zapisuję...'; 
+      syncIcon.style.color = 'var(--text-muted)'; 
+      lucide.createIcons(); 
+    }
     clearTimeout(settingsSaveTimeout);
     settingsSaveTimeout = setTimeout(saveSettingsToCloud, 1000);
-  } else {
-    const s = {
-      income: document.getElementById('income').value, kids800: document.getElementById('kids800').value,
-      kidsActiveHome: document.getElementById('kidsActiveHome').value, kidsActiveWork: document.getElementById('kidsActiveWork').value,
-      currentSavings: document.getElementById('currentSavings').value, rushEmergencyFund: document.getElementById('rushEmergencyFund').checked
-    };
-    try { safeStorage.setItem('offline_settings', JSON.stringify(s)); } catch(e){}
   }
 }
 
@@ -801,43 +814,21 @@ async function saveSettingsToCloud() {
       kidsActiveHome: document.getElementById('kidsActiveHome').value, kidsActiveWork: document.getElementById('kidsActiveWork').value,
       currentSavings: document.getElementById('currentSavings').value, rushEmergencyFund: document.getElementById('rushEmergencyFund').checked
   };
+  
   const { error } = await supabase.auth.updateUser({ data: { budget_settings: s } });
   
   var syncIcon = document.getElementById('cloudSyncStatus');
   if(syncIcon) {
-    if(!error) { syncIcon.innerHTML = '<i data-lucide="check-circle-2" style="width:14px;"></i> Zapisano'; syncIcon.style.color = 'var(--success)'; }
-    else { syncIcon.innerHTML = '<i data-lucide="alert-circle" style="width:14px;"></i> Błąd zapisu'; syncIcon.style.color = 'var(--danger)'; }
+    if(!error) { 
+      syncIcon.innerHTML = '<i data-lucide="check-circle-2" style="width:14px;"></i> Zapisano w chmurze'; 
+      syncIcon.style.color = 'var(--success)'; 
+    } else { 
+      syncIcon.innerHTML = '<i data-lucide="alert-circle" style="width:14px;"></i> Błąd zapisu'; 
+      syncIcon.style.color = 'var(--danger)'; 
+    }
     lucide.createIcons();
     setTimeout(() => { syncIcon.style.display = 'none'; }, 3000);
   }
-}
-
-function loadSettingsFromProfile(session) {
-  const meta = session.user.user_metadata;
-  if(meta && meta.budget_settings) {
-    const s = meta.budget_settings;
-    if(s.income) document.getElementById('income').value = s.income;
-    if(s.kids800) document.getElementById('kids800').value = s.kids800;
-    if(s.kidsActiveHome) document.getElementById('kidsActiveHome').value = s.kidsActiveHome;
-    if(s.kidsActiveWork) document.getElementById('kidsActiveWork').value = s.kidsActiveWork;
-    if(s.currentSavings) document.getElementById('currentSavings').value = s.currentSavings;
-    if(s.rushEmergencyFund) document.getElementById('rushEmergencyFund').checked = s.rushEmergencyFund;
-  }
-}
-
-function loadSettingsFromLocal() {
-  try {
-    const raw = safeStorage.getItem('offline_settings');
-    if(raw) {
-      const s = JSON.parse(raw);
-      if(s.income) document.getElementById('income').value = s.income;
-      if(s.kids800) document.getElementById('kids800').value = s.kids800;
-      if(s.kidsActiveHome) document.getElementById('kidsActiveHome').value = s.kidsActiveHome;
-      if(s.kidsActiveWork) document.getElementById('kidsActiveWork').value = s.kidsActiveWork;
-      if(s.currentSavings) document.getElementById('currentSavings').value = s.currentSavings;
-      if(s.rushEmergencyFund) document.getElementById('rushEmergencyFund').checked = s.rushEmergencyFund;
-    }
-  } catch(e){}
 }
 
 async function setupAuthListeners() {
@@ -864,15 +855,33 @@ async function setupAuthListeners() {
       const avatarEl = document.getElementById('userAvatarInitials');
       if (avatarEl) avatarEl.textContent = initials;
       
-      loadSettingsFromProfile(session);
+      // ZACIĄGANIE DANYCH (Dual Load)
+      const meta = session.user.user_metadata;
+      let cloudSettings = meta?.budget_settings;
+      let localSettings = null;
+      try { localSettings = JSON.parse(safeStorage.getItem('walletwise_settings')); } catch(e){}
+      
+      if (cloudSettings) {
+        applySettings(cloudSettings);
+        try { safeStorage.setItem('walletwise_settings', JSON.stringify(cloudSettings)); } catch(e){}
+      } else if (localSettings) {
+        applySettings(localSettings);
+        triggerSettingsSave(); 
+      }
+      
       loadCloudData();
     } else {
+      // Offline / Niezalogowany
       try { historyLogs = JSON.parse(safeStorage.getItem('my_history_logs_offline') || '[]'); } catch(e){}
-      loadSettingsFromLocal();
+      let localSettings = null;
+      try { localSettings = JSON.parse(safeStorage.getItem('walletwise_settings')); } catch(e){}
+      if(localSettings) applySettings(localSettings);
     }
   } catch(err) {
     try { historyLogs = JSON.parse(safeStorage.getItem('my_history_logs_offline') || '[]'); } catch(e){}
-    loadSettingsFromLocal();
+    let localSettings = null;
+    try { localSettings = JSON.parse(safeStorage.getItem('walletwise_settings')); } catch(e){}
+    if(localSettings) applySettings(localSettings);
   }
 }
 
@@ -1207,11 +1216,9 @@ async function handleExcelUpload(e) {
   reader.readAsArrayBuffer(file);
 }
 
-// NOWA WERSJA OBLICZANIA RÓŻNIC (TAB 3)
 function renderReportTab() {
   var totalInc = getTotalIncome(); var rush = document.getElementById('rushEmergencyFund').checked;
   
-  // 1. OBLICZANIE WARTOŚCI RZECZYWISTYCH
   var avgs = getAveragedCostsFromHistory();
   var realSurvival = avgs.reduce((acc, curr) => acc + curr.amount, 0); 
   var realFree = Math.max(0, totalInc - realSurvival);
@@ -1220,59 +1227,50 @@ function renderReportTab() {
   if (realFun > realFree) realFun = realFree; 
   var realSavings = realFree - realFun;
 
-  // 2. OBLICZANIE WARTOŚCI IDEALNYCH Z PLANU (50% na koszty, reszta podzielona)
   var idealSurvival = Math.round(totalInc * 0.50);
   var idealFun = Math.round(totalInc * realFunTarget);
   var idealSavings = totalInc - idealSurvival - idealFun;
 
-  // RENDEROWANIE GŁÓWNYCH WARTOŚCI
   document.getElementById('forecastSurvivalVal').textContent = realSurvival.toLocaleString('pl-PL') + ' PLN';
   document.getElementById('forecastSavingsVal').textContent = realSavings.toLocaleString('pl-PL') + ' PLN';
   document.getElementById('forecastFunVal').textContent = realFun.toLocaleString('pl-PL') + ' PLN';
   document.getElementById('forecastDailyFunVal').textContent = Math.round(realFun / 30) + ' PLN / dzień';
 
-  // RENDEROWANIE WARTOŚCI IDEALNYCH (W małych paskach podsumowania)
   document.getElementById('idealSurvivalVal').textContent = idealSurvival.toLocaleString('pl-PL') + ' PLN';
   document.getElementById('idealSavingsVal').textContent = idealSavings.toLocaleString('pl-PL') + ' PLN';
   document.getElementById('idealFunVal').textContent = idealFun.toLocaleString('pl-PL') + ' PLN';
   document.getElementById('idealDailyFunVal').textContent = Math.round(idealFun / 30) + ' PLN';
 
-  // --- LOGIKA KOLOROWANIA BADGE'ÓW RÓŻNICY ---
-  // Przetrwanie: Im MNIEJ, tym lepiej.
   var diffSurv = realSurvival - idealSurvival;
   var badgeSurv = document.getElementById('diffSurvivalBadge');
   if (diffSurv > 0) {
     badgeSurv.textContent = '+' + diffSurv.toLocaleString('pl-PL') + ' PLN';
-    badgeSurv.style.background = '#fee2e2'; badgeSurv.style.color = 'var(--danger)'; // Czerwony - Przekroczenie planu
+    badgeSurv.style.background = '#fee2e2'; badgeSurv.style.color = 'var(--danger)';
   } else {
     badgeSurv.textContent = diffSurv.toLocaleString('pl-PL') + ' PLN';
-    badgeSurv.style.background = '#dcfce7'; badgeSurv.style.color = 'var(--success)'; // Zielony - Zaoszczędzono na życiu
+    badgeSurv.style.background = '#dcfce7'; badgeSurv.style.color = 'var(--success)'; 
   }
 
-  // Oszczędności: Im WIĘCEJ, tym lepiej.
   var diffSav = realSavings - idealSavings;
   var badgeSav = document.getElementById('diffSavingsBadge');
   if (diffSav >= 0) {
     badgeSav.textContent = '+' + diffSav.toLocaleString('pl-PL') + ' PLN';
-    badgeSav.style.background = '#dcfce7'; badgeSav.style.color = 'var(--success)'; // Zielony - Oszczędzasz więcej niż plan zakładał!
+    badgeSav.style.background = '#dcfce7'; badgeSav.style.color = 'var(--success)';
   } else {
     badgeSav.textContent = diffSav.toLocaleString('pl-PL') + ' PLN';
-    badgeSav.style.background = '#fee2e2'; badgeSav.style.color = 'var(--danger)'; // Czerwony - Oszczędności topnieją
+    badgeSav.style.background = '#fee2e2'; badgeSav.style.color = 'var(--danger)'; 
   }
 
-  // Fun Money: Jeśli Fun Money rzeczywiste jest Mniejsze od idealnego, to znaczy że wysokie rachunki zjadły nam budżet na rozrywkę (Smutne)
   var diffFun = realFun - idealFun;
   var badgeFun = document.getElementById('diffFunBadge');
   if (diffFun < 0) {
     badgeFun.textContent = diffFun.toLocaleString('pl-PL') + ' PLN';
-    badgeFun.style.background = '#fee2e2'; badgeFun.style.color = 'var(--danger)'; // Czerwony - Utrata kasy na luz
+    badgeFun.style.background = '#fee2e2'; badgeFun.style.color = 'var(--danger)'; 
   } else {
     badgeFun.textContent = diffFun.toLocaleString('pl-PL') + ' PLN';
-    badgeFun.style.background = '#f1f5f9'; badgeFun.style.color = 'var(--text-muted)'; // Szary - Zgodnie z planem
+    badgeFun.style.background = '#f1f5f9'; badgeFun.style.color = 'var(--text-muted)'; 
   }
 
-
-  // RESZTA WIDOKU MIESIĘCY
   var sel = document.getElementById('selectReportPeriod'); var curSel = sel.value;
   var uniquePeriods = [...new Set(historyLogs.map(e => e.month))].sort().reverse(); sel.innerHTML = '';
 
@@ -1299,7 +1297,6 @@ function renderReportTab() {
   });
 }
 
-// INICJALIZACJA STARTOWA
 window.onload = async function() {
   document.getElementById('loginBtn').onclick = handleLogin;
   document.getElementById('registerBtn').onclick = handleRegister;
@@ -1312,7 +1309,6 @@ window.onload = async function() {
   } else { await setupAuthListeners(); }
 
   document.getElementById('appContainer').style.display = 'block';
-
   document.getElementById('histInputDate').valueAsDate = new Date();
 
   ['income', 'kids800', 'kidsActiveHome', 'kidsActiveWork', 'currentSavings'].forEach(id => {
@@ -1363,7 +1359,7 @@ window.onload = async function() {
   });
   document.getElementById('selectReportPeriod').onchange = function() { renderReportTab(); };
 
-  renderHistory();
+  // Uruchamiamy obliczenia na start, upewniając się że UI zareaguje (nawet jeśli auth się ładuje z opóźnieniem)
   calculateAll(); 
 };
 </script>
