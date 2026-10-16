@@ -72,48 +72,26 @@
     .tab-content.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* --- DOLNY PASEK NAWIGACJI DLA TELEFONÓW (MOBILE-FIRST UI) --- */
+    /* --- DOLNY PASEK NAWIGACJI DLA TELEFONÓW --- */
     @media (max-width: 768px) {
-      body { 
-        padding-bottom: 90px; /* Dodajemy miejsce na dole strony, by pasek nie zasłaniał treści */
-      } 
+      body { padding-bottom: 90px; } 
       .nav-tabs {
-        position: fixed; 
-        bottom: 0; 
-        left: 0; 
-        width: 100%;
-        margin: 0; 
-        /* Env variable chroni przed najechaniem na dolny pasek (notch/home indicator) na nowych iPhone'ach */
+        position: fixed; bottom: 0; left: 0; width: 100%; margin: 0; 
         padding: 12px 8px calc(12px + env(safe-area-inset-bottom, 0px));
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(12px); /* Efekt matowego szkła */
-        border-top: 1px solid rgba(226, 232, 240, 0.8); 
-        border-bottom: none;
-        justify-content: space-around; 
-        gap: 4px; 
-        z-index: 999;
+        background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); 
+        border-top: 1px solid rgba(226, 232, 240, 0.8); border-bottom: none;
+        justify-content: space-around; gap: 4px; z-index: 999;
         box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.05);
       }
       .tab-btn {
-        flex-direction: column; 
-        font-size: 0.7rem; 
-        padding: 8px 4px; 
-        border-radius: 12px;
-        width: 33%; 
-        gap: 6px; 
-        white-space: normal; 
-        text-align: center; 
-        border: none !important; 
-        box-shadow: none !important; 
-        background: transparent !important;
-        line-height: 1.1;
+        flex-direction: column; font-size: 0.7rem; padding: 8px 4px; border-radius: 12px; width: 33%; gap: 6px; 
+        white-space: normal; text-align: center; border: none !important; box-shadow: none !important; background: transparent !important; line-height: 1.1;
       }
       .tab-btn i, .tab-btn svg { width: 22px; height: 22px; }
       .tab-btn.active { color: var(--primary); }
-      .tab-btn.active svg { stroke-width: 2.5px; } /* Aktywna ikona staje się grubsza */
+      .tab-btn.active svg { stroke-width: 2.5px; } 
     }
-    /* --------------------------------------------------------------- */
-
+    
     /* KARTY */
     .card { background: var(--card-bg); border: 1px solid rgba(226, 232, 240, 0.6); border-radius: 24px; padding: 24px; box-shadow: var(--card-shadow); transition: box-shadow 0.3s ease; margin-bottom: 24px; }
     .card:hover { box-shadow: var(--hover-shadow); }
@@ -164,18 +142,6 @@
     input:focus, select:focus { background-color: #fff; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
     .suffix { position: absolute; right: 14px; top: 12px; color: var(--text-muted); font-weight: 700; font-size: 0.9rem; pointer-events: none; }
 
-    /* SUWAKI */
-    .slider-group { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px dashed var(--border); pointer-events: none; }
-    .slider-group:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-    .slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .slider-header span { font-weight: 700; color: #334155; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; }
-    .slider-header strong { font-size: 1.15rem; color: var(--primary); font-weight: 800; background: #eff6ff; padding: 4px 10px; border-radius: 8px; }
-    
-    input[type="range"] { -webkit-appearance: none; width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; outline: none; margin: 10px 0; }
-    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--primary); box-shadow: 0 2px 6px rgba(37,99,235,0.4); cursor: default; }
-    input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; border: none; border-radius: 50%; background: var(--primary); box-shadow: 0 2px 6px rgba(37,99,235,0.4); cursor: default; }
-    .slider-info { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; display: flex; justify-content: space-between; font-weight: 500; }
-
     .goal-banner { background: #ecfdf5; border: 2px solid var(--success); border-radius: 16px; padding: 16px; margin-top: 12px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.05); }
     .goal-banner:hover { background: #d1fae5; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(16, 185, 129, 0.1); }
     .goal-banner input { width: 22px; height: 22px; margin-top: 2px; cursor: pointer; accent-color: var(--success); }
@@ -186,10 +152,6 @@
     button.btn-add:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3); }
     button.cancel-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #f1f5f9; color: var(--text-muted); border: 1.5px solid var(--border); padding: 12px 16px; border-radius: 12px; cursor: pointer; font-weight: 700; transition: all 0.2s; }
     button.cancel-btn:hover { background: #e2e8f0; color: var(--text-main); transform: translateY(-2px); }
-
-    .form-inline { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-    .form-inline input[type="text"] { flex: 1; min-width: 150px; }
-    .form-inline input[type="number"] { width: 110px; }
     
     .sprint-card { background: linear-gradient(to right, #f0fdf4, #dcfce7); border: 1px solid #86efac; border-radius: 20px; padding: 24px; margin-bottom: 24px; position: relative; overflow: hidden; box-shadow: 0 4px 15px rgba(34, 197, 94, 0.08); }
     .sprint-header { display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2; margin-bottom: 12px; }
@@ -199,7 +161,7 @@
     .progress-bar-bg { width: 100%; height: 12px; background: rgba(255,255,255,0.6); border-radius: 6px; margin-top: 16px; overflow: hidden; position: relative; z-index: 2; border: 1px solid #bbf7d0; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); }
     .progress-bar-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 6px; }
 
-    /* STATYSTYKI PILLSE Z GRYWALIZACJĄ */
+    /* STATYSTYKI Z GRYWALIZACJĄ */
     .stat-badge-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
     .stat-badge { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: center; }
     .stat-badge span { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
@@ -259,7 +221,6 @@
     .cat-legend-item.active-cat { background: #eff6ff; border-color: var(--primary); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1); }
 
     .forecast-card { background: linear-gradient(135deg, #faf5ff, #fdf4ff); border: 1px solid #f0abfc; border-radius: 24px; padding: 28px; margin-bottom: 28px; box-shadow: 0 4px 15px rgba(217, 70, 239, 0.05); }
-    
     .metric-box-tab3 { background: #fff; padding: 20px; border-radius: 16px; border: 1px solid #f5d0fe; box-shadow: 0 4px 10px rgba(0,0,0,0.02); display: flex; flex-direction: column; }
     .metric-box-tab3 .comparison-bar { margin-top: auto; padding-top: 12px; border-top: 1px solid #fdf4ff; display: flex; justify-content: space-between; align-items: center; }
     .metric-box-tab3 .comparison-bar span { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
@@ -400,46 +361,37 @@
           </div>
 
           <div class="subgrid-col">
+            <!-- CZYSTY EKRAN: MAPA ZAMIAST SUWAKÓW -->
             <div class="card">
-              <div style="margin-bottom: 24px;">
-                <h2 style="margin-bottom:6px;"><i data-lucide="scale"></i> 2. Idealne Proporcje</h2>
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0; font-weight: 500;">Model 50/20/30 blokuje nadmierne wydatki i pilnuje optymalnej drogi do bogacenia się.</p>
-              </div>
-
-              <div class="slider-group">
-                <div class="slider-header">
-                  <span><i data-lucide="home" style="width: 16px;"></i> Mieszkanie i Rachunki</span>
-                  <strong id="valHousing">0 PLN (30%)</strong>
+              <h2><i data-lucide="pie-chart"></i> 2. Idealny Budżet (50/20/30)</h2>
+              <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; font-weight: 500;">
+                Model 50/20/30 blokuje nadmierne wydatki i pilnuje optymalnej drogi do bogacenia się. Oto Twój bezpieczny przydział:
+              </p>
+              <div class="bar-group">
+                <div>
+                  <div class="bar-header"><span>Mieszkanie</span><strong id="barHousingVal">0 PLN (0%)</strong></div>
+                  <div class="bar-bg"><div id="barHousing" class="bar-fill fill-slate" style="width: 0%;"></div></div>
                 </div>
-                <input type="range" id="sliderHousing" min="0" max="100" step="1" value="0">
-                <div class="slider-info">Limit: 30% budżetu</div>
-              </div>
-
-              <div class="slider-group">
-                <div class="slider-header">
-                  <span><i data-lucide="shopping-basket" style="width: 16px;"></i> Żywność i Chemia</span>
-                  <strong id="valFood">0 PLN (15%)</strong>
+                <div>
+                  <div class="bar-header"><span>Jedzenie</span><strong id="barFoodVal">0 PLN (0%)</strong></div>
+                  <div class="bar-bg"><div id="barFood" class="bar-fill fill-blue" style="width: 0%;"></div></div>
                 </div>
-                <input type="range" id="sliderFood" min="0" max="100" step="1" value="0">
-                <div class="slider-info">Limit: 15% budżetu</div>
-              </div>
-
-              <div class="slider-group">
-                <div class="slider-header">
-                  <span><i data-lucide="car" style="width: 16px;"></i> Transport</span>
-                  <strong id="valTransport">0 PLN (5%)</strong>
+                <div>
+                  <div class="bar-header"><span>Transport</span><strong id="barTransportVal">0 PLN (0%)</strong></div>
+                  <div class="bar-bg"><div id="barTransport" class="bar-fill fill-amber" style="width: 0%;"></div></div>
                 </div>
-                <input type="range" id="sliderTransport" min="0" max="100" step="1" value="0">
-                <div class="slider-info">Limit: 5% budżetu</div>
-              </div>
-
-              <div class="slider-group" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
-                <div class="slider-header">
-                  <span><i data-lucide="credit-card" style="width: 16px;"></i> Zobowiązania i Raty</span>
-                  <strong id="valOther">0 PLN (0%)</strong>
+                <div>
+                  <div class="bar-header"><span>Raty i Długi</span><strong id="barOtherVal">0 PLN (0%)</strong></div>
+                  <div class="bar-bg"><div id="barOther" class="bar-fill fill-slate" style="width: 0%; background: #94a3b8;"></div></div>
                 </div>
-                <input type="range" id="sliderOther" min="0" max="100" step="1" value="0">
-                <div class="slider-info">Zalecane: 0% (Brak długów)</div>
+                <div style="margin-top: 8px;">
+                  <div class="bar-header"><span style="color: var(--success);"><i data-lucide="trending-up" style="width:14px; display:inline; margin-bottom:-2px;"></i> Inwestycje/Oszczędności</span><strong style="color: var(--success);" id="barSavingsVal">0 PLN (0%)</strong></div>
+                  <div class="bar-bg" style="height: 14px;"><div id="barSavings" class="bar-fill fill-emerald" style="width: 0%;"></div></div>
+                </div>
+                <div>
+                  <div class="bar-header"><span style="color: #9333ea;"><i data-lucide="gamepad-2" style="width:14px; display:inline; margin-bottom:-2px;"></i> Zachcianki (Luz)</span><strong style="color: #9333ea;" id="barFunVal">0 PLN (0%)</strong></div>
+                  <div class="bar-bg" style="height: 14px;"><div id="barFun" class="bar-fill fill-purple" style="width: 0%;"></div></div>
+                </div>
               </div>
             </div>
           </div>
@@ -475,35 +427,6 @@
           </div>
         </div>
 
-        <div class="card">
-          <h2><i data-lucide="pie-chart"></i> Mapa Podziału Pieniędzy</h2>
-          <div class="bar-group">
-            <div>
-              <div class="bar-header"><span>Mieszkanie</span><strong id="barHousingVal">0 PLN (0%)</strong></div>
-              <div class="bar-bg"><div id="barHousing" class="bar-fill fill-slate" style="width: 0%;"></div></div>
-            </div>
-            <div>
-              <div class="bar-header"><span>Jedzenie</span><strong id="barFoodVal">0 PLN (0%)</strong></div>
-              <div class="bar-bg"><div id="barFood" class="bar-fill fill-blue" style="width: 0%;"></div></div>
-            </div>
-            <div>
-              <div class="bar-header"><span>Transport</span><strong id="barTransportVal">0 PLN (0%)</strong></div>
-              <div class="bar-bg"><div id="barTransport" class="bar-fill fill-amber" style="width: 0%;"></div></div>
-            </div>
-            <div>
-              <div class="bar-header"><span>Raty</span><strong id="barOtherVal">0 PLN (0%)</strong></div>
-              <div class="bar-bg"><div id="barOther" class="bar-fill fill-slate" style="width: 0%; background: #94a3b8;"></div></div>
-            </div>
-            <div style="margin-top: 8px;">
-              <div class="bar-header"><span style="color: var(--success);"><i data-lucide="trending-up" style="width:14px; display:inline; margin-bottom:-2px;"></i> Inwestycje/Oszczędności</span><strong style="color: var(--success);" id="barSavingsVal">0 PLN (0%)</strong></div>
-              <div class="bar-bg" style="height: 14px;"><div id="barSavings" class="bar-fill fill-emerald" style="width: 0%;"></div></div>
-            </div>
-            <div>
-              <div class="bar-header"><span style="color: #9333ea;"><i data-lucide="gamepad-2" style="width:14px; display:inline; margin-bottom:-2px;"></i> Zachcianki (Luz)</span><strong style="color: #9333ea;" id="barFunVal">0 PLN (0%)</strong></div>
-              <div class="bar-bg" style="height: 14px;"><div id="barFun" class="bar-fill fill-purple" style="width: 0%;"></div></div>
-            </div>
-          </div>
-        </div>
       </div>
 
     </div>
@@ -515,25 +438,37 @@
     <div class="history-top-grid">
       
       <div class="history-left-stack">
+        
+        <!-- ZAAWANSOWANY FORMULARZ Z KOSZYKIEM -->
         <div class="card card-compact" id="expenseFormCard" style="transition: background-color 0.3s;">
           <h2 id="formTitle" style="margin-bottom: 6px;"><i data-lucide="pen-tool"></i> Dodaj wydatek</h2>
           <p id="formSubtitle" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; font-weight: 500;">
-            Wybierz precyzyjną datę, aby budować odznaki "Dni bez wydatków".
+            Masz długi paragon z marketu? Użyj przycisku "Rozbij paragon", by dokładnie przypisać kwoty!
           </p>
 
-          <div class="form-inline">
-            <input type="date" id="histInputDate" style="width: 150px; font-weight: 700; cursor: pointer;">
-            
-            <select id="histCategory" style="width: 160px; font-weight: 700; color: var(--primary);">
-              <option value="Mieszkanie">1. Mieszkanie</option>
-              <option value="Jedzenie">2. Jedzenie</option>
-              <option value="Dziecko">3. Dziecko</option>
-              <option value="Inne">4. Inne</option>
-            </select>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px;">
+            <input type="date" id="histInputDate" style="width: 150px; font-weight: 700; cursor: pointer;" title="Data wydatku">
+            <input type="text" id="histName" placeholder="Nazwa sklepu (np. Biedronka, Opłaty)" style="flex: 1; min-width: 200px;">
+          </div>
+          
+          <div id="splitItemsContainer" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+            <!-- Pierwsza kategoria -->
+            <div class="split-item" style="display: flex; gap: 12px; align-items: center;">
+              <select class="split-category" style="width: 160px; font-weight: 700; color: var(--primary);">
+                <option value="Mieszkanie">1. Mieszkanie</option>
+                <option value="Jedzenie" selected>2. Jedzenie</option>
+                <option value="Dziecko">3. Dziecko</option>
+                <option value="Inne">4. Inne</option>
+              </select>
+              <input type="number" class="split-amount" placeholder="Kwota (PLN)" min="0" style="width: 120px;">
+              <button type="button" class="del-btn remove-split-btn" style="display:none;" onclick="this.parentElement.remove()"><i data-lucide="minus"></i></button>
+            </div>
+          </div>
 
-            <input type="text" id="histName" placeholder="Opis (np. Prąd, Biedronka)">
-            <input type="number" id="histAmount" placeholder="Kwota" min="0" style="width: 120px;">
-            <button type="button" class="btn-add" id="addHistBtn"><i data-lucide="plus-circle" style="width:18px;"></i> Zapisz</button>
+          <button type="button" class="cancel-btn" id="addSplitBtn" style="font-size: 0.8rem; padding: 6px 12px; margin-bottom: 16px; display: inline-flex;"><i data-lucide="split" style="width:14px;"></i> Rozbij paragon na kolejną kategorię</button>
+
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="button" class="btn-add" id="addHistBtn"><i data-lucide="plus-circle" style="width:18px;"></i> Zapisz rachunek</button>
             <button type="button" class="cancel-btn" id="cancelEditBtn" style="display: none;"><i data-lucide="x-circle" style="width:18px;"></i> Anuluj</button>
           </div>
           
@@ -723,9 +658,7 @@ try {
   window.localStorage.setItem('__test__', '1');
   window.localStorage.removeItem('__test__');
   safeStorage = window.localStorage;
-} catch(e) {
-  safeStorage = memoryStorage;
-}
+} catch(e) { safeStorage = memoryStorage; }
 
 function initSupabase() {
   try {
@@ -761,7 +694,6 @@ document.getElementById('toggleAuthBtn').onclick = function() {
   document.getElementById('authError').textContent = '';
 };
 
-// Funkcje Auth
 async function handleLogin() {
   const errorEl = document.getElementById('authError');
   errorEl.style.color = 'var(--text-muted)'; errorEl.innerHTML = '<i data-lucide="loader" class="lucide-spin" style="width:16px; margin-bottom:-3px;"></i> Łączenie...'; lucide.createIcons();
@@ -798,7 +730,7 @@ async function handleRegister() {
 }
 
 async function handleLogout() { 
-  try { safeStorage.removeItem('walletwise_settings'); } catch(e){} // CZYŚCIMY DANE LOKALNE!
+  try { safeStorage.removeItem('walletwise_settings'); } catch(e){} 
   if (supabase) await supabase.auth.signOut(); 
   window.location.reload(); 
 }
@@ -837,9 +769,7 @@ function triggerSettingsSave() {
   };
   
   if (isLoggedIn) {
-    // JESTEŚ ZALOGOWANY - natychmiast wrzucamy do Cache na wypadek odświeżenia
     try { safeStorage.setItem('walletwise_settings', JSON.stringify(s)); } catch(e){}
-
     if (supabase) {
       var syncIcon = document.getElementById('cloudSyncStatus');
       if(syncIcon) { 
@@ -852,7 +782,6 @@ function triggerSettingsSave() {
       settingsSaveTimeout = setTimeout(saveSettingsToCloud, 1000);
     }
   } else {
-    // JESTEŚ GOŚCIEM - Nic nie zapisujemy na stałe, formularze zresetują się po F5
     try { safeStorage.removeItem('walletwise_settings'); } catch(e){}
   }
 }
@@ -905,18 +834,15 @@ async function setupAuthListeners() {
       const avatarEl = document.getElementById('userAvatarInitials');
       if (avatarEl) avatarEl.textContent = initials;
       
-      // ZACIĄGANIE DANYCH
       const cloudSettings = session.user.user_metadata?.budget_settings;
       if (cloudSettings) {
         applySettings(cloudSettings);
         try { safeStorage.setItem('walletwise_settings', JSON.stringify(cloudSettings)); } catch(e){}
       } 
-      calculateAll();
-      loadCloudData();
+      calculateAll(); loadCloudData();
     } else {
-      // OFFLINE / GOŚĆ
       isLoggedIn = false;
-      try { safeStorage.removeItem('walletwise_settings'); } catch(e){} // Upewniamy się, że nie ma resztek
+      try { safeStorage.removeItem('walletwise_settings'); } catch(e){}
       applySettings({ income: '', kids800: '', kidsActiveHome: '', kidsActiveWork: '', currentSavings: '', rushEmergencyFund: false });
       calculateAll();
     }
@@ -984,11 +910,6 @@ function calculateAll() {
   var savings = totalInc - survival - funMoney; 
   var dailyFun = Math.round(funMoney / 30);
   var safeInc = Math.max(totalInc, 1); 
-
-  document.getElementById('sliderHousing').max = safeInc; document.getElementById('sliderHousing').value = housing; document.getElementById('valHousing').textContent = housing.toLocaleString('pl-PL') + ' PLN (30%)';
-  document.getElementById('sliderFood').max = safeInc; document.getElementById('sliderFood').value = food; document.getElementById('valFood').textContent = food.toLocaleString('pl-PL') + ' PLN (15%)';
-  document.getElementById('sliderTransport').max = safeInc; document.getElementById('sliderTransport').value = transport; document.getElementById('valTransport').textContent = transport.toLocaleString('pl-PL') + ' PLN (5%)';
-  document.getElementById('sliderOther').max = safeInc; document.getElementById('sliderOther').value = other; document.getElementById('valOther').textContent = other.toLocaleString('pl-PL') + ' PLN (0%)';
 
   var fbLabel = document.getElementById('funBadgeLabel');
   fbLabel.innerHTML = rush ? '<i data-lucide="party-popper" style="width: 14px;"></i> Zachcianki (10% budżetu)' : '<i data-lucide="party-popper" style="width: 14px;"></i> Zachcianki (20% budżetu)';
@@ -1073,7 +994,6 @@ function updateCategoryChart(periodItems) {
   }
 }
 
-// OBLICZANIE NO-SPEND DAYS
 function updateNoSpendDaysBadge() {
   var d = new Date();
   var curYear = d.getFullYear();
@@ -1140,20 +1060,48 @@ function renderHistoryTable() {
   updateNoSpendDaysBadge();
 }
 
+function resetExpenseForm() {
+  document.getElementById('histName').value = '';
+  document.getElementById('histInputDate').valueAsDate = new Date();
+  
+  var container = document.getElementById('splitItemsContainer');
+  container.innerHTML = `
+    <div class="split-item" style="display: flex; gap: 12px; align-items: center;">
+      <select class="split-category" style="width: 160px; font-weight: 700; color: var(--primary);">
+        <option value="Mieszkanie">1. Mieszkanie</option>
+        <option value="Jedzenie" selected>2. Jedzenie</option>
+        <option value="Dziecko">3. Dziecko</option>
+        <option value="Inne">4. Inne</option>
+      </select>
+      <input type="number" class="split-amount" placeholder="Kwota (PLN)" min="0" style="width: 120px;">
+      <button type="button" class="del-btn remove-split-btn" style="display:none;" onclick="this.parentElement.remove()"><i data-lucide="minus"></i></button>
+    </div>
+  `;
+  document.getElementById('addSplitBtn').style.display = 'inline-flex';
+  lucide.createIcons();
+}
+
 function startEditEntry(id) {
   var entry = historyLogs.find(e => e.id === id);
   if (!entry) return;
   editingEntryId = id;
   
-  if(entry.exact_date) {
-    document.getElementById('histInputDate').value = entry.exact_date;
-  } else {
+  resetExpenseForm();
+
+  if(entry.exact_date) { document.getElementById('histInputDate').value = entry.exact_date; } 
+  else {
     var itemMonth = entry.month_num || entry.monthNum || entry.month.split('-')[1];
     var itemYear = entry.year || entry.month.split('-')[0];
     document.getElementById('histInputDate').value = itemYear + '-' + itemMonth + '-01';
   }
   
-  document.getElementById('histCategory').value = entry.category; document.getElementById('histName').value = entry.name; document.getElementById('histAmount').value = entry.amount;
+  document.getElementById('histName').value = entry.name; 
+  document.querySelector('.split-category').value = entry.category;
+  document.querySelector('.split-amount').value = entry.amount;
+  
+  // W trybie edycji ukrywamy dodawanie kolejnych kategorii paragonu
+  document.getElementById('addSplitBtn').style.display = 'none';
+
   document.getElementById('formTitle').innerHTML = '<i data-lucide="pencil" style="color:var(--primary)"></i> Edytujesz wydatek';
   document.getElementById('addHistBtn').innerHTML = '<i data-lucide="save" style="width:18px;"></i> Zapisz zmiany';
   document.getElementById('cancelEditBtn').style.display = 'inline-flex';
@@ -1165,12 +1113,10 @@ function startEditEntry(id) {
 function cancelEditMode() {
   editingEntryId = null;
   document.getElementById('formTitle').innerHTML = '<i data-lucide="pen-tool"></i> Dodaj wydatek';
-  document.getElementById('addHistBtn').innerHTML = '<i data-lucide="plus-circle" style="width:18px;"></i> Zapisz'; 
+  document.getElementById('addHistBtn').innerHTML = '<i data-lucide="plus-circle" style="width:18px;"></i> Zapisz rachunek'; 
   document.getElementById('cancelEditBtn').style.display = 'none';
   document.getElementById('expenseFormCard').style.backgroundColor = '#ffffff';
-  document.getElementById('histName').value = ''; document.getElementById('histAmount').value = '';
-  document.getElementById('histInputDate').valueAsDate = new Date();
-  lucide.createIcons();
+  resetExpenseForm();
 }
 
 function getAveragedCostsFromHistory() {
@@ -1366,36 +1312,81 @@ window.onload = async function() {
   var rushEl = document.getElementById('rushEmergencyFund');
   if(rushEl) { rushEl.addEventListener('change', triggerSettingsSave); }
 
+  // LOGIKA DODAWANIA KOLEJNYCH PÓL PARAGONU
+  document.getElementById('addSplitBtn').onclick = function() {
+    var container = document.getElementById('splitItemsContainer');
+    var row = document.createElement('div');
+    row.className = 'split-item';
+    row.style.cssText = 'display: flex; gap: 12px; align-items: center; animation: fadeIn 0.2s;';
+    row.innerHTML = `
+      <select class="split-category" style="width: 160px; font-weight: 700; color: var(--primary);">
+        <option value="Mieszkanie">1. Mieszkanie</option>
+        <option value="Jedzenie">2. Jedzenie</option>
+        <option value="Dziecko">3. Dziecko</option>
+        <option value="Inne" selected>4. Inne</option>
+      </select>
+      <input type="number" class="split-amount" placeholder="Kwota (PLN)" min="0" style="width: 120px;">
+      <button type="button" class="del-btn remove-split-btn" onclick="this.parentElement.remove()"><i data-lucide="minus" style="width:16px;"></i></button>
+    `;
+    container.appendChild(row);
+    lucide.createIcons();
+  };
+
+  // ZAPISYWANIE PARAGONU DO BAZY
   document.getElementById('addHistBtn').onclick = async function() {
     var dateVal = document.getElementById('histInputDate').value; 
-    var selCat = document.getElementById('histCategory').value; 
     var n = document.getElementById('histName').value.trim(); 
-    var a = parseFloat(document.getElementById('histAmount').value);
+    var splitRows = document.querySelectorAll('.split-item');
 
-    if (dateVal && n && !isNaN(a) && a > 0) {
-      var selY = dateVal.split('-')[0];
-      var selM = dateVal.split('-')[1];
-      var p = selY + '-' + selM;
+    if (!dateVal || !n) { alert("Podaj datę i nazwę sklepu (opisu)."); return; }
 
-      if (editingEntryId !== null) {
-        if (isLoggedIn && supabase) {
-          const { error } = await supabase.from('history_logs').update({ month: p, year: selY, month_num: selM, exact_date: dateVal, category: selCat, name: n, amount: a }).eq('id', editingEntryId);
-          if (error) { alert("Błąd: " + error.message); return; }
+    var validItemsToSave = [];
+    splitRows.forEach(row => {
+        var cat = row.querySelector('.split-category').value;
+        var amt = parseFloat(row.querySelector('.split-amount').value);
+        if (!isNaN(amt) && amt > 0) {
+            validItemsToSave.push({ cat: cat, amt: amt });
         }
-        var entry = historyLogs.find(e => e.id === editingEntryId);
-        if(entry) { entry.month=p; entry.year=selY; entry.monthNum=selM; entry.exact_date=dateVal; entry.category=selCat; entry.name=n; entry.amount=a; }
-        cancelEditMode(); renderHistory();
-      } else {
-        if (isLoggedIn && supabase) {
-          const { data, error } = await supabase.from('history_logs').insert([{ month: p, year: selY, month_num: selM, exact_date: dateVal, category: selCat, name: n, amount: a }]).select();
-          if (!error && data) { historyLogs.push(data[0]); document.getElementById('histName').value = ''; document.getElementById('histAmount').value = ''; renderHistory(); }
-        } else {
-          historyLogs.push({ id: Date.now(), month: p, year: selY, monthNum: selM, exact_date: dateVal, category: selCat, name: n, amount: a });
-          document.getElementById('histName').value = ''; document.getElementById('histAmount').value = ''; renderHistory();
-        }
+    });
+
+    if (validItemsToSave.length === 0) { alert("Podaj przynajmniej jedną kwotę większą od 0."); return; }
+
+    var selY = dateVal.split('-')[0];
+    var selM = dateVal.split('-')[1];
+    var p = selY + '-' + selM;
+
+    if (editingEntryId !== null) {
+      // Tryb edycji obsługuje jeden wiersz
+      var first = validItemsToSave[0];
+      if (isLoggedIn && supabase) {
+        const { error } = await supabase.from('history_logs').update({ month: p, year: selY, month_num: selM, exact_date: dateVal, category: first.cat, name: n, amount: first.amt }).eq('id', editingEntryId);
+        if (error) { alert("Błąd: " + error.message); return; }
       }
+      var entry = historyLogs.find(e => e.id === editingEntryId);
+      if(entry) { entry.month=p; entry.year=selY; entry.monthNum=selM; entry.exact_date=dateVal; entry.category=first.cat; entry.name=n; entry.amount=first.amt; }
+      cancelEditMode(); renderHistory();
     } else {
-      alert("Wypełnij wszystkie pola, w tym precyzyjną datę.");
+      // Tryb nowego zapisu - wspiera rozbicie paragonu
+      var newRecords = [];
+      validItemsToSave.forEach(item => {
+        newRecords.push({ month: p, year: selY, month_num: selM, exact_date: dateVal, category: item.cat, name: n, amount: item.amt });
+      });
+
+      if (isLoggedIn && supabase) {
+        const { data, error } = await supabase.from('history_logs').insert(newRecords).select();
+        if (!error && data) { 
+          historyLogs = historyLogs.concat(data); 
+          resetExpenseForm(); 
+          renderHistory(); 
+        } else { alert("Błąd bazy: " + error.message); }
+      } else {
+        newRecords.forEach((rec, i) => {
+          rec.id = Date.now() + i;
+          rec.monthNum = rec.month_num;
+          historyLogs.push(rec);
+        });
+        resetExpenseForm(); renderHistory();
+      }
     }
   };
 
