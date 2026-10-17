@@ -164,17 +164,19 @@
     .bar-fill { height: 100%; border-radius: 6px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
     .fill-slate { background: #475569; } .fill-amber { background: var(--warning); } .fill-emerald { background: var(--success); } .fill-blue { background: var(--primary); } .fill-purple { background: #a855f7; }
 
-    /* TABELE */
+    /* TABELE (Zmienione wyrównanie i zawijanie tekstu) */
     .table-wrapper { overflow-x: auto; margin-top: 16px; border-radius: 16px; border: 1px solid var(--border); background: #fff; }
     .styled-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
-    .styled-table th { background: #f8fafc; color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; border-bottom: 2px solid var(--border); padding: 16px; text-align: left; }
-    .styled-table td { padding: 16px; border-bottom: 1px dashed var(--border); vertical-align: middle; color: #334155; font-weight: 500; }
+    .styled-table th { background: #f8fafc; color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; border-bottom: 2px solid var(--border); padding: 16px; text-align: center; }
+    .styled-table td { padding: 16px; border-bottom: 1px dashed var(--border); vertical-align: middle; color: #334155; font-weight: 500; text-align: center; }
     .styled-table tbody tr:hover { background-color: #f8fafc; transition: background-color 0.2s; }
     .styled-table tr:last-child td { border-bottom: none; }
+    
     .col-okres { white-space: nowrap; width: 1%; color: var(--text-main); font-weight: 800; }
-    .col-opis { white-space: normal; word-wrap: break-word; max-width: 250px; }
-    .col-amount { font-weight: 800; color: var(--text-main); text-align: right; }
-    .col-actions { text-align: right; white-space: nowrap; }
+    .col-cat { white-space: normal; word-wrap: break-word; max-width: 140px; }
+    .col-opis { white-space: normal; word-wrap: break-word; max-width: 200px; }
+    .col-amount { font-weight: 800; color: var(--text-main); text-align: center; white-space: nowrap; }
+    .col-actions { text-align: center; white-space: nowrap; }
     
     button.edit-btn, button.del-btn { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; border: none; cursor: pointer; transition: all 0.2s; margin-left: 6px; }
     button.edit-btn { background: #eff6ff; color: var(--primary); }
@@ -187,17 +189,18 @@
     .empty-state strong { display: block; font-size: 1.15rem; color: var(--text-main); margin-bottom: 8px; font-weight: 800; }
 
     /* SYSTEM KATEGORII BADGES */
-    .cat-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 50px; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+    .cat-badge { display: inline-flex; align-items: center; justify-content: center; text-align: center; gap: 4px; padding: 6px 12px; border-radius: 50px; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; white-space: normal; word-break: break-word; max-width: 100%; line-height: 1.2; }
     .cat-bucket-needs { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; } 
     .cat-bucket-fun { background: #faf5ff; color: #9333ea; border: 1px solid #e9d5ff; } 
     .cat-bucket-savings { background: #ecfdf5; color: #166534; border: 1px solid #a7f3d0; } 
     .cat-bucket-unknown { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
 
-    .history-top-grid { display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 24px; align-items: stretch; }
+    /* GRID MASONRY LAYOUT DLA TAB 2 */
+    .history-top-grid { display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 24px; align-items: start; }
     .history-left-stack { display: flex; flex-direction: column; gap: 24px; }
-    @media (min-width: 1024px) { .history-top-grid { grid-template-columns: 1.25fr 0.75fr; } }
+    @media (min-width: 1024px) { .history-top-grid { grid-template-columns: 1.35fr 0.65fr; } }
 
-    .chart-card-side { display: flex; flex-direction: column; justify-content: flex-start; }
+    .chart-card-side { display: flex; flex-direction: column; justify-content: flex-start; align-self: start; }
     .chart-box { position: relative; max-width: 220px; margin: 0 auto; padding: 10px 0; }
     
     /* AKORDEON LEGENDY - SIATKA 3 KOLUMNY COMPACT */
@@ -465,10 +468,12 @@
       </div>
     </div>
 
+    <!-- MASONRY GRID: Dzieli formularz z tabelą na lewo, a wykres na prawo -->
     <div class="history-top-grid">
       <div class="history-left-stack">
         
-        <div class="card card-compact" id="expenseFormCard" style="transition: background-color 0.3s;">
+        <!-- Formularz Dodawania -->
+        <div class="card card-compact" id="expenseFormCard" style="transition: background-color 0.3s; margin-bottom: 0;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
              <h2 id="formTitle" style="margin: 0;"><i data-lucide="pen-tool"></i> Dodaj wydatek</h2>
              <button type="button" class="category-manage-btn" onclick="openCategoryManager()"><i data-lucide="tags" style="width:16px;"></i> Kategorie</button>
@@ -513,8 +518,48 @@
           </div>
         </div>
 
-      </div>
+        <!-- Tabela przeniesiona na lewą stronę -->
+        <div class="card" style="margin-bottom: 0; border-radius: 20px;">
+          <div class="filter-bar">
+            <h2 style="margin: 0; font-size: 1.15rem;"><i data-lucide="list"></i> Wpisy w Dzienniku</h2>
+            <div class="filter-group">
+              <select id="histFilterYear" style="width: auto; padding: 8px 12px; font-weight: 700;"></select>
+              <select id="histFilterMonth" style="width: auto; padding: 8px 12px; font-weight: 700;"></select>
+              <select id="histFilterCategory" style="width: auto; padding: 8px 12px; font-weight: 700; color: var(--primary);">
+                <option value="ALL">Wszystkie kategorie</option>
+                <!-- Dynamic Categories -->
+              </select>
+              <select id="histSortOrder" style="width: auto; padding: 8px 12px; font-weight: 700; background: #fff;">
+                <option value="desc">Od najnowszych</option>
+                <option value="asc">Od najstarszych</option>
+              </select>
+            </div>
+          </div>
 
+          <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0 8px 12px 8px;">
+            <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted);">Suma widocznych z filtrem:</span>
+            <strong id="filteredMonthSum" style="font-size: 1.2rem; color: var(--text-main); font-weight: 900;">0 PLN</strong>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="styled-table">
+              <thead>
+                <tr>
+                  <th class="col-okres">Data wydatku</th>
+                  <th class="col-cat">Kategoria</th>
+                  <th class="col-opis">Opis</th>
+                  <th class="col-amount">Kwota</th>
+                  <th class="col-actions">Akcje</th>
+                </tr>
+              </thead>
+              <tbody id="historyTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div> <!-- Koniec lewej kolumny -->
+
+      <!-- Prawa kolumna (Wykres) -->
       <div class="card chart-card-side">
         <div>
           <h2 style="margin-bottom: 6px;" id="chartTitle"><i data-lucide="donut"></i> Podsumowanie Budżetu</h2>
@@ -528,44 +573,6 @@
         <div id="categoryLegendList" class="cat-legend-list"></div>
       </div>
 
-    </div>
-
-    <div class="card" style="margin-bottom: 0; border-radius: 20px;">
-      <div class="filter-bar">
-        <h2 style="margin: 0; font-size: 1.15rem;"><i data-lucide="list"></i> Wpisy w Dzienniku</h2>
-        <div class="filter-group">
-          <select id="histFilterYear" style="width: auto; padding: 8px 12px; font-weight: 700;"></select>
-          <select id="histFilterMonth" style="width: auto; padding: 8px 12px; font-weight: 700;"></select>
-          <select id="histFilterCategory" style="width: auto; padding: 8px 12px; font-weight: 700; color: var(--primary);">
-            <option value="ALL">Wszystkie kategorie</option>
-            <!-- Dynamic Categories -->
-          </select>
-          <select id="histSortOrder" style="width: auto; padding: 8px 12px; font-weight: 700; background: #fff;">
-            <option value="desc">Od najnowszych</option>
-            <option value="asc">Od najstarszych</option>
-          </select>
-        </div>
-      </div>
-
-      <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0 8px 12px 8px;">
-        <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted);">Suma widocznych z filtrem:</span>
-        <strong id="filteredMonthSum" style="font-size: 1.2rem; color: var(--text-main); font-weight: 900;">0 PLN</strong>
-      </div>
-
-      <div class="table-wrapper">
-        <table class="styled-table">
-          <thead>
-            <tr>
-              <th class="col-okres">Data wydatku</th>
-              <th>Kategoria</th>
-              <th class="col-opis">Opis</th>
-              <th class="col-amount">Kwota</th>
-              <th class="col-actions">Akcje</th>
-            </tr>
-          </thead>
-          <tbody id="historyTableBody"></tbody>
-        </table>
-      </div>
     </div>
 
   </div>
@@ -641,10 +648,10 @@
         <table class="styled-table">
           <thead>
             <tr>
-              <th class="col-okres">Kategoria</th>
+              <th class="col-cat">Kategoria</th>
               <th class="col-opis">Opis wydatku</th>
               <th class="col-amount">Kwota</th>
-              <th style="text-align: right;">Udział w miesiącu</th>
+              <th style="text-align: center;">Udział w miesiącu</th>
             </tr>
           </thead>
           <tbody id="monthDetailsBody"></tbody>
@@ -1106,7 +1113,6 @@ function updateCategoryChart(periodItems) {
 
   var labels = []; var dataVals = []; var bgColors = [];
 
-  // Twarde, wysokokontrastowe palety (zamiast samej przezroczystości)
   var palettes = {
     needs: ['#2563eb', '#93c5fd', '#1e3a8a', '#60a5fa', '#172554', '#3b82f6', '#bfdbfe', '#1d4ed8', '#1e40af'],
     fun: ['#9333ea', '#d8b4fe', '#4c1d95', '#c084fc', '#3b0764', '#a855f7', '#e9d5ff', '#7e22ce', '#581c87'],
@@ -1122,7 +1128,6 @@ function updateCategoryChart(periodItems) {
     subCats.forEach((cName, idx) => {
       labels.push(cName);
       dataVals.push(catTotals[activeBucket][cName]);
-      // Zamiast przezroczystości, pobieramy gotowe naprzemienne kolory z palety:
       bgColors.push(palettes[activeBucket][idx % palettes[activeBucket].length]);
     });
   }
@@ -1266,7 +1271,7 @@ function renderHistoryTable() {
     
     var tr = document.createElement('tr');
     tr.innerHTML = '<td class="col-okres">' + displayDate + '</td>' +
-                   '<td><span class="cat-badge cat-bucket-' + b + '">' + cat + '</span></td>' +
+                   '<td class="col-cat"><span class="cat-badge cat-bucket-' + b + '">' + cat + '</span></td>' +
                    '<td class="col-opis"><strong>' + tableItems[k].name + '</strong></td>' +
                    '<td class="col-amount">' + Number(tableItems[k].amount).toLocaleString('pl-PL') + ' PLN</td>' +
                    '<td class="col-actions">' +
@@ -1490,9 +1495,9 @@ function renderReportTab() {
       var b = getCategoryBucket(cat);
       var pct = tot > 0 ? Math.round((Number(item.amount) / tot) * 100) : 0;
       var tr = document.createElement('tr');
-      tr.innerHTML = '<td class="col-okres"><span class="cat-badge cat-bucket-' + b + '">' + cat + '</span></td>' +
+      tr.innerHTML = '<td class="col-cat"><span class="cat-badge cat-bucket-' + b + '">' + cat + '</span></td>' +
                      '<td class="col-opis"><strong>' + item.name + '</strong></td>' +
-                     '<td class="col-amount">' + Number(item.amount).toLocaleString('pl-PL') + ' PLN</td><td style="text-align: right; color: var(--text-muted); font-weight: 700;">' + pct + '%</td>';
+                     '<td class="col-amount">' + Number(item.amount).toLocaleString('pl-PL') + ' PLN</td><td style="text-align: center; color: var(--text-muted); font-weight: 700;">' + pct + '%</td>';
       tbody.appendChild(tr);
     });
   }
