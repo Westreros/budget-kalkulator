@@ -925,6 +925,9 @@ function calculateAll() {
 
   var setBar = function(id, val) { document.getElementById(id).style.width = totalInc > 0 ? (Math.min(100, (val / safeInc) * 100) + '%') : '0%'; };
   setBar('barHousing', housing); setBar('barFood', food); setBar('barTransport', transport); setBar('barOther', other); setBar('barSavings', savings); setBar('barFun', funMoney);
+  
+  // Real-time sync z zakładką Raportu (Gdyby ktoś podglądał ją przy szerokim ekranie lub po szybkim powrocie)
+  renderReportTab();
 }
 
 function updateHistoryFilterDropdowns() {
@@ -986,7 +989,6 @@ function updateNoSpendDaysBadge() {
   
   var daysPassedInMonth = d.getDate(); 
   
-  // Zliczamy tylko i wyłącznie zachcianki ('Inne') jako złamanie passy!
   var currentMonthEntries = historyLogs.filter(e => e.month === currentPeriod && e.category === 'Inne');
   var uniqueExpenseDates = new Set();
   
@@ -1177,38 +1179,34 @@ async function handleExcelUpload(e) {
 
 function renderReportTab() {
   var totalInc = getTotalIncome(); var rush = document.getElementById('rushEmergencyFund').checked;
-  
+  var realFunTarget = rush ? 0.10 : 0.20; 
+  var idealSurvival = Math.round(totalInc * 0.50);
+  var idealFun = Math.round(totalInc * realFunTarget);
+  var idealSavings = totalInc - idealSurvival - idealFun;
+
   var sel = document.getElementById('selectReportPeriod'); var curSel = sel.value;
-  var uniquePeriods = [...new Set(historyLogs.map(e => e.month))].sort().reverse(); sel.innerHTML = '';
+  var uniquePeriods = [...new Set(historyLogs.map(e => e.month))].sort().reverse(); 
+  sel.innerHTML = '';
 
+  var filtered = [];
   if (uniquePeriods.length === 0) {
-    sel.innerHTML = '<option value="">Brak danych</option>'; document.getElementById('monthTotalExpense').textContent = '0 PLN';
-    document.getElementById('monthDetailsBody').innerHTML = '<tr><td colspan="4"><div class="empty-state"><i data-lucide="search-x"></i><strong>Brak danych analitycznych</strong>Wypełnij dziennik, by zobaczyć podsumowanie.</div></td></tr>'; 
-    document.getElementById('forecastSurvivalVal').textContent = '0 PLN'; document.getElementById('forecastSavingsVal').textContent = '0 PLN'; document.getElementById('forecastFunVal').textContent = '0 PLN'; document.getElementById('forecastDailyFunVal').textContent = '0 PLN / dzień';
-    document.getElementById('idealSurvivalVal').textContent = '0 PLN'; document.getElementById('idealSavingsVal').textContent = '0 PLN'; document.getElementById('idealFunVal').textContent = '0 PLN'; document.getElementById('idealDailyFunVal').textContent = '0 PLN';
-    document.getElementById('diffSurvivalBadge').textContent = '0 PLN'; document.getElementById('diffSavingsBadge').textContent = '0 PLN'; document.getElementById('diffFunBadge').textContent = '0 PLN';
-    setTimeout(() => lucide.createIcons(), 10); return;
+    sel.innerHTML = '<option value="">Brak danych</option>'; 
+  } else {
+    uniquePeriods.forEach(p => { var opt = document.createElement('option'); opt.value = p; opt.textContent = formatPeriodToPL(p); sel.appendChild(opt); });
+    sel.value = uniquePeriods.includes(curSel) ? curSel : uniquePeriods[0];
+    filtered = historyLogs.filter(e => e.month === sel.value);
   }
-
-  uniquePeriods.forEach(p => { var opt = document.createElement('option'); opt.value = p; opt.textContent = formatPeriodToPL(p); sel.appendChild(opt); });
-  sel.value = uniquePeriods.includes(curSel) ? curSel : uniquePeriods[0];
   
-  var filtered = historyLogs.filter(e => e.month === sel.value);
   var tot = filtered.reduce((acc, curr) => acc + Number(curr.amount), 0);
   
-  // ZMIANA: Zlicza Koszty Przetrwania (Mieszkanie, Jedzenie, Dziecko) i Fun Money (Inne) BEZPOŚREDNIO Z WYBRANEGO MIESIĄCA
   var realSurvival = 0;
   var realFun = 0;
   filtered.forEach(item => {
     if (item.category === 'Inne') realFun += Number(item.amount);
     else realSurvival += Number(item.amount);
   });
-  var realSavings = totalInc - realSurvival - realFun;
-
-  var realFunTarget = rush ? 0.10 : 0.20; 
-  var idealSurvival = Math.round(totalInc * 0.50);
-  var idealFun = Math.round(totalInc * realFunTarget);
-  var idealSavings = totalInc - idealSurvival - idealFun;
+  
+  var realSavings = totalInc > 0 ? totalInc - realSurvival - realFun : 0;
 
   document.getElementById('forecastSurvivalVal').textContent = realSurvival.toLocaleString('pl-PL') + ' PLN';
   document.getElementById('forecastSavingsVal').textContent = realSavings.toLocaleString('pl-PL') + ' PLN';
@@ -1251,16 +1249,23 @@ function renderReportTab() {
   }
 
   document.getElementById('monthTotalExpense').textContent = tot.toLocaleString('pl-PL') + ' PLN';
+  var tbody = document.getElementById('monthDetailsBody'); 
+  tbody.innerHTML = '';
 
-  var tbody = document.getElementById('monthDetailsBody'); tbody.innerHTML = '';
-  filtered.forEach(item => {
-    var cat = item.category || 'Inne'; var pct = tot > 0 ? Math.round((Number(item.amount) / tot) * 100) : 0;
-    var tr = document.createElement('tr');
-    tr.innerHTML = '<td class="col-okres"><span class="cat-badge cat-' + cat + '">' + cat + '</span></td>' +
-                   '<td class="col-opis"><strong>' + item.name + '</strong></td>' +
-                   '<td class="col-amount">' + Number(item.amount).toLocaleString('pl-PL') + ' PLN</td><td style="text-align: right; color: var(--text-muted); font-weight: 700;">' + pct + '%</td>';
-    tbody.appendChild(tr);
-  });
+  if (uniquePeriods.length === 0 || filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state"><i data-lucide="search-x"></i><strong>Brak wydatków w tym miesiącu</strong>Zanotuj coś w Dzienniku.</div></td></tr>';
+  } else {
+    filtered.forEach(item => {
+      var cat = item.category || 'Inne'; var pct = tot > 0 ? Math.round((Number(item.amount) / tot) * 100) : 0;
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td class="col-okres"><span class="cat-badge cat-' + cat + '">' + cat + '</span></td>' +
+                     '<td class="col-opis"><strong>' + item.name + '</strong></td>' +
+                     '<td class="col-amount">' + Number(item.amount).toLocaleString('pl-PL') + ' PLN</td><td style="text-align: right; color: var(--text-muted); font-weight: 700;">' + pct + '%</td>';
+      tbody.appendChild(tr);
+    });
+  }
+  
+  setTimeout(() => lucide.createIcons(), 10);
 }
 
 window.onload = async function() {
