@@ -426,11 +426,10 @@
   <!-- ZAKŁADKA 2: DZIENNIK RACHUNKÓW -->
   <div id="historyTab" class="tab-content">
     
-    <!-- PRZENIESIONE NA GÓRĘ: STATYSTYKI -->
     <div class="stat-badge-grid" style="margin-bottom: 24px;">
       <div class="stat-badge" style="border: 2px solid #fdba74; background: linear-gradient(135deg, #fffbeb, #fff);">
         <span style="color: #ea580c;"><i data-lucide="flame" style="width: 16px;"></i> Passa w tym miesiącu</span>
-        <div class="streak-fire" id="noSpendBadgeVal">0 Dni <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">bez wydatków</span></div>
+        <div class="streak-fire" id="noSpendBadgeVal">0 Dni <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">bez zachcianek</span></div>
       </div>
       <div class="stat-badge">
         <span><i data-lucide="activity" style="width: 16px;"></i> Rzeczywista Średnia / Mc</span>
@@ -441,7 +440,6 @@
     <div class="history-top-grid">
       <div class="history-left-stack">
         
-        <!-- W PEŁNI WYRÓWNANY FORMULARZ Z KOSZYKIEM -->
         <div class="card card-compact" id="expenseFormCard" style="transition: background-color 0.3s;">
           <h2 id="formTitle" style="margin-bottom: 6px;"><i data-lucide="pen-tool"></i> Dodaj wydatek</h2>
           <p id="formSubtitle" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; font-weight: 500;">
@@ -449,12 +447,10 @@
           </p>
 
           <div id="expenseFormWrapper" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px;">
-            <!-- GŁÓWNA LINIA W JEDNYM RZĘDZIE -->
             <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
               <input type="date" id="histInputDate" style="width: 140px; font-weight: 700; cursor: pointer;" title="Data wydatku">
               <input type="text" id="histName" placeholder="Nazwa sklepu (np. Biedronka, Opłaty)" style="flex: 1; min-width: 150px;">
               
-              <!-- Pierwsza kategoria (display: contents sprawia, że jest traktowana jako część tego samego elastycznego wiersza) -->
               <div class="split-item" style="display: contents;">
                 <select class="split-category" style="width: 160px; font-weight: 700; color: var(--primary);">
                   <option value="Mieszkanie">1. Mieszkanie</option>
@@ -469,9 +465,7 @@
               <button type="button" class="cancel-btn" id="cancelEditBtn" style="display: none;"><i data-lucide="x-circle" style="width:18px;"></i></button>
             </div>
 
-            <!-- KONTENER NA DODATKOWE ROZBICIA (Pod spodem) -->
             <div id="splitItemsContainer" style="display: flex; flex-direction: column; gap: 12px;">
-              <!-- Dynamiczne rzędy ładują się tutaj -->
             </div>
           </div>
 
@@ -552,7 +546,7 @@
         <span id="forecastBasisTag" style="font-size: 0.75rem; background: #fae8ff; color: #a21caf; padding: 6px 14px; border-radius: 50px; font-weight: 800; text-transform: uppercase;">Zderzenie Danych</span>
       </div>
       <p style="font-size: 0.95rem; color: #701a75; margin-bottom: 24px; font-weight: 500; line-height: 1.5;">
-        Zestawiamy Twój miesięczny dochód z wpisanymi <strong>prawdziwymi średnimi</strong> z Dziennika Wydatków. Zobacz, czy trzymasz się swoich założeń.
+        Zestawiamy Twój budżet z wybranym miesiącem. Zobacz, czy trzymasz się swoich założeń.
       </p>
 
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
@@ -991,7 +985,9 @@ function updateNoSpendDaysBadge() {
   var currentPeriod = curYear + '-' + curMonthStr;
   
   var daysPassedInMonth = d.getDate(); 
-  var currentMonthEntries = historyLogs.filter(e => e.month === currentPeriod);
+  
+  // Zliczamy tylko i wyłącznie zachcianki ('Inne') jako złamanie passy!
+  var currentMonthEntries = historyLogs.filter(e => e.month === currentPeriod && e.category === 'Inne');
   var uniqueExpenseDates = new Set();
   
   currentMonthEntries.forEach(e => {
@@ -1002,7 +998,7 @@ function updateNoSpendDaysBadge() {
   if(noSpendDays < 0) noSpendDays = 0;
   
   var badgeEl = document.getElementById('noSpendBadgeVal');
-  if(badgeEl) { badgeEl.innerHTML = noSpendDays + ' Dni <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">bez wydatków</span>'; }
+  if(badgeEl) { badgeEl.innerHTML = noSpendDays + ' Dni <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">bez zachcianek</span>'; }
 }
 
 function renderHistoryTable() {
@@ -1182,14 +1178,34 @@ async function handleExcelUpload(e) {
 function renderReportTab() {
   var totalInc = getTotalIncome(); var rush = document.getElementById('rushEmergencyFund').checked;
   
-  var avgs = getAveragedCostsFromHistory();
-  var realSurvival = avgs.reduce((acc, curr) => acc + curr.amount, 0); 
-  var realFree = Math.max(0, totalInc - realSurvival);
-  var realFunTarget = rush ? 0.10 : 0.20; 
-  var realFun = Math.round(totalInc * realFunTarget);
-  if (realFun > realFree) realFun = realFree; 
-  var realSavings = realFree - realFun;
+  var sel = document.getElementById('selectReportPeriod'); var curSel = sel.value;
+  var uniquePeriods = [...new Set(historyLogs.map(e => e.month))].sort().reverse(); sel.innerHTML = '';
 
+  if (uniquePeriods.length === 0) {
+    sel.innerHTML = '<option value="">Brak danych</option>'; document.getElementById('monthTotalExpense').textContent = '0 PLN';
+    document.getElementById('monthDetailsBody').innerHTML = '<tr><td colspan="4"><div class="empty-state"><i data-lucide="search-x"></i><strong>Brak danych analitycznych</strong>Wypełnij dziennik, by zobaczyć podsumowanie.</div></td></tr>'; 
+    document.getElementById('forecastSurvivalVal').textContent = '0 PLN'; document.getElementById('forecastSavingsVal').textContent = '0 PLN'; document.getElementById('forecastFunVal').textContent = '0 PLN'; document.getElementById('forecastDailyFunVal').textContent = '0 PLN / dzień';
+    document.getElementById('idealSurvivalVal').textContent = '0 PLN'; document.getElementById('idealSavingsVal').textContent = '0 PLN'; document.getElementById('idealFunVal').textContent = '0 PLN'; document.getElementById('idealDailyFunVal').textContent = '0 PLN';
+    document.getElementById('diffSurvivalBadge').textContent = '0 PLN'; document.getElementById('diffSavingsBadge').textContent = '0 PLN'; document.getElementById('diffFunBadge').textContent = '0 PLN';
+    setTimeout(() => lucide.createIcons(), 10); return;
+  }
+
+  uniquePeriods.forEach(p => { var opt = document.createElement('option'); opt.value = p; opt.textContent = formatPeriodToPL(p); sel.appendChild(opt); });
+  sel.value = uniquePeriods.includes(curSel) ? curSel : uniquePeriods[0];
+  
+  var filtered = historyLogs.filter(e => e.month === sel.value);
+  var tot = filtered.reduce((acc, curr) => acc + Number(curr.amount), 0);
+  
+  // ZMIANA: Zlicza Koszty Przetrwania (Mieszkanie, Jedzenie, Dziecko) i Fun Money (Inne) BEZPOŚREDNIO Z WYBRANEGO MIESIĄCA
+  var realSurvival = 0;
+  var realFun = 0;
+  filtered.forEach(item => {
+    if (item.category === 'Inne') realFun += Number(item.amount);
+    else realSurvival += Number(item.amount);
+  });
+  var realSavings = totalInc - realSurvival - realFun;
+
+  var realFunTarget = rush ? 0.10 : 0.20; 
   var idealSurvival = Math.round(totalInc * 0.50);
   var idealFun = Math.round(totalInc * realFunTarget);
   var idealSavings = totalInc - idealSurvival - idealFun;
@@ -1230,23 +1246,10 @@ function renderReportTab() {
     badgeFun.textContent = diffFun.toLocaleString('pl-PL') + ' PLN';
     badgeFun.style.background = '#fee2e2'; badgeFun.style.color = 'var(--danger)'; 
   } else {
-    badgeFun.textContent = diffFun.toLocaleString('pl-PL') + ' PLN';
+    badgeFun.textContent = '+' + diffFun.toLocaleString('pl-PL') + ' PLN';
     badgeFun.style.background = '#f1f5f9'; badgeFun.style.color = 'var(--text-muted)'; 
   }
 
-  var sel = document.getElementById('selectReportPeriod'); var curSel = sel.value;
-  var uniquePeriods = [...new Set(historyLogs.map(e => e.month))].sort().reverse(); sel.innerHTML = '';
-
-  if (uniquePeriods.length === 0) {
-    sel.innerHTML = '<option value="">Brak danych</option>'; document.getElementById('monthTotalExpense').textContent = '0 PLN';
-    document.getElementById('monthDetailsBody').innerHTML = '<tr><td colspan="4"><div class="empty-state"><i data-lucide="search-x"></i><strong>Brak danych analitycznych</strong>Wypełnij dziennik, by zobaczyć podsumowanie.</div></td></tr>'; setTimeout(() => lucide.createIcons(), 10); return;
-  }
-
-  uniquePeriods.forEach(p => { var opt = document.createElement('option'); opt.value = p; opt.textContent = formatPeriodToPL(p); sel.appendChild(opt); });
-  sel.value = uniquePeriods.includes(curSel) ? curSel : uniquePeriods[0];
-  
-  var filtered = historyLogs.filter(e => e.month === sel.value);
-  var tot = filtered.reduce((acc, curr) => acc + Number(curr.amount), 0);
   document.getElementById('monthTotalExpense').textContent = tot.toLocaleString('pl-PL') + ' PLN';
 
   var tbody = document.getElementById('monthDetailsBody'); tbody.innerHTML = '';
