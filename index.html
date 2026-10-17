@@ -62,7 +62,7 @@
     .btn-logout { background: #f8fafc; border: 1.5px solid var(--border); color: var(--text-muted); padding: 10px 20px; border-radius: 50px; font-weight: 700; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
     .btn-logout:hover { background: #fee2e2; color: var(--danger); border-color: #fca5a5; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.15); }
 
-    /* ZAKŁADKI (WIDOK DESKTOP DOMYŚLNY) */
+    /* ZAKŁADKI */
     .nav-tabs { display: flex; gap: 12px; margin-bottom: 28px; border-bottom: 2px solid var(--border); padding-bottom: 12px; overflow-x: auto; scrollbar-width: none; }
     .nav-tabs::-webkit-scrollbar { display: none; }
     .tab-btn { background: none; border: 1px solid transparent; padding: 12px 24px; font-size: 1rem; font-weight: 700; color: var(--text-muted); cursor: pointer; border-radius: 14px; transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 8px; }
@@ -72,21 +72,10 @@
     .tab-content.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* --- DOLNY PASEK NAWIGACJI DLA TELEFONÓW --- */
     @media (max-width: 768px) {
       body { padding-bottom: 90px; } 
-      .nav-tabs {
-        position: fixed; bottom: 0; left: 0; width: 100%; margin: 0; 
-        padding: 12px 8px calc(12px + env(safe-area-inset-bottom, 0px));
-        background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); 
-        border-top: 1px solid rgba(226, 232, 240, 0.8); border-bottom: none;
-        justify-content: space-around; gap: 4px; z-index: 999;
-        box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.05);
-      }
-      .tab-btn {
-        flex-direction: column; font-size: 0.7rem; padding: 8px 4px; border-radius: 12px; width: 33%; gap: 6px; 
-        white-space: normal; text-align: center; border: none !important; box-shadow: none !important; background: transparent !important; line-height: 1.1;
-      }
+      .nav-tabs { position: fixed; bottom: 0; left: 0; width: 100%; margin: 0; padding: 12px 8px calc(12px + env(safe-area-inset-bottom, 0px)); background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-top: 1px solid rgba(226, 232, 240, 0.8); border-bottom: none; justify-content: space-around; gap: 4px; z-index: 999; box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.05); }
+      .tab-btn { flex-direction: column; font-size: 0.7rem; padding: 8px 4px; border-radius: 12px; width: 33%; gap: 6px; white-space: normal; text-align: center; border: none !important; box-shadow: none !important; background: transparent !important; line-height: 1.1; }
       .tab-btn i, .tab-btn svg { width: 22px; height: 22px; }
       .tab-btn.active { color: var(--primary); }
       .tab-btn.active svg { stroke-width: 2.5px; } 
@@ -210,10 +199,16 @@
 
     .chart-card-side { display: flex; flex-direction: column; justify-content: flex-start; }
     .chart-box { position: relative; max-width: 220px; margin: 0 auto; padding: 10px 0; }
-    .cat-legend-list { margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 16px; display: flex; flex-direction: column; gap: 8px; font-size: 0.9rem; }
-    .cat-legend-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-radius: 12px; border: 1.5px solid transparent; cursor: pointer; transition: all 0.2s ease; font-weight: 600; }
-    .cat-legend-item:hover { background: #f8fafc; border-color: var(--border); }
-    .cat-legend-item.active-cat { background: #eff6ff; border-color: var(--primary); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1); }
+    
+    /* AKORDEON LEGENDY */
+    .cat-legend-list { margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 16px; display: flex; flex-direction: column; }
+    .bucket-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: #f8fafc; border: 1.5px solid var(--border); border-radius: 12px; cursor: pointer; font-weight: 800; margin-bottom: 8px; transition: all 0.2s; color: var(--text-main); }
+    .bucket-header:hover { border-color: #cbd5e1; background: #f1f5f9; }
+    .bucket-header svg { transition: transform 0.3s ease; color: var(--text-muted); }
+    .bucket-details { display: none; flex-direction: column; gap: 6px; padding: 0 0 12px 16px; border-left: 2px solid var(--border); margin-left: 12px; margin-bottom: 12px; animation: fadeIn 0.3s ease; }
+    .bucket-sub-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; font-size: 0.85rem; font-weight: 600; border-radius: 10px; cursor: pointer; transition: all 0.2s; border: 1.5px solid transparent; }
+    .bucket-sub-item:hover { background: #f8fafc; border-color: var(--border); }
+    .bucket-sub-item.active-filter { background: #eff6ff; color: var(--primary); border-color: #bfdbfe; }
 
     .forecast-card { background: linear-gradient(135deg, #faf5ff, #fdf4ff); border: 1px solid #f0abfc; border-radius: 24px; padding: 28px; margin-bottom: 28px; box-shadow: 0 4px 15px rgba(217, 70, 239, 0.05); }
     .metric-box-tab3 { background: #fff; padding: 20px; border-radius: 16px; border: 1px solid #f5d0fe; box-shadow: 0 4px 10px rgba(0,0,0,0.02); display: flex; flex-direction: column; }
@@ -517,7 +512,10 @@
 
       <div class="card chart-card-side">
         <div>
-          <h2 style="margin-bottom: 6px;"><i data-lucide="donut"></i> Struktura Kategorii</h2>
+          <h2 style="margin-bottom: 6px;"><i data-lucide="donut"></i> Podsumowanie Budżetu</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; font-weight: 500;">
+            Kliknij grupę, by rozwinąć szczegóły. Wybierz z listy, by filtrować tabelę.
+          </p>
         </div>
         <div class="chart-box">
           <canvas id="categoryPieChart"></canvas>
@@ -654,12 +652,29 @@
 <script>
 lucide.createIcons();
 
+// Globalny stan dla interaktywnego akordeonu legendy
+window.openAccordionState = window.openAccordionState || { needs: false, fun: false, savings: false };
+
+window.toggleAccordion = function(bucketId) {
+  window.openAccordionState[bucketId] = !window.openAccordionState[bucketId];
+  var details = document.getElementById('details-' + bucketId);
+  var icon = document.getElementById('icon-' + bucketId);
+  if(details && icon) {
+    if (window.openAccordionState[bucketId]) {
+      details.style.display = 'flex';
+      icon.style.transform = 'rotate(180deg)';
+    } else {
+      details.style.display = 'none';
+      icon.style.transform = 'rotate(0deg)';
+    }
+  }
+};
+
 // ---------- BAZA, PAMIĘĆ I KATEGORIE ----------
 var supabase = null;
 var isLoggedIn = false;
 var historyLogs = [];
 
-// Zmiana: System startuje bez domyślnych kategorii.
 var defaultCategories = [];
 var customCategories = [...defaultCategories];
 
@@ -696,7 +711,6 @@ function getCategoryBucket(catName) {
 
 function generateCategoryOptionsHTML() {
   if(customCategories.length === 0) return '<option value="" disabled selected>Brak kategorii</option>';
-  // Renderujemy płaską listę (bez <optgroup>)
   return customCategories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
 }
 
@@ -719,7 +733,6 @@ function renderCategoryDropdowns() {
     if(filterVal && filterVal !== "ALL" && customCategories.some(c=>c.name===filterVal)) filter.value = filterVal; else filter.value = "ALL";
   }
   
-  // Logika Onboarding / Empty State dla formularza wydatków
   var formContent = document.getElementById('expenseFormContent');
   var noCatMsg = document.getElementById('noCategoriesMessage');
   if(customCategories.length === 0) {
@@ -1060,24 +1073,29 @@ function updateHistoryFilterDropdowns() {
 }
 
 function updateCategoryChart(periodItems) {
-  var canvas = document.getElementById('categoryPieChart'); var legendEl = document.getElementById('categoryLegendList');
+  var canvas = document.getElementById('categoryPieChart'); 
+  var legendEl = document.getElementById('categoryLegendList');
   if (!canvas || !legendEl) return;
-  var totals = {}; var grandTotal = 0;
+  
+  var bucketTotals = { needs: 0, fun: 0, savings: 0 };
+  var catTotals = { needs: {}, fun: {}, savings: {} };
+  var grandTotal = 0;
+
   for (var i = 0; i < periodItems.length; i++) { 
     var cat = periodItems[i].category; 
     var amt = Number(periodItems[i].amount) || 0; 
-    if(!totals[cat]) totals[cat] = 0;
-    totals[cat] += amt; grandTotal += amt; 
+    var b = getCategoryBucket(cat);
+    
+    bucketTotals[b] += amt;
+    if(!catTotals[b][cat]) catTotals[b][cat] = 0;
+    catTotals[b][cat] += amt;
+    grandTotal += amt; 
   }
 
   var labels = []; var dataVals = []; var bgColors = [];
-  for (var key in totals) { 
-    if (totals[key] > 0) { 
-      labels.push(key); dataVals.push(totals[key]); 
-      var b = getCategoryBucket(key);
-      bgColors.push(b === 'fun' ? '#a855f7' : (b === 'needs' ? '#3b82f6' : '#10b981')); 
-    } 
-  }
+  if(bucketTotals.needs > 0) { labels.push('Koszty Życia'); dataVals.push(bucketTotals.needs); bgColors.push('#3b82f6'); }
+  if(bucketTotals.fun > 0) { labels.push('Zachcianki'); dataVals.push(bucketTotals.fun); bgColors.push('#a855f7'); }
+  if(bucketTotals.savings > 0) { labels.push('Oszczędności'); dataVals.push(bucketTotals.savings); bgColors.push('#10b981'); }
 
   if (pieChartInstance) pieChartInstance.destroy();
   if (grandTotal === 0) { legendEl.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-weight: 500; padding: 12px 0;">Brak danych do wykresu.</div>'; return; }
@@ -1087,17 +1105,56 @@ function updateCategoryChart(periodItems) {
     options: { responsive: true, cutout: '75%', plugins: { legend: { display: false }, tooltip: { padding: 12, cornerRadius: 8, bodyFont: { family: 'Plus Jakarta Sans', size: 14 } } } }
   });
 
-  var fCat = document.getElementById('histFilterCategory').value; legendEl.innerHTML = '';
-  for (var c = 0; c < labels.length; c++) {
-    (function(cName, cVal) {
-      var pct = Math.round((cVal / grandTotal) * 100); var row = document.createElement('div');
-      var b = getCategoryBucket(cName);
-      row.className = 'cat-legend-item' + (fCat === cName ? ' active-cat' : '');
-      row.onclick = function() { var el = document.getElementById('histFilterCategory'); el.value = (el.value === cName ? 'ALL' : cName); renderHistoryTable(); };
-      row.innerHTML = '<span><span class="cat-badge cat-bucket-' + b + '">' + cName + '</span></span><strong>' + cVal.toLocaleString('pl-PL') + ' PLN <span style="font-size:0.75rem; color:var(--text-muted)">(' + pct + '%)</span></strong>';
-      legendEl.appendChild(row);
-    })(labels[c], dataVals[c]);
-  }
+  var fCat = document.getElementById('histFilterCategory').value; 
+  legendEl.innerHTML = '';
+  
+  var bucketConfig = [
+    { id: 'needs', name: 'Koszty Życia', color: '#3b82f6' },
+    { id: 'fun', name: 'Zachcianki', color: '#a855f7' },
+    { id: 'savings', name: 'Oszczędności', color: '#10b981' }
+  ];
+
+  bucketConfig.forEach(b => {
+    if(bucketTotals[b.id] > 0) {
+      var bPct = Math.round((bucketTotals[b.id] / grandTotal) * 100);
+      var isOpen = window.openAccordionState[b.id];
+      var displayStyle = isOpen ? 'display: flex;' : 'display: none;';
+      var rotation = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+      
+      var bHtml = `
+        <div class="bucket-header" onclick="toggleAccordion('${b.id}')">
+          <span style="display:flex; align-items:center; gap:8px;">
+            <span style="display:block; width:12px; height:12px; border-radius:50%; background:${b.color};"></span>
+            ${b.name} <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">(${bPct}%)</span>
+          </span>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span>${bucketTotals[b.id].toLocaleString('pl-PL')} PLN</span>
+            <i data-lucide="chevron-down" id="icon-${b.id}" style="width:16px; transform:${rotation};"></i>
+          </div>
+        </div>
+        <div class="bucket-details" id="details-${b.id}" style="${displayStyle}">
+      `;
+      
+      // Sortowanie podkategorii malejąco po kwocie
+      var subCats = Object.keys(catTotals[b.id]).sort((x, y) => catTotals[b.id][y] - catTotals[b.id][x]);
+      
+      subCats.forEach(cName => {
+        var cVal = catTotals[b.id][cName];
+        var isActive = fCat === cName ? ' active-filter' : '';
+        bHtml += `
+          <div class="bucket-sub-item${isActive}" onclick="document.getElementById('histFilterCategory').value = '${cName}'; renderHistoryTable();">
+            <span>${cName}</span>
+            <span>${cVal.toLocaleString('pl-PL')} PLN</span>
+          </div>
+        `;
+      });
+      
+      bHtml += `</div>`;
+      legendEl.innerHTML += bHtml;
+    }
+  });
+  
+  lucide.createIcons();
 }
 
 function updateNoSpendDaysBadge() {
