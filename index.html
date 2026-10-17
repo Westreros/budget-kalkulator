@@ -32,8 +32,8 @@
     body { background-color: var(--bg-color); color: var(--text-main); padding: 20px 16px; -webkit-font-smoothing: antialiased; }
     .container { width: 100%; max-width: 1800px; margin: 0 auto; }
     
-    /* MODAL LOGOWANIA */
-    #authScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 1000; }
+    /* MODALE (LOGOWANIE I KATEGORIE) */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 1000; }
     .auth-card { background: var(--card-bg); padding: 40px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 100%; max-width: 400px; text-align: center; position: relative; border: 1px solid rgba(255,255,255,0.2); }
     .close-auth-btn { position: absolute; top: 16px; right: 16px; background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); transition: all 0.2s; }
     .close-auth-btn:hover { background: #e2e8f0; color: var(--text-main); }
@@ -62,7 +62,7 @@
     .btn-logout { background: #f8fafc; border: 1.5px solid var(--border); color: var(--text-muted); padding: 10px 20px; border-radius: 50px; font-weight: 700; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
     .btn-logout:hover { background: #fee2e2; color: var(--danger); border-color: #fca5a5; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.15); }
 
-    /* ZAKŁADKI (WIDOK DESKTOP DOMYŚLNY) */
+    /* ZAKŁADKI */
     .nav-tabs { display: flex; gap: 12px; margin-bottom: 28px; border-bottom: 2px solid var(--border); padding-bottom: 12px; overflow-x: auto; scrollbar-width: none; }
     .nav-tabs::-webkit-scrollbar { display: none; }
     .tab-btn { background: none; border: 1px solid transparent; padding: 12px 24px; font-size: 1rem; font-weight: 700; color: var(--text-muted); cursor: pointer; border-radius: 14px; transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 8px; }
@@ -72,21 +72,10 @@
     .tab-content.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* --- DOLNY PASEK NAWIGACJI DLA TELEFONÓW --- */
     @media (max-width: 768px) {
       body { padding-bottom: 90px; } 
-      .nav-tabs {
-        position: fixed; bottom: 0; left: 0; width: 100%; margin: 0; 
-        padding: 12px 8px calc(12px + env(safe-area-inset-bottom, 0px));
-        background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); 
-        border-top: 1px solid rgba(226, 232, 240, 0.8); border-bottom: none;
-        justify-content: space-around; gap: 4px; z-index: 999;
-        box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.05);
-      }
-      .tab-btn {
-        flex-direction: column; font-size: 0.7rem; padding: 8px 4px; border-radius: 12px; width: 33%; gap: 6px; 
-        white-space: normal; text-align: center; border: none !important; box-shadow: none !important; background: transparent !important; line-height: 1.1;
-      }
+      .nav-tabs { position: fixed; bottom: 0; left: 0; width: 100%; margin: 0; padding: 12px 8px calc(12px + env(safe-area-inset-bottom, 0px)); background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-top: 1px solid rgba(226, 232, 240, 0.8); border-bottom: none; justify-content: space-around; gap: 4px; z-index: 999; box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.05); }
+      .tab-btn { flex-direction: column; font-size: 0.7rem; padding: 8px 4px; border-radius: 12px; width: 33%; gap: 6px; white-space: normal; text-align: center; border: none !important; box-shadow: none !important; background: transparent !important; line-height: 1.1; }
       .tab-btn i, .tab-btn svg { width: 22px; height: 22px; }
       .tab-btn.active { color: var(--primary); }
       .tab-btn.active svg { stroke-width: 2.5px; } 
@@ -140,6 +129,7 @@
     select { appearance: none; padding-right: 36px; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 12px center; background-size: 20px; }
     input:hover, select:hover { border-color: #cbd5e1; background-color: #fff; }
     input:focus, select:focus { background-color: #fff; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+    optgroup { font-weight: 800; color: #475569; font-style: normal; }
     .suffix { position: absolute; right: 14px; top: 12px; color: var(--text-muted); font-weight: 700; font-size: 0.9rem; pointer-events: none; }
 
     .goal-banner { background: #ecfdf5; border: 2px solid var(--success); border-radius: 16px; padding: 16px; margin-top: 12px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.05); }
@@ -197,11 +187,12 @@
     .empty-state svg { width: 56px; height: 56px; color: #cbd5e1; margin-bottom: 16px; }
     .empty-state strong { display: block; font-size: 1.15rem; color: var(--text-main); margin-bottom: 8px; font-weight: 800; }
 
+    /* SYSTEM KATEGORII BADGES */
     .cat-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 50px; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
-    .cat-Mieszkanie { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; } 
-    .cat-Jedzenie { background: #ecfdf5; color: #166534; border: 1px solid #a7f3d0; } 
-    .cat-Dziecko { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; } 
-    .cat-Inne { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+    .cat-bucket-needs { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; } 
+    .cat-bucket-fun { background: #faf5ff; color: #9333ea; border: 1px solid #e9d5ff; } 
+    .cat-bucket-savings { background: #ecfdf5; color: #166534; border: 1px solid #a7f3d0; } 
+    .cat-bucket-unknown { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
 
     .history-top-grid { display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 24px; align-items: stretch; }
     .history-left-stack { display: flex; flex-direction: column; gap: 24px; }
@@ -232,7 +223,7 @@
 <body>
 
 <!-- WIDOK LOGOWANIA I REJESTRACJI -->
-<div id="authScreen">
+<div id="authScreen" class="modal-overlay">
   <div class="auth-card">
     <button id="closeAuthBtn" class="close-auth-btn" title="Zamknij" onclick="document.getElementById('authScreen').style.display='none'"><i data-lucide="x"></i></button>
     <h2 id="authModeTitle"><i data-lucide="log-in" style="color: var(--primary)"></i> Zaloguj się</h2>
@@ -247,6 +238,30 @@
     
     <button id="toggleAuthBtn" class="auth-btn btn-register" style="margin-top: 12px;">Nie masz konta? Utwórz je.</button>
     <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 16px; display: flex; justify-content: center; align-items: center; gap: 4px; font-weight: 500;"><i data-lucide="shield-check" style="width: 14px; height: 14px;"></i> Dane szyfrowane (AES-256)</p>
+  </div>
+</div>
+
+<!-- MENEDŻER KATEGORII -->
+<div id="categoryManagerModal" class="modal-overlay">
+  <div class="auth-card" style="max-width: 450px;">
+    <button class="close-auth-btn" onclick="document.getElementById('categoryManagerModal').style.display='none'"><i data-lucide="x"></i></button>
+    <h2 style="justify-content: center;"><i data-lucide="folder-cog" style="color: var(--primary)"></i> Twoje Kategorie</h2>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Zarządzaj swoimi kategoriami i przypisz je do odpowiednich filarów modelu 50/20/30.</p>
+    
+    <div id="categoryListContainer" style="max-height: 250px; overflow-y: auto; text-align: left; margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px;">
+      <!-- Lista kategorii -->
+    </div>
+    
+    <div style="border-top: 1px dashed var(--border); padding-top: 20px; text-align: left;">
+      <label>Dodaj nową kategorię</label>
+      <input type="text" id="newCatName" class="auth-input" placeholder="np. Kawa na mieście, Netflix">
+      <select id="newCatBucket" class="auth-input" style="font-weight: 700;">
+        <option value="needs">Potrzeby (Koszty życia)</option>
+        <option value="fun">Zachcianki (Fun Money)</option>
+        <option value="savings">Oszczędności / Długi</option>
+      </select>
+      <button class="btn-add" onclick="addCustomCategory()" style="width: 100%;"><i data-lucide="plus"></i> Dodaj do systemu</button>
+    </div>
   </div>
 </div>
 
@@ -429,11 +444,11 @@
     <div class="stat-badge-grid" style="margin-bottom: 24px;">
       <div class="stat-badge" style="border: 2px solid #fdba74; background: linear-gradient(135deg, #fffbeb, #fff);">
         <span style="color: #ea580c;"><i data-lucide="flame" style="width: 16px;"></i> Passa bez zachcianek</span>
-        <div class="streak-fire" id="noSpendBadgeVal">0 Dni</div>
+        <strong class="streak-fire" id="noSpendBadgeVal" style="margin-top: 0; color: #f97316;">0 Dni</strong>
       </div>
       <div class="stat-badge">
         <span><i data-lucide="activity" style="width: 16px;"></i> Rzeczywista Średnia / Mc</span>
-        <strong id="avgGrandTotal" style="color: var(--primary);">0 PLN</strong>
+        <strong id="avgGrandTotal" style="color: var(--primary); margin-top: 0;">0 PLN</strong>
       </div>
     </div>
 
@@ -441,7 +456,10 @@
       <div class="history-left-stack">
         
         <div class="card card-compact" id="expenseFormCard" style="transition: background-color 0.3s;">
-          <h2 id="formTitle" style="margin-bottom: 6px;"><i data-lucide="pen-tool"></i> Dodaj wydatek</h2>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+             <h2 id="formTitle" style="margin: 0;"><i data-lucide="pen-tool"></i> Dodaj wydatek</h2>
+             <button type="button" class="cancel-btn" onclick="openCategoryManager()" style="font-size: 0.75rem; padding: 6px 12px;"><i data-lucide="settings" style="width:14px;"></i> Kategorie</button>
+          </div>
           <p id="formSubtitle" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; font-weight: 500;">
             Masz długi paragon z marketu? Użyj opcji podziału, by dokładnie przypisać kwoty.
           </p>
@@ -453,10 +471,7 @@
               
               <div class="split-item" style="display: contents;">
                 <select class="split-category" style="width: 160px; font-weight: 700; color: var(--primary);">
-                  <option value="Mieszkanie">1. Mieszkanie</option>
-                  <option value="Jedzenie" selected>2. Jedzenie</option>
-                  <option value="Dziecko">3. Dziecko</option>
-                  <option value="Inne">4. Inne</option>
+                  <!-- Dynamic Categories -->
                 </select>
                 <input type="number" class="split-amount" placeholder="Kwota" min="0" style="width: 120px;">
               </div>
@@ -465,15 +480,13 @@
               <button type="button" class="cancel-btn" id="cancelEditBtn" style="display: none;"><i data-lucide="x-circle" style="width:18px;"></i></button>
             </div>
 
-            <div id="splitItemsContainer" style="display: flex; flex-direction: column; gap: 12px;">
-            </div>
+            <div id="splitItemsContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
           </div>
 
           <button type="button" class="cancel-btn" id="addSplitBtn" style="font-size: 0.8rem; padding: 6px 12px; margin-bottom: 16px; display: inline-flex;"><i data-lucide="split" style="width:14px;"></i> Rozbij paragon na kolejną kategorię</button>
           
           <div class="excel-import-box">
             <label for="excelFile"><i data-lucide="file-spreadsheet"></i> Masz starsze dane? Wczytaj plik Excel (.xlsx, .csv)</label>
-            <span class="hint">Tymczasowo wrzuca wydatki w dzisiejszy dzień. Uporządkuj je później.</span>
             <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" style="display: none;">
           </div>
         </div>
@@ -483,9 +496,6 @@
       <div class="card chart-card-side">
         <div>
           <h2 style="margin-bottom: 6px;"><i data-lucide="donut"></i> Struktura Kategorii</h2>
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; font-weight: 500;">
-            Kliknij kategorię na liście, aby szybko przefiltrować tabelę rachunków.
-          </p>
         </div>
         <div class="chart-box">
           <canvas id="categoryPieChart"></canvas>
@@ -503,10 +513,7 @@
           <select id="histFilterMonth" style="width: auto; padding: 8px 12px; font-weight: 700;"></select>
           <select id="histFilterCategory" style="width: auto; padding: 8px 12px; font-weight: 700; color: var(--primary);">
             <option value="ALL">Wszystkie kategorie</option>
-            <option value="Mieszkanie">Mieszkanie</option>
-            <option value="Jedzenie">Jedzenie</option>
-            <option value="Dziecko">Dziecko</option>
-            <option value="Inne">Inne</option>
+            <!-- Dynamic Categories -->
           </select>
           <select id="histSortOrder" style="width: auto; padding: 8px 12px; font-weight: 700; background: #fff;">
             <option value="desc">Od najnowszych</option>
@@ -625,10 +632,18 @@
 <script>
 lucide.createIcons();
 
-// ---------- BAZA I PAMIĘĆ ----------
+// ---------- BAZA, PAMIĘĆ I KATEGORIE ----------
 var supabase = null;
 var isLoggedIn = false;
 var historyLogs = [];
+
+var defaultCategories = [
+  { name: "Mieszkanie", bucket: "needs" },
+  { name: "Jedzenie", bucket: "needs" },
+  { name: "Dziecko", bucket: "needs" },
+  { name: "Inne", bucket: "fun" }
+];
+var customCategories = [...defaultCategories];
 
 var memoryStorage = {
   items: {},
@@ -638,11 +653,7 @@ var memoryStorage = {
 };
 
 var safeStorage;
-try {
-  window.localStorage.setItem('__test__', '1');
-  window.localStorage.removeItem('__test__');
-  safeStorage = window.localStorage;
-} catch(e) { safeStorage = memoryStorage; }
+try { window.localStorage.setItem('__test__', '1'); window.localStorage.removeItem('__test__'); safeStorage = window.localStorage; } catch(e) { safeStorage = memoryStorage; }
 
 function initSupabase() {
   try {
@@ -651,15 +662,79 @@ function initSupabase() {
       var isLocalOrGithub = origin === 'file://' || origin === 'null' || origin.includes('github.io') || origin.includes('127.0.0.1') || origin.includes('localhost');
       var supabaseUrl = isLocalOrGithub ? 'https://kbzspdwizcwpzlvytdzw.supabase.co' : origin + '/baza';
       var supabaseKey = 'sb_publishable_nPfkgQfKOapm-t9OqWZ4KA__KuU0jqB';
-      
-      supabase = window.supabase.createClient(supabaseUrl, supabaseKey, {
-        auth: { storage: safeStorage, persistSession: safeStorage !== memoryStorage }
-      });
+      supabase = window.supabase.createClient(supabaseUrl, supabaseKey, { auth: { storage: safeStorage, persistSession: safeStorage !== memoryStorage } });
       return true;
     }
-  } catch (e) { console.error("Błąd inicjalizacji:", e); }
-  return false;
+  } catch (e) {} return false;
 }
+
+// -------------------------------------------
+// SYSTEM WIADEREK (BUCKET SYSTEM)
+// -------------------------------------------
+function getCategoryBucket(catName) {
+  var c = customCategories.find(x => x.name === catName);
+  return c ? c.bucket : 'needs'; // Fallback chroni stary system
+}
+
+function generateCategoryOptionsHTML() {
+  var needs = customCategories.filter(c => c.bucket === 'needs');
+  var fun = customCategories.filter(c => c.bucket === 'fun');
+  var savings = customCategories.filter(c => c.bucket === 'savings');
+
+  var html = '';
+  if(needs.length > 0) { html += '<optgroup label="KOSZTY PRZETRWANIA (Potrzeby)">' + needs.map(c => `<option value="${c.name}">${c.name}</option>`).join('') + '</optgroup>'; }
+  if(fun.length > 0) { html += '<optgroup label="ZACHCIANKI (Fun Money)">' + fun.map(c => `<option value="${c.name}">${c.name}</option>`).join('') + '</optgroup>'; }
+  if(savings.length > 0) { html += '<optgroup label="OSZCZĘDNOŚCI I DŁUGI">' + savings.map(c => `<option value="${c.name}">${c.name}</option>`).join('') + '</optgroup>'; }
+  return html;
+}
+
+function renderCategoryDropdowns() {
+  var ops = generateCategoryOptionsHTML();
+  document.querySelectorAll('.split-category').forEach(el => { var val = el.value; el.innerHTML = ops; if(val && customCategories.some(c=>c.name===val)) el.value = val; });
+  
+  var filter = document.getElementById('histFilterCategory');
+  if(filter) {
+    var filterVal = filter.value;
+    filter.innerHTML = '<option value="ALL">Wszystkie kategorie</option>' + ops;
+    if(filterVal && filterVal !== "ALL" && customCategories.some(c=>c.name===filterVal)) filter.value = filterVal; else filter.value = "ALL";
+  }
+}
+
+function openCategoryManager() {
+  document.getElementById('categoryManagerModal').style.display = 'flex';
+  renderCategoryManagerList();
+}
+
+function renderCategoryManagerList() {
+  var cList = document.getElementById('categoryListContainer'); cList.innerHTML = '';
+  customCategories.forEach(c => {
+    var bLabel = c.bucket === 'needs' ? 'Potrzeba' : (c.bucket === 'fun' ? 'Fun' : 'Oszczędność');
+    var row = document.createElement('div');
+    row.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px;";
+    row.innerHTML = `<div><strong>${c.name}</strong> <span class="cat-badge cat-bucket-${c.bucket}" style="margin-left:8px; font-size:0.7rem; padding: 2px 8px;">${bLabel}</span></div>
+                     <button class="del-btn" style="width:30px; height:30px; padding:0;" onclick="deleteCustomCategory('${c.name}')"><i data-lucide="trash-2" style="width:14px;"></i></button>`;
+    cList.appendChild(row);
+  });
+  lucide.createIcons();
+}
+
+function addCustomCategory() {
+  var name = document.getElementById('newCatName').value.trim();
+  var bucket = document.getElementById('newCatBucket').value;
+  if(!name) { alert("Wpisz nazwę kategorii."); return; }
+  if(customCategories.some(c => c.name.toLowerCase() === name.toLowerCase())) { alert("Taka kategoria już istnieje!"); return; }
+  
+  customCategories.push({ name: name, bucket: bucket });
+  document.getElementById('newCatName').value = '';
+  triggerSettingsSave(); renderCategoryDropdowns(); renderCategoryManagerList(); renderHistory();
+}
+
+function deleteCustomCategory(name) {
+  if(customCategories.length <= 1) { alert("Musisz mieć przynajmniej jedną kategorię."); return; }
+  customCategories = customCategories.filter(c => c.name !== name);
+  triggerSettingsSave(); renderCategoryDropdowns(); renderCategoryManagerList(); renderHistory();
+}
+
 
 // -------------------------------------------
 // LOGIKA PRZEŁĄCZANIA REJESTRACJA / LOGOWANIE
@@ -670,7 +745,6 @@ document.getElementById('toggleAuthBtn').onclick = function() {
   var titleEl = document.getElementById('authModeTitle');
   if(isRegisterMode) { titleEl.innerHTML = '<i data-lucide="user-plus" style="color: var(--success)"></i> Utwórz konto'; } else { titleEl.innerHTML = '<i data-lucide="log-in" style="color: var(--primary)"></i> Zaloguj się'; }
   lucide.createIcons();
-  
   document.getElementById('fullNameInput').style.display = isRegisterMode ? 'block' : 'none';
   document.getElementById('loginBtn').style.display = isRegisterMode ? 'none' : 'flex';
   document.getElementById('registerBtn').style.display = isRegisterMode ? 'flex' : 'none';
@@ -683,7 +757,6 @@ async function handleLogin() {
   errorEl.style.color = 'var(--text-muted)'; errorEl.innerHTML = '<i data-lucide="loader" class="lucide-spin" style="width:16px; margin-bottom:-3px;"></i> Łączenie...'; lucide.createIcons();
   if (!supabase) initSupabase();
   if (!supabase) { errorEl.style.color = 'var(--danger)'; errorEl.textContent = 'Trwa ładowanie zabezpieczeń... Kliknij ponownie za sekundę.'; return; }
-  
   const email = document.getElementById('emailInput').value.trim(); const password = document.getElementById('passwordInput').value;
   if(!email || !password) { errorEl.style.color = 'var(--danger)'; errorEl.textContent = 'Wpisz email i hasło.'; return; }
 
@@ -698,7 +771,6 @@ async function handleRegister() {
   errorEl.style.color = 'var(--text-muted)'; errorEl.innerHTML = '<i data-lucide="loader" class="lucide-spin" style="width:16px; margin-bottom:-3px;"></i> Rejestrowanie...'; lucide.createIcons();
   if (!supabase) initSupabase();
   if (!supabase) { errorEl.style.color = 'var(--danger)'; errorEl.textContent = 'Trwa ładowanie zabezpieczeń... Kliknij ponownie za sekundę.'; return; }
-
   const fullName = document.getElementById('fullNameInput').value.trim(); const email = document.getElementById('emailInput').value.trim(); const password = document.getElementById('passwordInput').value;
   if(!fullName) { errorEl.style.color = 'var(--danger)'; errorEl.textContent = 'Imię i nazwisko jest wymagane.'; return; }
   if(!email || password.length < 6) { errorEl.style.color = 'var(--danger)'; errorEl.textContent = 'Email i hasło (min. 6 znaków) są wymagane.'; return; }
@@ -727,7 +799,7 @@ async function loadCloudData() {
 }
 
 // -------------------------------------------
-// PODWÓJNY ZAPIS (LOCALSTORAGE + CLOUD)
+// ZAPIS (LOCALSTORAGE + CLOUD)
 // -------------------------------------------
 var settingsSaveTimeout;
 
@@ -739,6 +811,8 @@ function applySettings(s) {
   if(s.kidsActiveWork !== undefined) document.getElementById('kidsActiveWork').value = s.kidsActiveWork;
   if(s.currentSavings !== undefined) document.getElementById('currentSavings').value = s.currentSavings;
   if(s.rushEmergencyFund !== undefined) document.getElementById('rushEmergencyFund').checked = s.rushEmergencyFund;
+  if(s.categories && Array.isArray(s.categories)) customCategories = s.categories;
+  renderCategoryDropdowns();
 }
 
 function triggerSettingsSave() {
@@ -749,7 +823,8 @@ function triggerSettingsSave() {
     kidsActiveHome: document.getElementById('kidsActiveHome').value,
     kidsActiveWork: document.getElementById('kidsActiveWork').value,
     currentSavings: document.getElementById('currentSavings').value,
-    rushEmergencyFund: document.getElementById('rushEmergencyFund').checked
+    rushEmergencyFund: document.getElementById('rushEmergencyFund').checked,
+    categories: customCategories
   };
   
   if (isLoggedIn) {
@@ -775,7 +850,8 @@ async function saveSettingsToCloud() {
   const s = {
       income: document.getElementById('income').value, kids800: document.getElementById('kids800').value,
       kidsActiveHome: document.getElementById('kidsActiveHome').value, kidsActiveWork: document.getElementById('kidsActiveWork').value,
-      currentSavings: document.getElementById('currentSavings').value, rushEmergencyFund: document.getElementById('rushEmergencyFund').checked
+      currentSavings: document.getElementById('currentSavings').value, rushEmergencyFund: document.getElementById('rushEmergencyFund').checked,
+      categories: customCategories
   };
   
   const { error } = await supabase.auth.updateUser({ data: { budget_settings: s } });
@@ -827,13 +903,13 @@ async function setupAuthListeners() {
     } else {
       isLoggedIn = false;
       try { safeStorage.removeItem('walletwise_settings'); } catch(e){}
-      applySettings({ income: '', kids800: '', kidsActiveHome: '', kidsActiveWork: '', currentSavings: '', rushEmergencyFund: false });
+      applySettings({ income: '', kids800: '', kidsActiveHome: '', kidsActiveWork: '', currentSavings: '', rushEmergencyFund: false, categories: [...defaultCategories] });
       calculateAll();
     }
   } catch(err) {
     isLoggedIn = false;
     try { safeStorage.removeItem('walletwise_settings'); } catch(e){}
-    applySettings({ income: '', kids800: '', kidsActiveHome: '', kidsActiveWork: '', currentSavings: '', rushEmergencyFund: false });
+    applySettings({ income: '', kids800: '', kidsActiveHome: '', kidsActiveWork: '', currentSavings: '', rushEmergencyFund: false, categories: [...defaultCategories] });
     calculateAll();
   }
 }
@@ -843,7 +919,6 @@ async function setupAuthListeners() {
 // -------------------------------------------
 
 var MONTH_NAMES_PL = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"];
-var CATEGORY_COLORS = { "Mieszkanie": "#2563eb", "Jedzenie": "#10b981", "Dziecko": "#f59e0b", "Inne": "#64748b" };
 var pieChartInstance = null;
 var editingEntryId = null;
 
@@ -954,11 +1029,22 @@ function updateHistoryFilterDropdowns() {
 function updateCategoryChart(periodItems) {
   var canvas = document.getElementById('categoryPieChart'); var legendEl = document.getElementById('categoryLegendList');
   if (!canvas || !legendEl) return;
-  var totals = { "Mieszkanie": 0, "Jedzenie": 0, "Dziecko": 0, "Inne": 0 }; var grandTotal = 0;
-  for (var i = 0; i < periodItems.length; i++) { var cat = periodItems[i].category || "Mieszkanie"; var amt = Number(periodItems[i].amount) || 0; totals[cat] += amt; grandTotal += amt; }
+  var totals = {}; var grandTotal = 0;
+  for (var i = 0; i < periodItems.length; i++) { 
+    var cat = periodItems[i].category; 
+    var amt = Number(periodItems[i].amount) || 0; 
+    if(!totals[cat]) totals[cat] = 0;
+    totals[cat] += amt; grandTotal += amt; 
+  }
 
   var labels = []; var dataVals = []; var bgColors = [];
-  for (var key in totals) { if (totals[key] > 0) { labels.push(key); dataVals.push(totals[key]); bgColors.push(CATEGORY_COLORS[key] || "#94a3b8"); } }
+  for (var key in totals) { 
+    if (totals[key] > 0) { 
+      labels.push(key); dataVals.push(totals[key]); 
+      var b = getCategoryBucket(key);
+      bgColors.push(b === 'fun' ? '#a855f7' : (b === 'needs' ? '#3b82f6' : '#10b981')); 
+    } 
+  }
 
   if (pieChartInstance) pieChartInstance.destroy();
   if (grandTotal === 0) { legendEl.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-weight: 500; padding: 12px 0;">Brak danych do wykresu.</div>'; return; }
@@ -972,9 +1058,10 @@ function updateCategoryChart(periodItems) {
   for (var c = 0; c < labels.length; c++) {
     (function(cName, cVal) {
       var pct = Math.round((cVal / grandTotal) * 100); var row = document.createElement('div');
+      var b = getCategoryBucket(cName);
       row.className = 'cat-legend-item' + (fCat === cName ? ' active-cat' : '');
       row.onclick = function() { var el = document.getElementById('histFilterCategory'); el.value = (el.value === cName ? 'ALL' : cName); renderHistoryTable(); };
-      row.innerHTML = '<span><span class="cat-badge cat-' + cName + '">' + cName + '</span></span><strong>' + cVal.toLocaleString('pl-PL') + ' PLN <span style="font-size:0.75rem; color:var(--text-muted)">(' + pct + '%)</span></strong>';
+      row.innerHTML = '<span><span class="cat-badge cat-bucket-' + b + '">' + cName + '</span></span><strong>' + cVal.toLocaleString('pl-PL') + ' PLN <span style="font-size:0.75rem; color:var(--text-muted)">(' + pct + '%)</span></strong>';
       legendEl.appendChild(row);
     })(labels[c], dataVals[c]);
   }
@@ -985,14 +1072,13 @@ function updateNoSpendDaysBadge() {
   var curYear = d.getFullYear();
   var curMonthStr = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1);
   var currentPeriod = curYear + '-' + curMonthStr;
-  
   var daysPassedInMonth = d.getDate(); 
   
-  var currentMonthEntries = historyLogs.filter(e => e.month === currentPeriod && e.category === 'Inne');
   var uniqueExpenseDates = new Set();
-  
-  currentMonthEntries.forEach(e => {
-    if(e.exact_date) uniqueExpenseDates.add(e.exact_date);
+  historyLogs.forEach(e => {
+    if(e.month === currentPeriod && getCategoryBucket(e.category) === 'fun' && e.exact_date) {
+      uniqueExpenseDates.add(e.exact_date);
+    }
   });
   
   var noSpendDays = daysPassedInMonth - uniqueExpenseDates.size;
@@ -1029,12 +1115,13 @@ function renderHistoryTable() {
   }
 
   for (var k = 0; k < tableItems.length; k++) {
-    var cat = tableItems[k].category || 'Mieszkanie';
+    var cat = tableItems[k].category;
+    var b = getCategoryBucket(cat);
     var displayDate = tableItems[k].exact_date ? tableItems[k].exact_date : formatPeriodToPL(tableItems[k].month);
     
     var tr = document.createElement('tr');
     tr.innerHTML = '<td class="col-okres">' + displayDate + '</td>' +
-                   '<td><span class="cat-badge cat-' + cat + '">' + cat + '</span></td>' +
+                   '<td><span class="cat-badge cat-bucket-' + b + '">' + cat + '</span></td>' +
                    '<td class="col-opis"><strong>' + tableItems[k].name + '</strong></td>' +
                    '<td class="col-amount">' + Number(tableItems[k].amount).toLocaleString('pl-PL') + ' PLN</td>' +
                    '<td class="col-actions">' +
@@ -1052,7 +1139,8 @@ function resetExpenseForm() {
   document.getElementById('histInputDate').valueAsDate = new Date();
   
   document.getElementById('splitItemsContainer').innerHTML = ''; 
-  document.querySelector('.split-category').value = 'Jedzenie';
+  var catSelect = document.querySelector('.split-category');
+  if(catSelect.options.length > 0) catSelect.selectedIndex = 0;
   document.querySelector('.split-amount').value = '';
   
   document.getElementById('addSplitBtn').style.display = 'inline-flex';
@@ -1096,25 +1184,18 @@ function cancelEditMode() {
   resetExpenseForm();
 }
 
-function getAveragedCostsFromHistory() {
-  if (historyLogs.length === 0) return [];
-  var grp = {};
-  for (var i = 0; i < historyLogs.length; i++) {
-    var item = historyLogs[i]; var n = item.name.trim(); if (!n) continue;
-    if (!grp[n]) grp[n] = { total: 0, count: 0, cat: item.category };
-    grp[n].total += Number(item.amount); grp[n].count += 1;
-  }
-  return Object.keys(grp).map(k => ({ rawName: k, count: grp[k].count, category: grp[k].cat, amount: Math.round(grp[k].total / grp[k].count) }));
-}
-
 function renderHistory() {
   updateHistoryFilterDropdowns(); renderHistoryTable();
   
-  var avgs = getAveragedCostsFromHistory();
-  var totAvg = 0;
-  if (avgs.length > 0) {
-    for (var i = 0; i < avgs.length; i++) { totAvg += avgs[i].amount; }
+  var totAvg = 0; // Simple avg logic placeholder based on recent months if needed, currently just sums grand logic from original
+  var grp = {};
+  for (var i = 0; i < historyLogs.length; i++) {
+    var item = historyLogs[i]; var n = item.name.trim(); if (!n) continue;
+    if (!grp[n]) grp[n] = { total: 0, count: 0 };
+    grp[n].total += Number(item.amount); grp[n].count += 1;
   }
+  var avgs = Object.keys(grp).map(k => ({ rawName: k, count: grp[k].count, amount: Math.round(grp[k].total / grp[k].count) }));
+  if (avgs.length > 0) { for (var i = 0; i < avgs.length; i++) { totAvg += avgs[i].amount; } }
   document.getElementById('avgGrandTotal').textContent = totAvg.toLocaleString('pl-PL') + ' PLN / mc';
 }
 
@@ -1156,7 +1237,7 @@ async function handleExcelUpload(e) {
         if (nameCandidate && amountCandidate !== null) {
           var low = nameCandidate.toLowerCase();
           if (low !== 'nazwa' && low !== 'kategoria' && low !== 'kwota' && low !== 'opis') {
-            newItems.push({ month: p, year: pYear.toString(), month_num: pMonth, exact_date: exactD, category: 'Inne', name: nameCandidate, amount: amountCandidate });
+            newItems.push({ month: p, year: pYear.toString(), month_num: pMonth, exact_date: exactD, category: customCategories.length > 0 ? customCategories[0].name : 'Inne', name: nameCandidate, amount: amountCandidate });
           }
         }
       }
@@ -1201,8 +1282,9 @@ function renderReportTab() {
   var realSurvival = 0;
   var realFun = 0;
   filtered.forEach(item => {
-    if (item.category === 'Inne') realFun += Number(item.amount);
-    else realSurvival += Number(item.amount);
+    var b = getCategoryBucket(item.category);
+    if (b === 'fun') realFun += Number(item.amount);
+    else if (b === 'needs') realSurvival += Number(item.amount);
   });
   
   var realSavings = totalInc > 0 ? totalInc - realSurvival - realFun : 0;
@@ -1255,9 +1337,11 @@ function renderReportTab() {
     tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state"><i data-lucide="search-x"></i><strong>Brak wydatków w tym miesiącu</strong>Zanotuj coś w Dzienniku.</div></td></tr>';
   } else {
     filtered.forEach(item => {
-      var cat = item.category || 'Inne'; var pct = tot > 0 ? Math.round((Number(item.amount) / tot) * 100) : 0;
+      var cat = item.category; 
+      var b = getCategoryBucket(cat);
+      var pct = tot > 0 ? Math.round((Number(item.amount) / tot) * 100) : 0;
       var tr = document.createElement('tr');
-      tr.innerHTML = '<td class="col-okres"><span class="cat-badge cat-' + cat + '">' + cat + '</span></td>' +
+      tr.innerHTML = '<td class="col-okres"><span class="cat-badge cat-bucket-' + b + '">' + cat + '</span></td>' +
                      '<td class="col-opis"><strong>' + item.name + '</strong></td>' +
                      '<td class="col-amount">' + Number(item.amount).toLocaleString('pl-PL') + ' PLN</td><td style="text-align: right; color: var(--text-muted); font-weight: 700;">' + pct + '%</td>';
       tbody.appendChild(tr);
@@ -1273,6 +1357,8 @@ window.onload = async function() {
     const raw = safeStorage.getItem('walletwise_settings');
     if(raw) { applySettings(JSON.parse(raw)); calculateAll(); }
   } catch(e) {}
+  
+  renderCategoryDropdowns();
 
   document.getElementById('loginBtn').onclick = handleLogin;
   document.getElementById('registerBtn').onclick = handleRegister;
@@ -1302,10 +1388,7 @@ window.onload = async function() {
     row.innerHTML = `
       <div style="flex: 1; min-width: 10px;"></div>
       <select class="split-category" style="width: 160px; font-weight: 700; color: var(--primary);">
-        <option value="Mieszkanie">1. Mieszkanie</option>
-        <option value="Jedzenie">2. Jedzenie</option>
-        <option value="Dziecko">3. Dziecko</option>
-        <option value="Inne" selected>4. Inne</option>
+        ${generateCategoryOptionsHTML()}
       </select>
       <input type="number" class="split-amount" placeholder="Kwota" min="0" style="width: 120px;">
       <button type="button" class="del-btn remove-split-btn" style="width: 44px; padding: 0; height: 44px;" onclick="this.parentElement.remove()"><i data-lucide="minus"></i></button>
