@@ -428,8 +428,8 @@
     
     <div class="stat-badge-grid" style="margin-bottom: 24px;">
       <div class="stat-badge" style="border: 2px solid #fdba74; background: linear-gradient(135deg, #fffbeb, #fff);">
-        <span style="color: #ea580c;"><i data-lucide="flame" style="width: 16px;"></i> Passa w tym miesiącu</span>
-        <div class="streak-fire" id="noSpendBadgeVal">0 Dni <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">bez zachcianek</span></div>
+        <span style="color: #ea580c;"><i data-lucide="flame" style="width: 16px;"></i> Passa bez zachcianek</span>
+        <div class="streak-fire" id="noSpendBadgeVal">0 Dni</div>
       </div>
       <div class="stat-badge">
         <span><i data-lucide="activity" style="width: 16px;"></i> Rzeczywista Średnia / Mc</span>
@@ -926,7 +926,6 @@ function calculateAll() {
   var setBar = function(id, val) { document.getElementById(id).style.width = totalInc > 0 ? (Math.min(100, (val / safeInc) * 100) + '%') : '0%'; };
   setBar('barHousing', housing); setBar('barFood', food); setBar('barTransport', transport); setBar('barOther', other); setBar('barSavings', savings); setBar('barFun', funMoney);
   
-  // Real-time sync z zakładką Raportu (Gdyby ktoś podglądał ją przy szerokim ekranie lub po szybkim powrocie)
   renderReportTab();
 }
 
@@ -1000,7 +999,7 @@ function updateNoSpendDaysBadge() {
   if(noSpendDays < 0) noSpendDays = 0;
   
   var badgeEl = document.getElementById('noSpendBadgeVal');
-  if(badgeEl) { badgeEl.innerHTML = noSpendDays + ' Dni <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;">bez zachcianek</span>'; }
+  if(badgeEl) { badgeEl.innerHTML = noSpendDays + ' Dni'; }
 }
 
 function renderHistoryTable() {
