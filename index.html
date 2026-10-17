@@ -661,15 +661,12 @@ lucide.createIcons();
 window.openAccordionState = window.openAccordionState || { needs: false, fun: false, savings: false };
 
 window.toggleAccordion = function(bucketId) {
-  // Jeśli otwieramy ten bucket, wymuszone zamknięcie innych (mutex)
   if (!window.openAccordionState[bucketId]) {
     Object.keys(window.openAccordionState).forEach(k => window.openAccordionState[k] = false);
     window.openAccordionState[bucketId] = true;
   } else {
-    // Jeśli był otwarty, zamykamy go
     window.openAccordionState[bucketId] = false;
   }
-  // Re-render całości odświeża legendę i wyzwala nowy wykres
   renderHistoryTable();
 };
 
@@ -783,7 +780,6 @@ function deleteCustomCategory(name) {
   customCategories = customCategories.filter(c => c.name !== name);
   triggerSettingsSave(); renderCategoryDropdowns(); renderCategoryManagerList(); renderHistory();
 }
-
 
 // -------------------------------------------
 // LOGIKA PRZEŁĄCZANIA REJESTRACJA / LOGOWANIE
@@ -1095,10 +1091,8 @@ function updateCategoryChart(periodItems) {
     grandTotal += amt; 
   }
 
-  // Sprawdzenie stanu (czy jesteśmy w trybie drill-down)
   var activeBucket = Object.keys(window.openAccordionState).find(k => window.openAccordionState[k]);
   
-  // Dynamiczna aktualizacja podtytułu
   var subTitleEl = document.getElementById('chartSubtitle');
   if(subTitleEl) {
     if(activeBucket) {
@@ -1112,22 +1106,24 @@ function updateCategoryChart(periodItems) {
 
   var labels = []; var dataVals = []; var bgColors = [];
 
+  // Twarde, wysokokontrastowe palety (zamiast samej przezroczystości)
+  var palettes = {
+    needs: ['#2563eb', '#93c5fd', '#1e3a8a', '#60a5fa', '#172554', '#3b82f6', '#bfdbfe', '#1d4ed8', '#1e40af'],
+    fun: ['#9333ea', '#d8b4fe', '#4c1d95', '#c084fc', '#3b0764', '#a855f7', '#e9d5ff', '#7e22ce', '#581c87'],
+    savings: ['#10b981', '#6ee7b7', '#064e3b', '#34d399', '#022c22', '#059669', '#a7f3d0', '#047857', '#065f46']
+  };
+
   if (!activeBucket) {
-    // Tryb Główny: Widok 3 Wiaderek
     if(bucketTotals.needs > 0) { labels.push('Koszty Życia'); dataVals.push(bucketTotals.needs); bgColors.push('#3b82f6'); }
     if(bucketTotals.fun > 0) { labels.push('Zachcianki'); dataVals.push(bucketTotals.fun); bgColors.push('#a855f7'); }
     if(bucketTotals.savings > 0) { labels.push('Oszczędności'); dataVals.push(bucketTotals.savings); bgColors.push('#10b981'); }
   } else {
-    // Tryb Drill-down: Pokazuje poszczególne kategorie ze środka wiadra
     var subCats = Object.keys(catTotals[activeBucket]).sort((x, y) => catTotals[activeBucket][y] - catTotals[activeBucket][x]);
     subCats.forEach((cName, idx) => {
       labels.push(cName);
       dataVals.push(catTotals[activeBucket][cName]);
-      // Generowanie dynamicznych odcieni koloru dla podkategorii
-      var baseColor = activeBucket === 'needs' ? [59, 130, 246] : (activeBucket === 'fun' ? [168, 85, 247] : [16, 185, 129]);
-      var alpha = 1 - (idx * 0.15);
-      if (alpha < 0.2) alpha = 0.2;
-      bgColors.push(`rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${alpha})`);
+      // Zamiast przezroczystości, pobieramy gotowe naprzemienne kolory z palety:
+      bgColors.push(palettes[activeBucket][idx % palettes[activeBucket].length]);
     });
   }
 
@@ -1149,11 +1145,9 @@ function updateCategoryChart(periodItems) {
       },
       onClick: (event, elements) => {
         if (elements.length > 0) {
-          // Jeśli jesteśmy w trybie drill-down, kliknięcie wykresu wraca na samą górę
           if (activeBucket) {
             window.toggleAccordion(activeBucket);
           } else {
-            // Jesteśmy na szczycie, wchodzimy głębiej do wybranego wiadra
             const index = elements[0].index;
             const label = pieChartInstance.data.labels[index];
             let bId = '';
