@@ -200,17 +200,17 @@
     .chart-card-side { display: flex; flex-direction: column; justify-content: flex-start; }
     .chart-box { position: relative; max-width: 220px; margin: 0 auto; padding: 10px 0; }
     
-    /* AKORDEON LEGENDY - SIATKA 2 KOLUMNY */
+    /* AKORDEON LEGENDY - SIATKA 3 KOLUMNY COMPACT */
     .cat-legend-list { margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 16px; display: flex; flex-direction: column; }
     .bucket-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: #f8fafc; border: 1.5px solid var(--border); border-radius: 12px; cursor: pointer; font-weight: 800; margin-bottom: 8px; transition: all 0.2s; color: var(--text-main); }
     .bucket-header:hover { border-color: #cbd5e1; background: #f1f5f9; }
     .bucket-header svg { transition: transform 0.3s ease; color: var(--text-muted); }
     
-    .bucket-details { display: none; grid-template-columns: repeat(2, 1fr); gap: 6px 12px; padding: 0 0 12px 16px; border-left: 2px solid var(--border); margin-left: 12px; margin-bottom: 12px; animation: fadeIn 0.3s ease; }
+    .bucket-details { display: none; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 0 0 12px 12px; border-left: 2px solid var(--border); margin-left: 12px; margin-bottom: 12px; animation: fadeIn 0.3s ease; }
     
-    .bucket-sub-item { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: 8px 10px; font-size: 0.8rem; font-weight: 600; border-radius: 10px; cursor: pointer; transition: all 0.2s; border: 1.5px solid transparent; background: #f8fafc; }
-    .bucket-sub-item span.cat-name { color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-    .bucket-sub-item span.cat-amt { color: var(--text-main); font-size: 0.9rem; margin-top: 2px; }
+    .bucket-sub-item { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: 6px 8px; font-size: 0.75rem; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: 1.5px solid transparent; background: #f8fafc; }
+    .bucket-sub-item span.cat-name { color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; width: 100%; display: block; }
+    .bucket-sub-item span.cat-amt { color: var(--text-main); font-size: 0.8rem; margin-top: 2px; }
     .bucket-sub-item:hover { border-color: var(--border); background: #f1f5f9; }
     .bucket-sub-item.active-filter { background: #eff6ff; border-color: #bfdbfe; }
     .bucket-sub-item.active-filter span.cat-name { color: var(--primary); }
@@ -517,9 +517,9 @@
 
       <div class="card chart-card-side">
         <div>
-          <h2 style="margin-bottom: 6px;"><i data-lucide="donut"></i> Podsumowanie Budżetu</h2>
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; font-weight: 500;">
-            Kliknij na wykres, by rozwinąć szczegóły. Wybierz kategorię, by filtrować tabelę.
+          <h2 style="margin-bottom: 6px;" id="chartTitle"><i data-lucide="donut"></i> Podsumowanie Budżetu</h2>
+          <p id="chartSubtitle" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; font-weight: 500;">
+            Kliknij wykres, by rozwinąć szczegóły. Wybierz z legendy, by filtrować.
           </p>
         </div>
         <div class="chart-box">
@@ -657,22 +657,20 @@
 <script>
 lucide.createIcons();
 
-// Globalny stan dla interaktywnego akordeonu legendy
+// Globalny stan dla interaktywnego akordeonu i chart drill-down
 window.openAccordionState = window.openAccordionState || { needs: false, fun: false, savings: false };
 
 window.toggleAccordion = function(bucketId) {
-  window.openAccordionState[bucketId] = !window.openAccordionState[bucketId];
-  var details = document.getElementById('details-' + bucketId);
-  var icon = document.getElementById('icon-' + bucketId);
-  if(details && icon) {
-    if (window.openAccordionState[bucketId]) {
-      details.style.display = 'grid'; // CSS Grid z 2 kolumnami
-      icon.style.transform = 'rotate(180deg)';
-    } else {
-      details.style.display = 'none';
-      icon.style.transform = 'rotate(0deg)';
-    }
+  // Jeśli otwieramy ten bucket, wymuszone zamknięcie innych (mutex)
+  if (!window.openAccordionState[bucketId]) {
+    Object.keys(window.openAccordionState).forEach(k => window.openAccordionState[k] = false);
+    window.openAccordionState[bucketId] = true;
+  } else {
+    // Jeśli był otwarty, zamykamy go
+    window.openAccordionState[bucketId] = false;
   }
+  // Re-render całości odświeża legendę i wyzwala nowy wykres
+  renderHistoryTable();
 };
 
 // ---------- BAZA, PAMIĘĆ I KATEGORIE ----------
@@ -1097,10 +1095,41 @@ function updateCategoryChart(periodItems) {
     grandTotal += amt; 
   }
 
+  // Sprawdzenie stanu (czy jesteśmy w trybie drill-down)
+  var activeBucket = Object.keys(window.openAccordionState).find(k => window.openAccordionState[k]);
+  
+  // Dynamiczna aktualizacja podtytułu
+  var subTitleEl = document.getElementById('chartSubtitle');
+  if(subTitleEl) {
+    if(activeBucket) {
+      subTitleEl.innerHTML = 'Kliknij wykres, by <strong>wrócić do ogółu</strong>.';
+      subTitleEl.style.color = 'var(--primary)';
+    } else {
+      subTitleEl.innerHTML = 'Kliknij wykres, by rozwinąć szczegóły. Wybierz z legendy, by filtrować.';
+      subTitleEl.style.color = 'var(--text-muted)';
+    }
+  }
+
   var labels = []; var dataVals = []; var bgColors = [];
-  if(bucketTotals.needs > 0) { labels.push('Koszty Życia'); dataVals.push(bucketTotals.needs); bgColors.push('#3b82f6'); }
-  if(bucketTotals.fun > 0) { labels.push('Zachcianki'); dataVals.push(bucketTotals.fun); bgColors.push('#a855f7'); }
-  if(bucketTotals.savings > 0) { labels.push('Oszczędności'); dataVals.push(bucketTotals.savings); bgColors.push('#10b981'); }
+
+  if (!activeBucket) {
+    // Tryb Główny: Widok 3 Wiaderek
+    if(bucketTotals.needs > 0) { labels.push('Koszty Życia'); dataVals.push(bucketTotals.needs); bgColors.push('#3b82f6'); }
+    if(bucketTotals.fun > 0) { labels.push('Zachcianki'); dataVals.push(bucketTotals.fun); bgColors.push('#a855f7'); }
+    if(bucketTotals.savings > 0) { labels.push('Oszczędności'); dataVals.push(bucketTotals.savings); bgColors.push('#10b981'); }
+  } else {
+    // Tryb Drill-down: Pokazuje poszczególne kategorie ze środka wiadra
+    var subCats = Object.keys(catTotals[activeBucket]).sort((x, y) => catTotals[activeBucket][y] - catTotals[activeBucket][x]);
+    subCats.forEach((cName, idx) => {
+      labels.push(cName);
+      dataVals.push(catTotals[activeBucket][cName]);
+      // Generowanie dynamicznych odcieni koloru dla podkategorii
+      var baseColor = activeBucket === 'needs' ? [59, 130, 246] : (activeBucket === 'fun' ? [168, 85, 247] : [16, 185, 129]);
+      var alpha = 1 - (idx * 0.15);
+      if (alpha < 0.2) alpha = 0.2;
+      bgColors.push(`rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${alpha})`);
+    });
+  }
 
   if (pieChartInstance) pieChartInstance.destroy();
   if (grandTotal === 0) { legendEl.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-weight: 500; padding: 12px 0;">Brak danych do wykresu.</div>'; return; }
@@ -1120,13 +1149,19 @@ function updateCategoryChart(periodItems) {
       },
       onClick: (event, elements) => {
         if (elements.length > 0) {
-          const index = elements[0].index;
-          const label = pieChartInstance.data.labels[index];
-          let bId = '';
-          if (label === 'Koszty Życia') bId = 'needs';
-          if (label === 'Zachcianki') bId = 'fun';
-          if (label === 'Oszczędności') bId = 'savings';
-          if (bId) window.toggleAccordion(bId);
+          // Jeśli jesteśmy w trybie drill-down, kliknięcie wykresu wraca na samą górę
+          if (activeBucket) {
+            window.toggleAccordion(activeBucket);
+          } else {
+            // Jesteśmy na szczycie, wchodzimy głębiej do wybranego wiadra
+            const index = elements[0].index;
+            const label = pieChartInstance.data.labels[index];
+            let bId = '';
+            if (label === 'Koszty Życia') bId = 'needs';
+            if (label === 'Zachcianki') bId = 'fun';
+            if (label === 'Oszczędności') bId = 'savings';
+            if (bId) window.toggleAccordion(bId);
+          }
         }
       }
     }
