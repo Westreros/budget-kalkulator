@@ -73,7 +73,7 @@
     .tab-content.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* DOLNY PASEK NA MOBILE ORAZ MOBILNE POPRAWKI UX */
+    /* DOLNY PASEK NA MOBILE */
     @media (max-width: 768px) {
       body { padding-bottom: 90px; } 
       .nav-tabs { position: fixed; bottom: 0; left: 0; width: 100%; margin: 0; padding: 12px 8px calc(12px + env(safe-area-inset-bottom, 0px)); background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-top: 1px solid rgba(226, 232, 240, 0.8); border-bottom: none; justify-content: space-around; gap: 4px; z-index: 999; box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.05); }
@@ -131,7 +131,7 @@
     .subgrid-col { display: flex; flex-direction: column; gap: 24px; width: 100%; }
     .subgrid-col .card { margin-bottom: 0; }
     
-    /* FORMULARZE BAZOWE */
+    /* FORMULARZE */
     label { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; font-weight: 600; color: #334155; margin-bottom: 6px; }
     .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
     .input-group { position: relative; margin-bottom: 16px; }
@@ -172,7 +172,7 @@
     .stat-badge { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden; transition: all 0.5s; }
     .stat-badge span { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.05em; position: relative; z-index: 2; }
     .stat-badge strong { font-size: 1.4rem; color: var(--text-main); font-weight: 900; margin-top: 6px; display: block; position: relative; z-index: 2; }
-    .streak-fire { color: #f97316; font-size: 1.8rem; font-weight: 900; display: flex; align-items: center; gap: 8px; margin-top: 6px; position: relative; z-index: 2; }
+    .streak-fire { font-size: 1.8rem; font-weight: 900; display: flex; align-items: center; gap: 8px; margin-top: 6px; position: relative; z-index: 2; transition: color 0.5s; }
 
     /* PASKI PROGRESU */
     .bar-group { display: flex; flex-direction: column; gap: 18px; margin-top: 16px; }
@@ -476,7 +476,7 @@
             <strong id="monthlyFunVal" style="color: #9333ea;">0 PLN</strong>
           </div>
           <div class="stat-badge">
-            <span><i data-lucide="sun" style="width: 14px;"></i> Bezpieczny Fun/Dzień</span>
+            <span><i data-lucide="sun" style="width: 14px;"></i> Bazowy Luz/Dzień</span>
             <strong id="dailyFunVal" style="color: var(--primary);">0 PLN/dzień</strong>
           </div>
         </div>
@@ -498,9 +498,13 @@
         </div>
       </div>
       
+      <!-- Pozostało na Zachcianki w tym miesiącu -->
       <div class="stat-badge">
-        <span><i data-lucide="activity" style="width: 16px;"></i> Rzeczywista Średnia / Mc</span>
-        <strong id="avgGrandTotal" style="color: var(--primary); margin-top: 0;">0 PLN</strong>
+        <span style="color: var(--primary);"><i data-lucide="wallet" style="width: 16px;"></i> Pozostało na Zachcianki</span>
+        <strong id="leftFunMoneyValTab2" style="color: var(--text-main); margin-top: 0;">0 PLN</strong>
+        <div class="bar-bg" style="height: 6px; margin-top: 12px; background: rgba(0,0,0,0.05); border: none; overflow: hidden; border-radius: 4px;">
+           <div id="leftFunProgressBar" class="bar-fill" style="width: 100%; background: var(--primary); transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.5s;"></div>
+        </div>
       </div>
     </div>
 
@@ -644,19 +648,19 @@
         </div>
 
         <div class="metric-box-tab3">
-          <span style="font-size: 0.8rem; color: #86198f; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 6px;"><i data-lucide="party-popper" style="width:16px;"></i> Realne Fun Money</span>
+          <span style="font-size: 0.8rem; color: #86198f; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 6px;"><i data-lucide="party-popper" style="width:16px;"></i> Pozostałe Fun Money</span>
           <strong id="forecastFunVal" style="font-size: 1.6rem; color: #9333ea; display: block; margin-top: 8px; font-weight: 900;">0 PLN</strong>
           <div class="comparison-bar">
-             <span>Plan idealny: <strong id="idealFunVal" style="color: var(--text-main);">0 PLN</strong></span>
+             <span>Z budżetu: <strong id="idealFunVal" style="color: var(--text-main);">0 PLN</strong></span>
              <span id="diffFunBadge" class="diff-badge">0 PLN</span>
           </div>
         </div>
 
         <div class="metric-box-tab3">
-          <span style="font-size: 0.8rem; color: #86198f; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 6px;"><i data-lucide="coffee" style="width:16px;"></i> Dzienny Luz</span>
+          <span style="font-size: 0.8rem; color: #86198f; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 6px;"><i data-lucide="coffee" style="width:16px;"></i> Bezpiecznie na dziś</span>
           <strong id="forecastDailyFunVal" style="font-size: 1.6rem; color: var(--primary); display: block; margin-top: 8px; font-weight: 900;">0 PLN / dzień</strong>
           <div class="comparison-bar">
-             <span>Z Planu: <strong id="idealDailyFunVal" style="color: var(--text-main);">0 PLN</strong></span>
+             <span id="dailyFunSubtitle" style="color: var(--text-muted); font-weight: 500; font-size: 0.8rem;">Zależne od dni</span>
           </div>
         </div>
 
@@ -1252,60 +1256,6 @@ function updateCategoryChart(periodItems) {
   lucide.createIcons();
 }
 
-function updateNoSpendDaysBadge() {
-  var d = new Date();
-  var curYear = d.getFullYear();
-  var curMonthStr = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1);
-  var currentMonthPrefix = curYear + '-' + curMonthStr;
-  var todayDay = d.getDate(); 
-  
-  var funDays = new Set();
-  historyLogs.forEach(e => {
-    if (e.month === currentMonthPrefix && getCategoryBucket(e.category) === 'fun' && e.exact_date) {
-      var parts = e.exact_date.split('-');
-      if(parts.length === 3) {
-         funDays.add(parseInt(parts[2], 10));
-      }
-    }
-  });
-  
-  var streak = 0;
-  for (var i = todayDay; i >= 1; i--) {
-    if (funDays.has(i)) {
-      break; 
-    }
-    streak++;
-  }
-  
-  var badgeEl = document.getElementById('noSpendBadgeVal');
-  if(badgeEl) { badgeEl.innerHTML = streak + (streak === 1 ? ' Dzień' : ' Dni'); }
-  
-  var progressBar = document.getElementById('streakProgressBar');
-  var badgeContainer = document.getElementById('streakBadgeContainer');
-  var titleLabel = document.getElementById('streakTitleLabel');
-  
-  if(progressBar && badgeContainer && titleLabel) {
-    var pct = Math.min(100, (streak / 30) * 100);
-    progressBar.style.width = pct + '%';
-    
-    var color = '#f97316'; 
-    var bgGrad = 'linear-gradient(135deg, #fffbeb, #fff)';
-    var borderCol = '#fdba74';
-    
-    if (streak === 0) { color = '#94a3b8'; borderCol = '#e2e8f0'; bgGrad = '#f8fafc'; }
-    else if (streak <= 3) { color = '#fb923c'; borderCol = '#fdba74'; }
-    else if (streak <= 7) { color = '#ea580c'; borderCol = '#f97316'; }
-    else if (streak <= 14) { color = '#c2410c'; borderCol = '#ea580c'; bgGrad = 'linear-gradient(135deg, #ffedd5, #fff)'; }
-    else { color = '#9a3412'; borderCol = '#c2410c'; bgGrad = 'linear-gradient(135deg, #ffedd5, #fff)'; }
-    
-    progressBar.style.backgroundColor = color;
-    badgeEl.style.color = color;
-    titleLabel.style.color = color;
-    badgeContainer.style.borderColor = borderCol;
-    badgeContainer.style.background = bgGrad;
-  }
-}
-
 function renderHistoryTable() {
   var tbody = document.getElementById('historyTableBody');
   if (!tbody) return; tbody.innerHTML = '';
@@ -1349,7 +1299,6 @@ function renderHistoryTable() {
     tbody.appendChild(tr);
   }
   setTimeout(() => lucide.createIcons(), 10);
-  updateNoSpendDaysBadge();
 }
 
 function resetExpenseForm() {
@@ -1407,18 +1356,77 @@ function cancelEditMode() {
 }
 
 function renderHistory() {
-  updateHistoryFilterDropdowns(); renderHistoryTable();
+  updateHistoryFilterDropdowns(); 
+  renderHistoryTable();
   
-  var totAvg = 0; 
-  var grp = {};
-  for (var i = 0; i < historyLogs.length; i++) {
-    var item = historyLogs[i]; var n = item.name.trim(); if (!n) continue;
-    if (!grp[n]) grp[n] = { total: 0, count: 0 };
-    grp[n].total += Number(item.amount); grp[n].count += 1;
+  var d = new Date();
+  var curPeriod = d.getFullYear() + '-' + ((d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1));
+  
+  var totalInc = getTotalIncome(); 
+  var rush = document.getElementById('rushEmergencyFund').checked;
+  var idealFun = Math.round(totalInc * (rush ? 0.10 : 0.20));
+  
+  var spentFunThisMonth = 0;
+  var funDays = new Set();
+  
+  historyLogs.forEach(e => {
+    if(e.month === curPeriod && getCategoryBucket(e.category) === 'fun') {
+      spentFunThisMonth += Number(e.amount);
+      if(e.exact_date) {
+        var parts = e.exact_date.split('-');
+        if(parts.length === 3) funDays.add(parseInt(parts[2], 10));
+      }
+    }
+  });
+  
+  var leftFun = Math.max(0, idealFun - spentFunThisMonth);
+  var pct = idealFun > 0 ? Math.max(0, Math.min(100, (leftFun / idealFun) * 100)) : 0;
+  
+  var elVal = document.getElementById('leftFunMoneyValTab2');
+  if(elVal) elVal.textContent = leftFun.toLocaleString('pl-PL') + ' PLN';
+  var bar = document.getElementById('leftFunProgressBar');
+  if(bar) {
+    bar.style.width = pct + '%';
+    if(pct > 50) bar.style.backgroundColor = 'var(--primary)';
+    else if(pct > 20) bar.style.backgroundColor = 'var(--warning)';
+    else bar.style.backgroundColor = 'var(--danger)';
   }
-  var avgs = Object.keys(grp).map(k => ({ rawName: k, count: grp[k].count, amount: Math.round(grp[k].total / grp[k].count) }));
-  if (avgs.length > 0) { for (var i = 0; i < avgs.length; i++) { totAvg += avgs[i].amount; } }
-  document.getElementById('avgGrandTotal').textContent = totAvg.toLocaleString('pl-PL') + ' PLN / mc';
+
+  // --- LOGIKA PASSY (Algorytm Nieprzerwanych Dni Wstecz) ---
+  var todayDay = d.getDate(); 
+  var streak = 0;
+  for (var i = todayDay; i >= 1; i--) {
+    if (funDays.has(i)) break; 
+    streak++;
+  }
+  
+  var badgeEl = document.getElementById('noSpendBadgeVal');
+  if(badgeEl) badgeEl.innerHTML = streak + (streak === 1 ? ' Dzień' : ' Dni'); 
+  
+  var streakBar = document.getElementById('streakProgressBar');
+  var badgeContainer = document.getElementById('streakBadgeContainer');
+  var titleLabel = document.getElementById('streakTitleLabel');
+  
+  if(streakBar && badgeContainer && titleLabel) {
+    var streakPct = Math.min(100, (streak / 30) * 100);
+    streakBar.style.width = streakPct + '%';
+    
+    var color = '#f97316'; 
+    var bgGrad = 'linear-gradient(135deg, #fffbeb, #fff)';
+    var borderCol = '#fdba74';
+    
+    if (streak === 0) { color = '#94a3b8'; borderCol = '#e2e8f0'; bgGrad = '#f8fafc'; }
+    else if (streak <= 3) { color = '#fb923c'; borderCol = '#fdba74'; }
+    else if (streak <= 7) { color = '#ea580c'; borderCol = '#f97316'; }
+    else if (streak <= 14) { color = '#c2410c'; borderCol = '#ea580c'; bgGrad = 'linear-gradient(135deg, #ffedd5, #fff)'; }
+    else { color = '#9a3412'; borderCol = '#c2410c'; bgGrad = 'linear-gradient(135deg, #ffedd5, #fff)'; }
+    
+    streakBar.style.backgroundColor = color;
+    badgeEl.style.color = color;
+    titleLabel.style.color = color;
+    badgeContainer.style.borderColor = borderCol;
+    badgeContainer.style.background = bgGrad;
+  }
 }
 
 async function deleteHistoryEntry(id) {
@@ -1510,16 +1518,11 @@ function renderReportTab() {
   });
   
   var realSavings = totalInc > 0 ? totalInc - realSurvival - realFun : 0;
+  var leftFun = Math.max(0, idealFun - realFun);
 
   document.getElementById('forecastSurvivalVal').textContent = realSurvival.toLocaleString('pl-PL') + ' PLN';
   document.getElementById('forecastSavingsVal').textContent = realSavings.toLocaleString('pl-PL') + ' PLN';
-  document.getElementById('forecastFunVal').textContent = realFun.toLocaleString('pl-PL') + ' PLN';
-  document.getElementById('forecastDailyFunVal').textContent = Math.round(realFun / 30) + ' PLN / dzień';
-
-  document.getElementById('idealSurvivalVal').textContent = idealSurvival.toLocaleString('pl-PL') + ' PLN';
-  document.getElementById('idealSavingsVal').textContent = idealSavings.toLocaleString('pl-PL') + ' PLN';
-  document.getElementById('idealFunVal').textContent = idealFun.toLocaleString('pl-PL') + ' PLN';
-  document.getElementById('idealDailyFunVal').textContent = Math.round(idealFun / 30) + ' PLN';
+  document.getElementById('forecastFunVal').textContent = leftFun.toLocaleString('pl-PL') + ' PLN';
 
   var diffSurv = realSurvival - idealSurvival;
   var badgeSurv = document.getElementById('diffSurvivalBadge');
@@ -1541,15 +1544,30 @@ function renderReportTab() {
     badgeSav.style.background = '#fee2e2'; badgeSav.style.color = 'var(--danger)'; 
   }
 
-  var diffFun = realFun - idealFun;
   var badgeFun = document.getElementById('diffFunBadge');
-  if (diffFun < 0) {
-    badgeFun.textContent = diffFun.toLocaleString('pl-PL') + ' PLN';
-    badgeFun.style.background = '#fee2e2'; badgeFun.style.color = 'var(--danger)'; 
+  badgeFun.textContent = 'Wydano ' + realFun.toLocaleString('pl-PL') + ' PLN';
+  badgeFun.style.background = '#f1f5f9'; badgeFun.style.color = 'var(--text-muted)'; 
+
+  var d = new Date();
+  var curPeriod = d.getFullYear() + '-' + ((d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1));
+  var isCurrentMonth = (sel.value === curPeriod);
+  var subTitle = '';
+  var dailyLuz = 0;
+
+  if(isCurrentMonth) {
+    var daysInMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+    var daysLeft = daysInMonth - d.getDate() + 1; 
+    dailyLuz = Math.round(leftFun / daysLeft);
+    subTitle = 'Na resztę m-ca (' + daysLeft + ' dni)';
   } else {
-    badgeFun.textContent = '+' + diffFun.toLocaleString('pl-PL') + ' PLN';
-    badgeFun.style.background = '#f1f5f9'; badgeFun.style.color = 'var(--text-muted)'; 
+    var parts = sel.value ? sel.value.split('-') : ['2023', '01'];
+    var daysInMonth = new Date(parts[0], parts[1], 0).getDate();
+    dailyLuz = Math.round(idealFun / daysInMonth);
+    subTitle = 'Założenie bazowe';
   }
+
+  document.getElementById('forecastDailyFunVal').textContent = dailyLuz.toLocaleString('pl-PL') + ' PLN / dzień';
+  document.getElementById('dailyFunSubtitle').textContent = subTitle;
 
   document.getElementById('monthTotalExpense').textContent = tot.toLocaleString('pl-PL') + ' PLN';
   var tbody = document.getElementById('monthDetailsBody'); 
