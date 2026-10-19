@@ -29,6 +29,7 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    html, body { overflow-x: hidden; width: 100%; position: relative; }
     body { background-color: var(--bg-color); color: var(--text-main); padding: 20px 16px; -webkit-font-smoothing: antialiased; }
     .container { width: 100%; max-width: 1800px; margin: 0 auto; }
     
@@ -72,6 +73,7 @@
     .tab-content.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+    /* DOLNY PASEK NA MOBILE ORAZ MOBILNE POPRAWKI UX */
     @media (max-width: 768px) {
       body { padding-bottom: 90px; } 
       .nav-tabs { position: fixed; bottom: 0; left: 0; width: 100%; margin: 0; padding: 12px 8px calc(12px + env(safe-area-inset-bottom, 0px)); background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-top: 1px solid rgba(226, 232, 240, 0.8); border-bottom: none; justify-content: space-around; gap: 4px; z-index: 999; box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.05); }
@@ -79,6 +81,24 @@
       .tab-btn i, .tab-btn svg { width: 22px; height: 22px; }
       .tab-btn.active { color: var(--primary); }
       .tab-btn.active svg { stroke-width: 2.5px; } 
+
+      .metric-hero .val { font-size: 2.2rem; } /* Mniejsza kwota glówna na tel. by zapobiec zjawisku ucięcia */
+      
+      /* Formularz w Dzienniku - transformacja w pion na mobile */
+      .expense-form-row { flex-direction: column !important; align-items: stretch !important; gap: 12px !important; }
+      .expense-form-row .split-item { display: flex !important; flex-direction: column; gap: 12px; }
+      .expense-form-row #histInputDate, .expense-form-row #histName, .expense-form-row .split-category, .expense-form-row .split-amount, #addHistBtn, #cancelEditBtn { width: 100% !important; flex: none !important; min-width: 0 !important; }
+      
+      /* Dynamiczne pola w Dzienniku na mobile */
+      .split-item-dynamic { flex-direction: column !important; align-items: stretch !important; }
+      .split-item-dynamic .spacer { display: none !important; }
+      .split-item-dynamic .split-category, .split-item-dynamic .split-amount, .split-item-dynamic .remove-split-btn { width: 100% !important; flex: none !important; }
+
+      /* Filtry i Statystyki na mobile */
+      .filter-bar { flex-direction: column; align-items: stretch !important; }
+      .filter-group { flex-direction: column; align-items: stretch !important; }
+      .filter-group select { width: 100% !important; flex: none !important; }
+      .stat-badge-grid { grid-template-columns: 1fr !important; }
     }
     
     /* KARTY */
@@ -114,7 +134,7 @@
     .subgrid-col { display: flex; flex-direction: column; gap: 24px; width: 100%; }
     .subgrid-col .card { margin-bottom: 0; }
     
-    /* FORMULARZE */
+    /* FORMULARZE BAZOWE */
     label { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; font-weight: 600; color: #334155; margin-bottom: 6px; }
     .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
     .input-group { position: relative; margin-bottom: 16px; }
@@ -164,7 +184,7 @@
     .bar-fill { height: 100%; border-radius: 6px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
     .fill-slate { background: #475569; } .fill-amber { background: var(--warning); } .fill-emerald { background: var(--success); } .fill-blue { background: var(--primary); } .fill-purple { background: #a855f7; }
 
-    /* TABELE (Zmienione wyrównanie i zawijanie tekstu) */
+    /* TABELE */
     .table-wrapper { overflow-x: auto; margin-top: 16px; border-radius: 16px; border: 1px solid var(--border); background: #fff; }
     .styled-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
     .styled-table th { background: #f8fafc; color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; border-bottom: 2px solid var(--border); padding: 16px; text-align: center; }
@@ -217,6 +237,20 @@
     .bucket-sub-item:hover { border-color: var(--border); background: #f1f5f9; }
     .bucket-sub-item.active-filter { background: #eff6ff; border-color: #bfdbfe; }
     .bucket-sub-item.active-filter span.cat-name { color: var(--primary); }
+
+    /* LAYOUT KLASY DLA FORMULARZA DZIENNIKA */
+    .expense-form-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .expense-form-row #histInputDate { width: 155px; font-weight: 700; cursor: pointer; }
+    .expense-form-row #histName { flex: 1; min-width: 130px; }
+    .expense-form-row .split-item { display: contents; }
+    .expense-form-row .split-category { width: 160px; font-weight: 700; color: var(--primary); }
+    .expense-form-row .split-amount { width: 120px; }
+
+    .split-item-dynamic { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; animation: fadeIn 0.2s; margin-top: 12px; }
+    .split-item-dynamic .spacer { flex: 1; min-width: 10px; }
+    .split-item-dynamic .split-category { width: 160px; font-weight: 700; color: var(--primary); }
+    .split-item-dynamic .split-amount { width: 120px; }
+    .split-item-dynamic .remove-split-btn { width: 44px; padding: 0; height: 44px; display: inline-flex; justify-content: center; align-items: center; }
 
     .forecast-card { background: linear-gradient(135deg, #faf5ff, #fdf4ff); border: 1px solid #f0abfc; border-radius: 24px; padding: 28px; margin-bottom: 28px; box-shadow: 0 4px 15px rgba(217, 70, 239, 0.05); }
     .metric-box-tab3 { background: #fff; padding: 20px; border-radius: 16px; border: 1px solid #f5d0fe; box-shadow: 0 4px 10px rgba(0,0,0,0.02); display: flex; flex-direction: column; }
@@ -491,15 +525,15 @@
 
           <div id="expenseFormContent">
             <div id="expenseFormWrapper" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px;">
-              <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                <input type="date" id="histInputDate" style="width: 155px; font-weight: 700; cursor: pointer;" title="Data wydatku">
-                <input type="text" id="histName" placeholder="Nazwa sklepu (np. Biedronka, Opłaty)" style="flex: 1; min-width: 130px;">
+              <div class="expense-form-row">
+                <input type="date" id="histInputDate" title="Data wydatku">
+                <input type="text" id="histName" placeholder="Nazwa sklepu (np. Biedronka, Opłaty)">
                 
-                <div class="split-item" style="display: contents;">
-                  <select class="split-category" style="width: 160px; font-weight: 700; color: var(--primary);">
+                <div class="split-item">
+                  <select class="split-category">
                     <!-- Dynamic Categories -->
                   </select>
-                  <input type="number" class="split-amount" placeholder="Kwota" min="0" style="width: 120px;">
+                  <input type="number" class="split-amount" placeholder="Kwota" min="0">
                 </div>
 
                 <button type="button" class="btn-add" id="addHistBtn"><i data-lucide="plus-circle" style="width:18px;"></i> Zapisz</button>
@@ -1537,15 +1571,14 @@ window.onload = async function() {
   document.getElementById('addSplitBtn').onclick = function() {
     var container = document.getElementById('splitItemsContainer');
     var row = document.createElement('div');
-    row.className = 'split-item';
-    row.style.cssText = 'display: flex; gap: 12px; align-items: center; flex-wrap: wrap; animation: fadeIn 0.2s;';
+    row.className = 'split-item-dynamic';
     row.innerHTML = `
-      <div style="flex: 1; min-width: 10px;"></div>
-      <select class="split-category" style="width: 160px; font-weight: 700; color: var(--primary);">
+      <div class="spacer"></div>
+      <select class="split-category">
         ${generateCategoryOptionsHTML()}
       </select>
-      <input type="number" class="split-amount" placeholder="Kwota" min="0" style="width: 120px;">
-      <button type="button" class="del-btn remove-split-btn" style="width: 44px; padding: 0; height: 44px;" onclick="this.parentElement.remove()"><i data-lucide="minus"></i></button>
+      <input type="number" class="split-amount" placeholder="Kwota" min="0">
+      <button type="button" class="del-btn remove-split-btn" onclick="this.parentElement.remove()"><i data-lucide="minus"></i></button>
     `;
     container.appendChild(row);
     lucide.createIcons();
@@ -1556,7 +1589,7 @@ window.onload = async function() {
 
     var dateVal = document.getElementById('histInputDate').value; 
     var n = document.getElementById('histName').value.trim(); 
-    var splitRows = document.querySelectorAll('.split-item');
+    var splitRows = document.querySelectorAll('.expense-form-row .split-item, .split-item-dynamic');
 
     if (!dateVal || !n) { alert("Podaj datę i nazwę sklepu (opisu)."); return; }
 
