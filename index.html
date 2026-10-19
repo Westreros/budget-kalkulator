@@ -82,19 +82,16 @@
       .tab-btn.active { color: var(--primary); }
       .tab-btn.active svg { stroke-width: 2.5px; } 
 
-      .metric-hero .val { font-size: 2.2rem; } /* Mniejsza kwota glówna na tel. by zapobiec zjawisku ucięcia */
+      .metric-hero .val { font-size: 2.2rem; }
       
-      /* Formularz w Dzienniku - transformacja w pion na mobile */
       .expense-form-row { flex-direction: column !important; align-items: stretch !important; gap: 12px !important; }
       .expense-form-row .split-item { display: flex !important; flex-direction: column; gap: 12px; }
       .expense-form-row #histInputDate, .expense-form-row #histName, .expense-form-row .split-category, .expense-form-row .split-amount, #addHistBtn, #cancelEditBtn { width: 100% !important; flex: none !important; min-width: 0 !important; }
       
-      /* Dynamiczne pola w Dzienniku na mobile */
       .split-item-dynamic { flex-direction: column !important; align-items: stretch !important; }
       .split-item-dynamic .spacer { display: none !important; }
       .split-item-dynamic .split-category, .split-item-dynamic .split-amount, .split-item-dynamic .remove-split-btn { width: 100% !important; flex: none !important; }
 
-      /* Filtry i Statystyki na mobile */
       .filter-bar { flex-direction: column; align-items: stretch !important; }
       .filter-group { flex-direction: column; align-items: stretch !important; }
       .filter-group select { width: 100% !important; flex: none !important; }
@@ -172,10 +169,10 @@
 
     /* STATYSTYKI Z GRYWALIZACJĄ */
     .stat-badge-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-    .stat-badge { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: center; }
-    .stat-badge span { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
-    .stat-badge strong { font-size: 1.4rem; color: var(--text-main); font-weight: 900; margin-top: 6px; display: block; }
-    .streak-fire { color: #f97316; font-size: 1.8rem; font-weight: 900; display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+    .stat-badge { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden; transition: all 0.5s; }
+    .stat-badge span { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.05em; position: relative; z-index: 2; }
+    .stat-badge strong { font-size: 1.4rem; color: var(--text-main); font-weight: 900; margin-top: 6px; display: block; position: relative; z-index: 2; }
+    .streak-fire { color: #f97316; font-size: 1.8rem; font-weight: 900; display: flex; align-items: center; gap: 8px; margin-top: 6px; position: relative; z-index: 2; }
 
     /* PASKI PROGRESU */
     .bar-group { display: flex; flex-direction: column; gap: 18px; margin-top: 16px; }
@@ -492,17 +489,22 @@
   <div id="historyTab" class="tab-content">
     
     <div class="stat-badge-grid" style="margin-bottom: 24px;">
-      <div class="stat-badge" style="border: 2px solid #fdba74; background: linear-gradient(135deg, #fffbeb, #fff);">
-        <span style="color: #ea580c;"><i data-lucide="flame" style="width: 16px;"></i> Passa bez zachcianek</span>
-        <strong class="streak-fire" id="noSpendBadgeVal" style="margin-top: 0; color: #f97316;">0 Dni</strong>
+      <!-- Pasek Postępu Passy (Gamifikacja) -->
+      <div class="stat-badge" id="streakBadgeContainer" style="border: 2px solid #fdba74; background: linear-gradient(135deg, #fffbeb, #fff); transition: all 0.5s;">
+        <span id="streakTitleLabel" style="color: #ea580c; transition: color 0.5s;"><i data-lucide="flame" style="width: 16px;"></i> Passa bez zachcianek</span>
+        <strong class="streak-fire" id="noSpendBadgeVal" style="margin-top: 0; color: #f97316; transition: color 0.5s;">0 Dni</strong>
+        <div class="bar-bg" style="height: 6px; margin-top: 12px; background: rgba(0,0,0,0.05); border: none; box-shadow: none; overflow: hidden; border-radius: 4px;">
+           <div id="streakProgressBar" class="bar-fill" style="width: 0%; background: #fdba74; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.5s;"></div>
+        </div>
       </div>
+      
       <div class="stat-badge">
         <span><i data-lucide="activity" style="width: 16px;"></i> Rzeczywista Średnia / Mc</span>
         <strong id="avgGrandTotal" style="color: var(--primary); margin-top: 0;">0 PLN</strong>
       </div>
     </div>
 
-    <!-- MASONRY GRID: Dzieli formularz z tabelą na lewo, a wykres na prawo -->
+    <!-- MASONRY GRID -->
     <div class="history-top-grid">
       <div class="history-left-stack">
         
@@ -552,7 +554,6 @@
           </div>
         </div>
 
-        <!-- Tabela przeniesiona na lewą stronę -->
         <div class="card" style="margin-bottom: 0; border-radius: 20px;">
           <div class="filter-bar">
             <h2 style="margin: 0; font-size: 1.15rem;"><i data-lucide="list"></i> Wpisy w Dzienniku</h2>
@@ -1255,21 +1256,54 @@ function updateNoSpendDaysBadge() {
   var d = new Date();
   var curYear = d.getFullYear();
   var curMonthStr = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1);
-  var currentPeriod = curYear + '-' + curMonthStr;
-  var daysPassedInMonth = d.getDate(); 
+  var currentMonthPrefix = curYear + '-' + curMonthStr;
+  var todayDay = d.getDate(); 
   
-  var uniqueExpenseDates = new Set();
+  var funDays = new Set();
   historyLogs.forEach(e => {
-    if(e.month === currentPeriod && getCategoryBucket(e.category) === 'fun' && e.exact_date) {
-      uniqueExpenseDates.add(e.exact_date);
+    if (e.month === currentMonthPrefix && getCategoryBucket(e.category) === 'fun' && e.exact_date) {
+      var parts = e.exact_date.split('-');
+      if(parts.length === 3) {
+         funDays.add(parseInt(parts[2], 10));
+      }
     }
   });
   
-  var noSpendDays = daysPassedInMonth - uniqueExpenseDates.size;
-  if(noSpendDays < 0) noSpendDays = 0;
+  var streak = 0;
+  for (var i = todayDay; i >= 1; i--) {
+    if (funDays.has(i)) {
+      break; 
+    }
+    streak++;
+  }
   
   var badgeEl = document.getElementById('noSpendBadgeVal');
-  if(badgeEl) { badgeEl.innerHTML = noSpendDays + ' Dni'; }
+  if(badgeEl) { badgeEl.innerHTML = streak + (streak === 1 ? ' Dzień' : ' Dni'); }
+  
+  var progressBar = document.getElementById('streakProgressBar');
+  var badgeContainer = document.getElementById('streakBadgeContainer');
+  var titleLabel = document.getElementById('streakTitleLabel');
+  
+  if(progressBar && badgeContainer && titleLabel) {
+    var pct = Math.min(100, (streak / 30) * 100);
+    progressBar.style.width = pct + '%';
+    
+    var color = '#f97316'; 
+    var bgGrad = 'linear-gradient(135deg, #fffbeb, #fff)';
+    var borderCol = '#fdba74';
+    
+    if (streak === 0) { color = '#94a3b8'; borderCol = '#e2e8f0'; bgGrad = '#f8fafc'; }
+    else if (streak <= 3) { color = '#fb923c'; borderCol = '#fdba74'; }
+    else if (streak <= 7) { color = '#ea580c'; borderCol = '#f97316'; }
+    else if (streak <= 14) { color = '#c2410c'; borderCol = '#ea580c'; bgGrad = 'linear-gradient(135deg, #ffedd5, #fff)'; }
+    else { color = '#9a3412'; borderCol = '#c2410c'; bgGrad = 'linear-gradient(135deg, #ffedd5, #fff)'; }
+    
+    progressBar.style.backgroundColor = color;
+    badgeEl.style.color = color;
+    titleLabel.style.color = color;
+    badgeContainer.style.borderColor = borderCol;
+    badgeContainer.style.background = bgGrad;
+  }
 }
 
 function renderHistoryTable() {
