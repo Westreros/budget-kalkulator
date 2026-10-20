@@ -77,9 +77,8 @@
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
     /* KARTY & GLOBAL FIX DLA OVERFLOW */
-    .card, .grid, .subgrid-col, .history-top-grid, .history-left-stack, .stat-badge-grid, .stat-badge, .table-wrapper, .expense-form-row, .split-item, .split-item-dynamic {
-      min-width: 0;
-      max-width: 100%;
+    .card, .grid, .subgrid-col, .history-top-grid, .history-left-stack, .stat-badge-grid, .stat-badge, .expense-form-row, .split-item, .split-item-dynamic {
+      min-width: 0; max-width: 100%;
     }
     
     .card { background: var(--card-bg); border: 1px solid rgba(226, 232, 240, 0.6); border-radius: 24px; padding: 24px; box-shadow: var(--card-shadow); transition: box-shadow 0.3s ease; margin-bottom: 24px; }
@@ -271,7 +270,7 @@
     .category-manage-btn { font-size: 0.85rem; padding: 8px 16px; background: #eff6ff; color: var(--primary); border: 1.5px solid #bfdbfe; font-weight: 800; border-radius: 12px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
     .category-manage-btn:hover { background: #dbeafe; border-color: #93c5fd; transform: translateY(-1px); }
 
-    /* DOLNY PASEK NA MOBILE ORAZ MOBILNE POPRAWKI UX */
+    /* ==== KARTY ZAMIAST TABEL NA MOBILE ==== */
     @media (max-width: 768px) {
       body { padding: 12px 10px; padding-bottom: 90px; } 
       
@@ -307,6 +306,20 @@
       .bucket-details { grid-template-columns: repeat(2, 1fr) !important; padding-left: 0 !important; border-left: none !important; margin-left: 0 !important; gap: 8px !important; }
       
       .user-name { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+      /* GLOBALNA PRZEBUDOWA TABEL NA KARTY NA MOBILE */
+      .table-wrapper { border: none !important; background: transparent !important; overflow: visible !important; padding: 0 !important; margin-top: 0 !important; }
+      .styled-table thead { display: none; }
+      .styled-table, .styled-table tbody, .styled-table tr, .styled-table td { display: block; width: 100%; }
+      .styled-table tr { margin-bottom: 16px; border: 1px solid var(--border); border-radius: 16px; padding: 16px; background: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.02); position: relative; }
+      .styled-table td { text-align: right !important; padding: 10px 0 !important; border-bottom: 1px dashed var(--border) !important; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+      .styled-table td:last-child { border-bottom: none !important; padding-bottom: 0 !important; }
+      .styled-table td::before { content: attr(data-label); font-weight: 700; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; margin-right: auto; text-align: left; }
+      .col-actions { justify-content: flex-end !important; gap: 8px; margin-top: 8px; padding-top: 16px !important; border-top: 1px solid var(--border) !important; border-bottom: none !important; }
+      .col-actions::before { display: none !important; }
+      .styled-table .col-okres, .styled-table .col-cat, .styled-table .col-opis, .styled-table .col-amount { white-space: normal !important; max-width: 100% !important; width: 100% !important; }
+      .cat-badge { padding: 4px 10px; font-size: 0.75rem; text-align: right; }
+      .col-opis strong { text-align: right; word-break: break-word; }
     }
   </style>
 </head>
@@ -394,7 +407,6 @@
   
   <header>
     <div style="display: flex; align-items: center;">
-      <!-- NOWE LOGO SVG "The Wise W" -->
       <svg width="36" height="36" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 12px; flex-shrink: 0;">
         <rect width="100" height="100" rx="28" fill="url(#wiseGrad)"/>
         <path d="M26 38L40 66L50 48L60 66L74 38" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
@@ -428,7 +440,6 @@
     </div>
   </header>
 
-  <!-- Baner instalacji PWA (Schowany domyślnie, pokaże się na urządzeniach mobilnych bez instalacji) -->
   <div id="pwaInstallBanner" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; margin-bottom: 20px; border-radius: 16px; padding: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
     <div style="display: flex; align-items: center; gap: 12px;">
       <i data-lucide="download-cloud" style="color: var(--primary);"></i>
@@ -1532,16 +1543,16 @@ function renderHistoryTable() {
   var sum = tableItems.reduce((acc, curr) => acc + Number(curr.amount), 0);
   document.getElementById('filteredMonthSum').textContent = sum.toLocaleString('pl-PL') + ' PLN';
 
-  if (tableItems.length === 0) { tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><i data-lucide="receipt"></i><strong>Brak wydatków na liście</strong>Zanotuj swój pierwszy wydatek u góry.</div></td></tr>'; setTimeout(() => lucide.createIcons(), 10); return; }
+  if (tableItems.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="border:none;"><div class="empty-state"><i data-lucide="receipt"></i><strong>Brak wydatków na liście</strong>Zanotuj swój pierwszy wydatek u góry.</div></td></tr>'; setTimeout(() => lucide.createIcons(), 10); return; }
 
   for (var k = 0; k < tableItems.length; k++) {
     var cat = tableItems[k].category; var b = getCategoryBucket(cat); var displayDate = tableItems[k].exact_date ? tableItems[k].exact_date : formatPeriodToPL(tableItems[k].month);
     var tr = document.createElement('tr');
-    tr.innerHTML = '<td class="col-okres">' + displayDate + '</td>' +
-                   '<td class="col-cat"><span class="cat-badge cat-bucket-' + b + '">' + cat + '</span></td>' +
-                   '<td class="col-opis"><strong>' + tableItems[k].name + '</strong></td>' +
-                   '<td class="col-amount">' + Number(tableItems[k].amount).toLocaleString('pl-PL') + ' PLN</td>' +
-                   '<td class="col-actions">' +
+    tr.innerHTML = '<td class="col-okres" data-label="Data wydatku">' + displayDate + '</td>' +
+                   '<td class="col-cat" data-label="Kategoria"><span class="cat-badge cat-bucket-' + b + '">' + cat + '</span></td>' +
+                   '<td class="col-opis" data-label="Opis/Sklep"><strong>' + tableItems[k].name + '</strong></td>' +
+                   '<td class="col-amount" data-label="Kwota">' + Number(tableItems[k].amount).toLocaleString('pl-PL') + ' PLN</td>' +
+                   '<td class="col-actions" data-label="Akcje">' +
                      '<button type="button" class="edit-btn" title="Edytuj" onclick="startEditEntry(' + tableItems[k].id + ')"><i data-lucide="pencil" style="width:16px;"></i></button>' +
                      '<button type="button" class="del-btn" title="Usuń" onclick="deleteHistoryEntry(' + tableItems[k].id + ')"><i data-lucide="trash-2" style="width:16px;"></i></button>' +
                    '</td>';
@@ -1755,14 +1766,15 @@ function renderReportTab() {
   var tbody = document.getElementById('monthDetailsBody'); tbody.innerHTML = '';
 
   if (uniquePeriods.length === 0 || filtered.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4"><div class="empty-state"><i data-lucide="search-x"></i><strong>Brak wydatków w tym miesiącu</strong>Zanotuj coś w Dzienniku.</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" style="border:none;"><div class="empty-state"><i data-lucide="search-x"></i><strong>Brak wydatków w tym miesiącu</strong>Zanotuj coś w Dzienniku.</div></td></tr>';
   } else {
     filtered.forEach(item => {
       var cat = item.category; var b = getCategoryBucket(cat); var pct = tot > 0 ? Math.round((Number(item.amount) / tot) * 100) : 0;
       var tr = document.createElement('tr');
-      tr.innerHTML = '<td class="col-cat"><span class="cat-badge cat-bucket-' + b + '">' + cat + '</span></td>' +
-                     '<td class="col-opis"><strong>' + item.name + '</strong></td>' +
-                     '<td class="col-amount">' + Number(item.amount).toLocaleString('pl-PL') + ' PLN</td><td style="text-align: center; color: var(--text-muted); font-weight: 700;">' + pct + '%</td>';
+      tr.innerHTML = '<td class="col-cat" data-label="Kategoria"><span class="cat-badge cat-bucket-' + b + '">' + cat + '</span></td>' +
+                     '<td class="col-opis" data-label="Opis"><strong>' + item.name + '</strong></td>' +
+                     '<td class="col-amount" data-label="Kwota">' + Number(item.amount).toLocaleString('pl-PL') + ' PLN</td>' +
+                     '<td style="text-align: right; color: var(--text-muted); font-weight: 700;" data-label="Udział w m-cu">' + pct + '%</td>';
       tbody.appendChild(tr);
     });
   }
@@ -1819,7 +1831,6 @@ window.onload = async function() {
       } else { newRecords.forEach((rec, i) => { rec.id = Date.now() + i; rec.monthNum = rec.month_num; historyLogs.push(rec); }); resetExpenseForm(); renderHistory(); }
     }
     
-    // Sprawdźmy wszystkie nowo dodane pozycje pod kątem Jackpota
     var totalAddedToSavings = 0;
     validItemsToSave.forEach(item => { if(getCategoryBucket(item.cat) === 'savings') totalAddedToSavings += item.amt; });
     if (totalAddedToSavings > 0) checkGlobalSavingsJackpot(totalAddedToSavings);
