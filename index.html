@@ -3,8 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WalletWise - Twój Plan 50/20/30</title>
+  <title>WiseWallet - Twój Plan 50/20/30</title>
   
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563eb">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3344/3344055.png">
+
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -52,7 +56,6 @@
     
     header { margin-bottom: 24px; text-align: left; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; }
     h1 { font-size: 2.2rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
-    .logo-icon { color: var(--primary); }
     p.subtitle { color: var(--text-muted); font-size: 1rem; margin-top: 6px; font-weight: 500; }
 
     /* PROFIL */
@@ -285,7 +288,6 @@
       
       .input-row { grid-template-columns: 1fr !important; gap: 12px !important; margin-bottom: 12px !important; }
       
-      /* Formularz w Dzienniku na telefon */
       .expense-form-row { flex-direction: column !important; align-items: stretch !important; gap: 12px !important; }
       .expense-form-row .split-item { display: flex !important; flex-direction: column; gap: 12px; }
       .expense-form-row #histInputDate, .expense-form-row #histName, .expense-form-row .split-category, .expense-form-row .split-amount, #addHistBtn, #cancelEditBtn { width: 100% !important; flex: none !important; min-width: 0 !important; }
@@ -391,9 +393,23 @@
 <div class="container" id="appContainer">
   
   <header>
-    <div>
-      <h1><i data-lucide="wallet" class="logo-icon"></i> WalletWise</h1>
-      <p class="subtitle">Twój aktywny trener planu 50/20/30.</p>
+    <div style="display: flex; align-items: center;">
+      <!-- NOWE LOGO SVG "The Wise W" -->
+      <svg width="36" height="36" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 12px; flex-shrink: 0;">
+        <rect width="100" height="100" rx="28" fill="url(#wiseGrad)"/>
+        <path d="M26 38L40 66L50 48L60 66L74 38" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="50" cy="34" r="6" fill="#fcd34d" />
+        <defs>
+          <linearGradient id="wiseGrad" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#2563eb"/>
+            <stop offset="1" stop-color="#9333ea"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div>
+        <h1 style="margin-bottom: 0;">WiseWallet</h1>
+        <p class="subtitle" style="margin-top: 2px;">Twój aktywny trener planu 50/20/30.</p>
+      </div>
     </div>
     
     <div style="margin-top: 8px;" id="authHeaderBlock">
@@ -411,6 +427,18 @@
       </div>
     </div>
   </header>
+
+  <!-- Baner instalacji PWA (Schowany domyślnie, pokaże się na urządzeniach mobilnych bez instalacji) -->
+  <div id="pwaInstallBanner" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; margin-bottom: 20px; border-radius: 16px; padding: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <i data-lucide="download-cloud" style="color: var(--primary);"></i>
+      <div>
+        <strong style="color: #1e3a8a; display: block; font-size: 0.95rem;">Zainstaluj aplikację</strong>
+        <span style="font-size: 0.8rem; color: var(--text-muted);">Szybszy dostęp i powiadomienia offline</span>
+      </div>
+    </div>
+    <button id="pwaInstallBtn" class="btn-add" style="font-size: 0.85rem; padding: 8px 16px; width: auto;">Zainstaluj</button>
+  </div>
 
   <nav class="nav-tabs">
     <button type="button" class="tab-btn active" onclick="appSwitchTab('calculatorTab', this)"><i data-lucide="calculator"></i> <span class="tab-text">Planer i Budżet</span></button>
@@ -687,7 +715,7 @@
   <!-- ZAKŁADKA 3 -->
   <div id="reportTab" class="tab-content">
   
-    <!-- NOWOŚĆ: Baner Wyzwania Premium -->
+    <!-- Baner Wyzwania Premium -->
     <div id="premiumChallengeBanner" class="goal-banner" style="margin-bottom: 24px; background: linear-gradient(135deg, #fffbeb, #fef3c7); border-color: #fde68a;">
        <div class="goal-banner-text" style="width: 100%;">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 8px;">
@@ -786,6 +814,29 @@
 
 <script>
 lucide.createIcons();
+
+// --- PWA INSTALLATION BANNER ---
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault(); deferredPrompt = e;
+  document.getElementById('pwaInstallBanner').style.display = 'flex';
+});
+
+document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') document.getElementById('pwaInstallBanner').style.display = 'none';
+    deferredPrompt = null;
+  }
+});
+
+// SERVICE WORKER REGISTRATION
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js').catch(err => console.log('SW error:', err));
+  });
+}
 
 window.openAccordionState = window.openAccordionState || { needs: false, fun: false, savings: false };
 window.toggleAccordion = function(bucketId) {
@@ -915,7 +966,6 @@ function checkGlobalSavingsJackpot(addedAmount) {
 // WYZWANIE PREMIUM (MISTRZ OSZCZĘDZANIA)
 // -------------------------------------------
 function calculateSavingsStreak() {
-  var d = new Date();
   var totalInc = getTotalIncome(); 
   var rush = document.getElementById('rushEmergencyFund').checked;
   var housing = Math.round(totalInc * 0.30); var food = Math.round(totalInc * 0.15); var transport = Math.round(totalInc * 0.05); var other = 0;
@@ -942,7 +992,6 @@ function calculateSavingsStreak() {
   
   return streak;
 }
-
 
 // -------------------------------------------
 // AUTO-KSIĘGOWANIE SKARBONKI DO DZIENNIKA
@@ -1770,6 +1819,7 @@ window.onload = async function() {
       } else { newRecords.forEach((rec, i) => { rec.id = Date.now() + i; rec.monthNum = rec.month_num; historyLogs.push(rec); }); resetExpenseForm(); renderHistory(); }
     }
     
+    // Sprawdźmy wszystkie nowo dodane pozycje pod kątem Jackpota
     var totalAddedToSavings = 0;
     validItemsToSave.forEach(item => { if(getCategoryBucket(item.cat) === 'savings') totalAddedToSavings += item.amt; });
     if (totalAddedToSavings > 0) checkGlobalSavingsJackpot(totalAddedToSavings);
