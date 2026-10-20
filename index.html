@@ -56,11 +56,11 @@
     p.subtitle { color: var(--text-muted); font-size: 1rem; margin-top: 6px; font-weight: 500; }
 
     /* PROFIL */
-    .user-profile-badge { display: flex; align-items: center; gap: 12px; background: var(--card-bg); border: 1px solid var(--border); padding: 6px 20px 6px 6px; border-radius: 50px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: all 0.2s; }
+    .user-profile-badge { display: flex; align-items: center; gap: 12px; background: var(--card-bg); border: 1px solid var(--border); padding: 6px 20px 6px 6px; border-radius: 50px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: all 0.2s; max-width: 100%; min-width: 0; }
     .user-profile-badge:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-    .user-avatar { background: linear-gradient(135deg, #38bdf8, #2563eb); color: #fff; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; box-shadow: inset 0 -2px 4px rgba(0,0,0,0.1); }
-    .user-name { font-size: 1.05rem; font-weight: 700; color: var(--text-main); white-space: nowrap; }
-    .btn-logout { background: #f8fafc; border: 1.5px solid var(--border); color: var(--text-muted); padding: 10px 20px; border-radius: 50px; font-weight: 700; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+    .user-avatar { background: linear-gradient(135deg, #38bdf8, #2563eb); color: #fff; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; box-shadow: inset 0 -2px 4px rgba(0,0,0,0.1); flex-shrink: 0; }
+    .user-name { font-size: 1.05rem; font-weight: 700; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+    .btn-logout { background: #f8fafc; border: 1.5px solid var(--border); color: var(--text-muted); padding: 10px 20px; border-radius: 50px; font-weight: 700; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
     .btn-logout:hover { background: #fee2e2; color: var(--danger); border-color: #fca5a5; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.15); }
 
     /* ZAKŁADKI */
@@ -73,36 +73,16 @@
     .tab-content.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* DOLNY PASEK NA MOBILE */
-    @media (max-width: 768px) {
-      body { padding-bottom: 90px; } 
-      .nav-tabs { position: fixed; bottom: 0; left: 0; width: 100%; margin: 0; padding: 12px 8px calc(12px + env(safe-area-inset-bottom, 0px)); background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-top: 1px solid rgba(226, 232, 240, 0.8); border-bottom: none; justify-content: space-around; gap: 4px; z-index: 999; box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.05); }
-      .tab-btn { flex-direction: column; font-size: 0.7rem; padding: 8px 4px; border-radius: 12px; width: 33%; gap: 6px; white-space: normal; text-align: center; border: none !important; box-shadow: none !important; background: transparent !important; line-height: 1.1; }
-      .tab-btn i, .tab-btn svg { width: 22px; height: 22px; }
-      .tab-btn.active { color: var(--primary); }
-      .tab-btn.active svg { stroke-width: 2.5px; } 
-
-      .metric-hero .val { font-size: 2.2rem; }
-      
-      .expense-form-row { flex-direction: column !important; align-items: stretch !important; gap: 12px !important; }
-      .expense-form-row .split-item { display: flex !important; flex-direction: column; gap: 12px; }
-      .expense-form-row #histInputDate, .expense-form-row #histName, .expense-form-row .split-category, .expense-form-row .split-amount, #addHistBtn, #cancelEditBtn { width: 100% !important; flex: none !important; min-width: 0 !important; }
-      
-      .split-item-dynamic { flex-direction: column !important; align-items: stretch !important; }
-      .split-item-dynamic .spacer { display: none !important; }
-      .split-item-dynamic .split-category, .split-item-dynamic .split-amount, .split-item-dynamic .remove-split-btn { width: 100% !important; flex: none !important; }
-
-      .filter-bar { flex-direction: column; align-items: stretch !important; }
-      .filter-group { flex-direction: column; align-items: stretch !important; }
-      .filter-group select { width: 100% !important; flex: none !important; }
-      .stat-badge-grid { grid-template-columns: 1fr !important; }
+    /* KARTY & GLOBAL FIX DLA OVERFLOW */
+    .card, .grid, .subgrid-col, .history-top-grid, .history-left-stack, .stat-badge-grid, .stat-badge, .table-wrapper, .expense-form-row, .split-item, .split-item-dynamic {
+      min-width: 0;
+      max-width: 100%;
     }
     
-    /* KARTY */
     .card { background: var(--card-bg); border: 1px solid rgba(226, 232, 240, 0.6); border-radius: 24px; padding: 24px; box-shadow: var(--card-shadow); transition: box-shadow 0.3s ease; margin-bottom: 24px; }
     .card:hover { box-shadow: var(--hover-shadow); }
     .card-compact { padding: 20px 24px; }
-    h2 { font-size: 1.25rem; font-weight: 800; margin-bottom: 16px; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+    h2 { font-size: 1.25rem; font-weight: 800; margin-bottom: 16px; color: var(--text-main); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     
     .hero-top-row { display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 28px; }
     @media (min-width: 768px) { .hero-top-row { grid-template-columns: 1fr 1fr; } }
@@ -112,7 +92,7 @@
     .metric-hero.dark { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff; box-shadow: 0 15px 35px -5px rgba(15, 23, 42, 0.3); border: none; }
     .metric-hero.light { background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border); box-shadow: var(--card-shadow); }
     
-    .metric-hero-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .metric-hero-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
     .metric-hero .tag { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800; display: flex; align-items: center; gap: 6px; }
     .metric-hero.dark .tag { color: #94a3b8; }
     .metric-hero.light .tag { color: var(--text-muted); }
@@ -137,22 +117,22 @@
     .input-group { position: relative; margin-bottom: 16px; }
     
     input[type="number"], input[type="text"], input[type="date"], select {
-      width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 12px; font-size: 1rem; font-weight: 600; outline: none; background-color: #f8fafc; transition: all 0.2s; color: var(--text-main);
+      width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 12px; font-size: 1rem; font-weight: 600; outline: none; background-color: #f8fafc; transition: all 0.2s; color: var(--text-main); min-width: 0;
     }
     input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     input[type="number"] { -moz-appearance: textfield; }
     .input-group input[type="number"], .input-group input[type="text"] { padding-right: 48px; }
 
-    select { appearance: none; padding-right: 36px; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 12px center; background-size: 20px; }
+    select { appearance: none; padding-right: 36px; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 12px center; background-size: 20px; text-overflow: ellipsis; }
     input:hover, select:hover { border-color: #cbd5e1; background-color: #fff; }
     input:focus, select:focus { background-color: #fff; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
     .suffix { position: absolute; right: 14px; top: 12px; color: var(--text-muted); font-weight: 700; font-size: 0.9rem; pointer-events: none; }
 
     .goal-banner { background: #ecfdf5; border: 2px solid var(--success); border-radius: 16px; padding: 16px; margin-top: 12px; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.05); }
     .goal-banner:hover { background: #d1fae5; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(16, 185, 129, 0.1); }
-    .goal-banner input { width: 22px; height: 22px; margin-top: 2px; cursor: pointer; accent-color: var(--success); }
-    .goal-banner-text strong { display: flex; align-items: center; gap: 6px; color: #065f46; font-size: 1.05rem; font-weight: 800; }
-    .goal-banner-text p { font-size: 0.85rem; color: #047857; margin-top: 4px; font-weight: 500; line-height: 1.4; }
+    .goal-banner input { width: 22px; height: 22px; margin-top: 2px; cursor: pointer; accent-color: var(--success); flex-shrink: 0; }
+    .goal-banner-text strong { display: flex; align-items: center; gap: 6px; color: #065f46; font-size: 1.05rem; font-weight: 800; flex-wrap: wrap; }
+    .goal-banner-text p { font-size: 0.85rem; color: #047857; margin-top: 4px; font-weight: 500; line-height: 1.4; word-wrap: break-word; }
 
     button.btn-add { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--primary); color: #fff; border: none; padding: 12px 20px; border-radius: 12px; cursor: pointer; font-weight: 700; white-space: nowrap; transition: all 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
     button.btn-add:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3); }
@@ -160,41 +140,52 @@
     button.cancel-btn:hover { background: #e2e8f0; color: var(--text-main); transform: translateY(-2px); }
     
     /* SKARBONKI ORAZ ŚNIEŻNA KULA */
-    .rollover-badge { display: inline-flex; align-items: center; gap: 6px; background: #f3e8ff; color: #7e22ce; padding: 6px 14px; border-radius: 50px; font-size: 0.8rem; font-weight: 800; border: 1px solid #e9d5ff; animation: fadeIn 0.5s; }
+    .rollover-badge { display: inline-flex; align-items: center; gap: 6px; background: #f3e8ff; color: #7e22ce; padding: 6px 14px; border-radius: 50px; font-size: 0.8rem; font-weight: 800; border: 1px solid #e9d5ff; animation: fadeIn 0.5s; word-wrap: break-word; white-space: normal; line-height: 1.4; }
     
     .goal-item { background: #f8fafc; border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 12px; transition: all 0.2s; position: relative; }
     .goal-item:hover { border-color: #cbd5e1; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
-    .goal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-    .goal-title { font-weight: 800; color: var(--text-main); font-size: 1.05rem; }
+    .goal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+    .goal-title { font-weight: 800; color: var(--text-main); font-size: 1.05rem; word-wrap: break-word; }
     .goal-amounts { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-align: right; }
-    .goal-actions { display: flex; gap: 8px; margin-top: 12px; }
+    .goal-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 
-    /* ANIMACJA MONETY */
+    /* ZAAWANSOWANE ANIMACJE MONET */
+    .coin-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; overflow: visible; }
+    
     @keyframes dropCoinAnim {
-      0% { transform: translateY(-50px) scale(0.2); opacity: 0; }
-      30% { transform: translateY(-30px) scale(1.4); opacity: 1; }
-      60% { transform: translateY(0px) scale(1); opacity: 1; }
-      80% { transform: translateY(5px) scale(1); opacity: 0.8; }
-      100% { transform: translateY(20px) scale(0.5); opacity: 0; }
+      0% { transform: translateY(-30px) scale(0.5); opacity: 0; }
+      20% { transform: translateY(-10px) scale(1.2); opacity: 1; }
+      50% { transform: translateY(10px) scale(1); opacity: 1; }
+      80% { transform: translateY(20px) scale(1); opacity: 0.8; }
+      100% { transform: translateY(40px) scale(0.5); opacity: 0; }
     }
-    .coin-drop { position: absolute; right: 20px; top: -10px; animation: dropCoinAnim 1s ease-in-out forwards; pointer-events: none; z-index: 50; }
+    
+    @keyframes jackpotAnim {
+      0% { transform: translate(0, 0) scale(0.5) rotate(0deg); opacity: 0; }
+      10% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(1.5) rotate(var(--rot)); opacity: 0; }
+    }
+
+    .coin-drop { position: absolute; right: 20px; top: 10px; animation: dropCoinAnim 1s ease-in-out forwards; z-index: 9999; pointer-events: none; }
+    .coin-jackpot { position: fixed; left: 50vw; top: 50vh; animation: jackpotAnim 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; z-index: 99999; pointer-events: none; }
 
     /* STATYSTYKI Z GRYWALIZACJĄ */
     .stat-badge-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
     .stat-badge { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden; transition: all 0.5s; }
-    .stat-badge span { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.05em; position: relative; z-index: 2; }
-    .stat-badge strong { font-size: 1.4rem; color: var(--text-main); font-weight: 900; margin-top: 6px; display: block; position: relative; z-index: 2; }
-    .streak-fire { font-size: 1.8rem; font-weight: 900; display: flex; align-items: center; gap: 8px; margin-top: 6px; position: relative; z-index: 2; transition: color 0.5s; }
+    .stat-badge span { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.05em; position: relative; z-index: 2; flex-wrap: wrap; }
+    .stat-badge strong { font-size: 1.4rem; color: var(--text-main); font-weight: 900; margin-top: 6px; display: block; position: relative; z-index: 2; word-wrap: break-word; }
+    .streak-fire { font-size: 1.8rem; font-weight: 900; display: flex; align-items: center; gap: 8px; margin-top: 6px; position: relative; z-index: 2; transition: color 0.5s; word-wrap: break-word; }
 
     /* PASKI PROGRESU */
     .bar-group { display: flex; flex-direction: column; gap: 18px; margin-top: 16px; }
-    .bar-header { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px; font-weight: 600; color: #334155; }
+    .bar-header { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px; font-weight: 600; color: #334155; flex-wrap: wrap; gap: 4px; }
     .bar-bg { width: 100%; height: 12px; background: #f1f5f9; border-radius: 6px; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); }
     .bar-fill { height: 100%; border-radius: 6px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
     .fill-slate { background: #475569; } .fill-amber { background: var(--warning); } .fill-emerald { background: var(--success); } .fill-blue { background: var(--primary); } .fill-purple { background: #a855f7; }
 
     /* TABELE */
-    .table-wrapper { overflow-x: auto; margin-top: 16px; border-radius: 16px; border: 1px solid var(--border); background: #fff; }
+    .table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 16px; border-radius: 16px; border: 1px solid var(--border); background: #fff; }
     .styled-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
     .styled-table th { background: #f8fafc; color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; border-bottom: 2px solid var(--border); padding: 16px; text-align: center; }
     .styled-table td { padding: 16px; border-bottom: 1px dashed var(--border); vertical-align: middle; color: #334155; font-weight: 500; text-align: center; }
@@ -207,7 +198,7 @@
     .col-amount { font-weight: 800; color: var(--text-main); text-align: center; white-space: nowrap; }
     .col-actions { text-align: center; white-space: nowrap; }
     
-    button.edit-btn, button.del-btn { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; border: none; cursor: pointer; transition: all 0.2s; margin-left: 6px; }
+    button.edit-btn, button.del-btn { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; border: none; cursor: pointer; transition: all 0.2s; margin-left: 6px; flex-shrink: 0; }
     button.edit-btn { background: #eff6ff; color: var(--primary); }
     button.edit-btn:hover { background: #dbeafe; transform: scale(1.05); }
     button.del-btn { background: #fef2f2; color: var(--danger); }
@@ -232,17 +223,17 @@
     .chart-card-side { display: flex; flex-direction: column; justify-content: flex-start; align-self: start; }
     .chart-box { position: relative; max-width: 220px; margin: 0 auto; padding: 10px 0; }
     
-    /* AKORDEON LEGENDY - SIATKA 3 KOLUMNY COMPACT */
+    /* AKORDEON LEGENDY */
     .cat-legend-list { margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 16px; display: flex; flex-direction: column; }
-    .bucket-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: #f8fafc; border: 1.5px solid var(--border); border-radius: 12px; cursor: pointer; font-weight: 800; margin-bottom: 8px; transition: all 0.2s; color: var(--text-main); }
+    .bucket-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; background: #f8fafc; border: 1.5px solid var(--border); border-radius: 12px; cursor: pointer; font-weight: 800; margin-bottom: 8px; transition: all 0.2s; color: var(--text-main); flex-wrap: nowrap; gap: 8px;}
     .bucket-header:hover { border-color: #cbd5e1; background: #f1f5f9; }
-    .bucket-header svg { transition: transform 0.3s ease; color: var(--text-muted); }
+    .bucket-header svg { transition: transform 0.3s ease; color: var(--text-muted); flex-shrink: 0; }
     
     .bucket-details { display: none; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 0 0 12px 12px; border-left: 2px solid var(--border); margin-left: 12px; margin-bottom: 12px; animation: fadeIn 0.3s ease; }
     
     .bucket-sub-item { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: 6px 8px; font-size: 0.75rem; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.2s; border: 1.5px solid transparent; background: #f8fafc; }
     .bucket-sub-item span.cat-name { color: var(--text-muted); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; width: 100%; display: block; }
-    .bucket-sub-item span.cat-amt { color: var(--text-main); font-size: 0.8rem; margin-top: 2px; }
+    .bucket-sub-item span.cat-amt { color: var(--text-main); font-size: 0.8rem; margin-top: 2px; word-wrap: break-word; }
     .bucket-sub-item:hover { border-color: var(--border); background: #f1f5f9; }
     .bucket-sub-item.active-filter { background: #eff6ff; border-color: #bfdbfe; }
     .bucket-sub-item.active-filter span.cat-name { color: var(--primary); }
@@ -259,24 +250,62 @@
     .split-item-dynamic .spacer { flex: 1; min-width: 10px; }
     .split-item-dynamic .split-category { width: 160px; font-weight: 700; color: var(--primary); }
     .split-item-dynamic .split-amount { width: 120px; }
-    .split-item-dynamic .remove-split-btn { width: 44px; padding: 0; height: 44px; display: inline-flex; justify-content: center; align-items: center; }
+    .split-item-dynamic .remove-split-btn { width: 44px; padding: 0; height: 44px; display: inline-flex; justify-content: center; align-items: center; flex-shrink: 0; }
 
     .forecast-card { background: linear-gradient(135deg, #faf5ff, #fdf4ff); border: 1px solid #f0abfc; border-radius: 24px; padding: 28px; margin-bottom: 28px; box-shadow: 0 4px 15px rgba(217, 70, 239, 0.05); }
     .metric-box-tab3 { background: #fff; padding: 20px; border-radius: 16px; border: 1px solid #f5d0fe; box-shadow: 0 4px 10px rgba(0,0,0,0.02); display: flex; flex-direction: column; }
-    .metric-box-tab3 .comparison-bar { margin-top: auto; padding-top: 12px; border-top: 1px solid #fdf4ff; display: flex; justify-content: space-between; align-items: center; }
+    .metric-box-tab3 .comparison-bar { margin-top: auto; padding-top: 12px; border-top: 1px solid #fdf4ff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; }
     .metric-box-tab3 .comparison-bar span { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
     .metric-box-tab3 .diff-badge { padding: 4px 8px; border-radius: 8px; font-weight: 800; font-size: 0.75rem; letter-spacing: 0.02em; }
 
     .excel-import-box { border: 2px dashed #93c5fd; background-color: #eff6ff; border-radius: 16px; padding: 16px; text-align: center; margin-top: 16px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px; }
     .excel-import-box:hover { background-color: #dbeafe; border-color: var(--primary); transform: translateY(-2px); }
-    .excel-import-box label { cursor: pointer; color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 8px; font-size: 1rem; }
+    .excel-import-box label { cursor: pointer; color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 8px; font-size: 1rem; text-align: center; flex-wrap: wrap; justify-content: center; }
     
     .filter-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 12px; background: #f8fafc; padding: 16px; border-radius: 16px; border: 1px solid var(--border); }
     .filter-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     
-    .category-manage-btn { font-size: 0.85rem; padding: 8px 16px; background: #eff6ff; color: var(--primary); border: 1.5px solid #bfdbfe; font-weight: 800; border-radius: 12px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s; }
+    .category-manage-btn { font-size: 0.85rem; padding: 8px 16px; background: #eff6ff; color: var(--primary); border: 1.5px solid #bfdbfe; font-weight: 800; border-radius: 12px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
     .category-manage-btn:hover { background: #dbeafe; border-color: #93c5fd; transform: translateY(-1px); }
 
+    /* DOLNY PASEK NA MOBILE ORAZ MOBILNE POPRAWKI UX */
+    @media (max-width: 768px) {
+      body { padding: 12px 10px; padding-bottom: 90px; } 
+      
+      .card, .card-compact { padding: 16px !important; border-radius: 20px !important; }
+      .metric-hero { padding: 20px !important; }
+      
+      .nav-tabs { position: fixed; bottom: 0; left: 0; width: 100%; margin: 0; padding: 12px 8px calc(12px + env(safe-area-inset-bottom, 0px)); background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-top: 1px solid rgba(226, 232, 240, 0.8); border-bottom: none; justify-content: space-around; gap: 4px; z-index: 999; box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.05); }
+      .tab-btn { flex-direction: column; font-size: 0.7rem; padding: 8px 4px; border-radius: 12px; width: 33%; gap: 6px; white-space: normal; text-align: center; border: none !important; box-shadow: none !important; background: transparent !important; line-height: 1.1; }
+      .tab-btn i, .tab-btn svg { width: 22px; height: 22px; }
+      .tab-btn.active { color: var(--primary); }
+      .tab-btn.active svg { stroke-width: 2.5px; } 
+
+      .metric-hero .val { font-size: 2.2rem; }
+      
+      .input-row { grid-template-columns: 1fr !important; gap: 12px !important; margin-bottom: 12px !important; }
+      
+      /* Formularz w Dzienniku na telefon */
+      .expense-form-row { flex-direction: column !important; align-items: stretch !important; gap: 12px !important; }
+      .expense-form-row .split-item { display: flex !important; flex-direction: column; gap: 12px; }
+      .expense-form-row #histInputDate, .expense-form-row #histName, .expense-form-row .split-category, .expense-form-row .split-amount, #addHistBtn, #cancelEditBtn { width: 100% !important; flex: none !important; min-width: 0 !important; }
+      
+      .split-item-dynamic { flex-direction: column !important; align-items: stretch !important; }
+      .split-item-dynamic .spacer { display: none !important; }
+      .split-item-dynamic .split-category, .split-item-dynamic .split-amount, .split-item-dynamic .remove-split-btn { width: 100% !important; flex: none !important; }
+
+      .filter-bar { flex-direction: column; align-items: stretch !important; }
+      .filter-group { flex-direction: column; align-items: stretch !important; }
+      .filter-group select { width: 100% !important; flex: none !important; }
+      
+      .stat-badge-grid { grid-template-columns: 1fr !important; gap: 12px !important; margin-bottom: 16px !important;}
+      .hero-top-row { gap: 16px !important; margin-bottom: 20px !important;}
+      .grid, .subgrid-col, .history-top-grid, .history-left-stack { gap: 16px !important; }
+      
+      .bucket-details { grid-template-columns: repeat(2, 1fr) !important; padding-left: 0 !important; border-left: none !important; margin-left: 0 !important; gap: 8px !important; }
+      
+      .user-name { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    }
   </style>
 </head>
 <body>
@@ -307,9 +336,7 @@
     <h2 style="justify-content: center;"><i data-lucide="tags" style="color: var(--primary)"></i> Twoje Kategorie</h2>
     <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Zarządzaj swoimi kategoriami i przypisz je do odpowiednich filarów modelu 50/20/30.</p>
     
-    <div id="categoryListContainer" style="max-height: 250px; overflow-y: auto; text-align: left; margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px;">
-      <!-- Lista kategorii -->
-    </div>
+    <div id="categoryListContainer" style="max-height: 250px; overflow-y: auto; text-align: left; margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px;"></div>
     
     <div style="border-top: 1px dashed var(--border); padding-top: 20px; text-align: left;">
       <label>Dodaj nową kategorię</label>
@@ -324,7 +351,7 @@
   </div>
 </div>
 
-<!-- MENEDŻER SKARBONKI (DODAJ/EDYTUJ CEL) -->
+<!-- MENEDŻER SKARBONKI -->
 <div id="goalManagerModal" class="modal-overlay">
   <div class="auth-card" style="max-width: 400px;">
     <button class="close-auth-btn" onclick="document.getElementById('goalManagerModal').style.display='none'"><i data-lucide="x"></i></button>
@@ -338,7 +365,6 @@
       <input type="number" id="newGoalTarget" class="auth-input" placeholder="np. 5000">
       <label>Już odłożono (PLN)</label>
       <input type="number" id="newGoalSaved" class="auth-input" placeholder="0">
-      
       <input type="hidden" id="editingGoalId">
       <button class="btn-add" onclick="saveGoal()" style="width: 100%; background: var(--success);"><i data-lucide="save"></i> Zapisz cel</button>
     </div>
@@ -457,14 +483,13 @@
                 </div>
               </label>
               
-              <!-- Ukryte technicznie pole z oszczędnościami (synchronizowane ze Skarbonką Awaryjną) -->
               <input type="hidden" id="currentSavings" value="0">
             </div>
           </div>
 
           <div class="subgrid-col">
             <div class="card">
-              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap: wrap;">
                 <h2><i data-lucide="pie-chart"></i> 2. Idealny Budżet (50/20/30)</h2>
               </div>
               <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; font-weight: 500;">
@@ -511,12 +536,12 @@
         
         <!-- SKARBONKI -->
         <div class="card" id="goalsCard" style="padding: 24px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; flex-wrap: wrap; gap: 8px;">
             <h2 style="margin:0;"><i data-lucide="piggy-bank" style="color: var(--success);"></i> Moje Skarbonki</h2>
             <button type="button" class="btn-add" id="btnAddGoal" style="padding: 8px 16px; font-size: 0.85rem;" onclick="openAddGoalModal()"><i data-lucide="plus" style="width:14px;"></i> Cel</button>
           </div>
           <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; font-weight: 500;">
-            Przypisz swoje zaoszczędzone środki do konkretnych celów, aby widzieć postępy.
+            Przypisz swoje zaoszczędzone środki do konkretnych celów. Wpłaty automatycznie lądują w Twoim Dzienniku.
           </p>
           
           <div id="goalsListContainer" style="position: relative;">
@@ -524,16 +549,6 @@
           </div>
         </div>
 
-        <div class="stat-badge-grid">
-          <div class="stat-badge">
-            <span id="funBadgeLabel"><i data-lucide="party-popper" style="width: 14px;"></i> Zachcianki (Miesiąc)</span>
-            <strong id="monthlyFunVal" style="color: #9333ea;">0 PLN</strong>
-          </div>
-          <div class="stat-badge">
-            <span><i data-lucide="sun" style="width: 14px;"></i> Bazowy Luz/Dzień</span>
-            <strong id="dailyFunVal" style="color: var(--primary);">0 PLN/dzień</strong>
-          </div>
-        </div>
       </div>
 
     </div>
@@ -568,7 +583,7 @@
         
         <!-- Formularz Dodawania -->
         <div class="card card-compact" id="expenseFormCard" style="transition: background-color 0.3s; margin-bottom: 0;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
              <h2 id="formTitle" style="margin: 0;"><i data-lucide="pen-tool"></i> Dodaj wydatek</h2>
              <button type="button" class="category-manage-btn" onclick="openCategoryManager()"><i data-lucide="tags" style="width:16px;"></i> Kategorie</button>
           </div>
@@ -628,7 +643,7 @@
             </div>
           </div>
 
-          <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0 8px 12px 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0 8px 12px 8px; flex-wrap: wrap; gap: 8px;">
             <span style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted);">Suma widocznych z filtrem:</span>
             <strong id="filteredMonthSum" style="font-size: 1.2rem; color: var(--text-main); font-weight: 900;">0 PLN</strong>
           </div>
@@ -671,8 +686,20 @@
 
   <!-- ZAKŁADKA 3 -->
   <div id="reportTab" class="tab-content">
+  
+    <!-- NOWOŚĆ: Baner Wyzwania Premium -->
+    <div id="premiumChallengeBanner" class="goal-banner" style="margin-bottom: 24px; background: linear-gradient(135deg, #fffbeb, #fef3c7); border-color: #fde68a;">
+       <div class="goal-banner-text" style="width: 100%;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 8px;">
+             <strong style="color: #b45309;"><i data-lucide="crown" style="color: #d97706;"></i> Wyzwanie: Mistrz Oszczędzania</strong>
+             <span id="streakMonthsRatio" style="background: #f59e0b; color: #fff; padding: 4px 10px; border-radius: 50px; font-weight: 900; font-size: 0.8rem; white-space: nowrap;">0/6 m-cy</span>
+          </div>
+          <p style="color: #b45309; margin-top: 8px;">Utrzymaj swój miesięczny cel oszczędnościowy (100%) przez 6 miesięcy z rzędu, aby odblokować <strong>darmowy miesiąc wersji Premium!</strong></p>
+       </div>
+    </div>
+  
     <div class="forecast-card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
         <h2 style="color: #86198f; margin: 0; display: flex; align-items: center; gap: 8px;"><i data-lucide="eye"></i> Brutalna Rzeczywistość</h2>
         <span id="forecastBasisTag" style="font-size: 0.75rem; background: #fae8ff; color: #a21caf; padding: 6px 14px; border-radius: 50px; font-weight: 800; text-transform: uppercase;">Zderzenie Danych</span>
       </div>
@@ -681,7 +708,7 @@
       </p>
       
       <div id="rolloverBadgeTab3" class="rollover-badge" style="display:none; margin-bottom:24px;">
-         <i data-lucide="snowflake" style="width:14px;"></i> Zastosowano Rollover z zeszłego miesiąca: +<span id="rolloverAmountTab3">0</span> PLN na Zachcianki
+         <i data-lucide="snowflake" style="width:14px; flex-shrink: 0;"></i> Zastosowano Rollover z zeszłego miesiąca: +<span id="rolloverAmountTab3">0</span> PLN na Zachcianki
       </div>
 
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
@@ -818,16 +845,130 @@ function calculateRollover() {
 }
 
 // -------------------------------------------
-// ANIMACJA DOPAMINOWA (MONETA)
+// ZAAWANSOWANE ANIMACJE DOPAMINOWE (MONETY)
 // -------------------------------------------
-function triggerCoinDrop(containerId) {
-  var container = document.getElementById(containerId);
+function triggerCoinDrop(containerId, amount, isJackpot = false) {
+  var container = containerId === 'body' ? document.body : document.getElementById(containerId);
   if(!container) return;
-  var coin = document.createElement('div');
-  coin.className = 'coin-drop';
-  coin.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#fcd34d" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>';
-  container.appendChild(coin);
-  setTimeout(() => coin.remove(), 1000);
+  
+  if (containerId !== 'body' && getComputedStyle(container).position === 'static') {
+      container.style.position = 'relative';
+  }
+
+  let coinCount = isJackpot ? 30 : (amount >= 500 ? 5 : (amount >= 200 ? 3 : 1));
+
+  for (let i = 0; i < coinCount; i++) {
+    let coin = document.createElement('div');
+    coin.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#fcd34d" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>';
+    
+    if (isJackpot) {
+      coin.className = 'coin-jackpot';
+      let angle = (Math.random() * 180) * (Math.PI / 180);
+      let power = 80 + Math.random() * 150;
+      let tx = Math.cos(angle) * power + 'px';
+      let ty = -Math.abs(Math.sin(angle) * power * 1.5) + 'px'; 
+      let rot = (Math.random() * 720 - 360) + 'deg';
+      coin.style.setProperty('--tx', tx);
+      coin.style.setProperty('--ty', ty);
+      coin.style.setProperty('--rot', rot);
+      coin.style.animationDelay = (Math.random() * 0.3) + 's';
+    } else {
+      coin.className = 'coin-drop';
+      coin.style.right = (10 + Math.random() * 40) + 'px';
+      coin.style.animationDelay = (i * 0.15) + 's';
+    }
+    
+    container.appendChild(coin);
+    setTimeout(() => coin.remove(), 2000);
+  }
+}
+
+// -------------------------------------------
+// GLOBALNY CEL OSZCZĘDNOŚCIOWY (JACKPOT CHECK)
+// -------------------------------------------
+function checkGlobalSavingsJackpot(addedAmount) {
+  var d = new Date();
+  var curPeriod = d.getFullYear() + '-' + ((d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1));
+  
+  var totalInc = getTotalIncome(); 
+  var rush = document.getElementById('rushEmergencyFund').checked;
+  var housing = Math.round(totalInc * 0.30); var food = Math.round(totalInc * 0.15); var transport = Math.round(totalInc * 0.05); var other = 0;
+  var survival = housing + food + transport + other;
+  var funMoney = Math.round(totalInc * (rush ? 0.10 : 0.20));
+  var idealSavings = totalInc - survival - funMoney; 
+
+  if (idealSavings <= 0) return;
+
+  var currentSavingsThisMonth = 0;
+  historyLogs.forEach(e => {
+      if(e.month === curPeriod && getCategoryBucket(e.category) === 'savings') {
+          currentSavingsThisMonth += Number(e.amount);
+      }
+  });
+
+  if (currentSavingsThisMonth >= idealSavings && (currentSavingsThisMonth - addedAmount) < idealSavings) {
+      triggerCoinDrop('body', 0, true);
+  }
+}
+
+// -------------------------------------------
+// WYZWANIE PREMIUM (MISTRZ OSZCZĘDZANIA)
+// -------------------------------------------
+function calculateSavingsStreak() {
+  var d = new Date();
+  var totalInc = getTotalIncome(); 
+  var rush = document.getElementById('rushEmergencyFund').checked;
+  var housing = Math.round(totalInc * 0.30); var food = Math.round(totalInc * 0.15); var transport = Math.round(totalInc * 0.05); var other = 0;
+  var survival = housing + food + transport + other;
+  var funMoney = Math.round(totalInc * (rush ? 0.10 : 0.20));
+  var idealSavings = totalInc - survival - funMoney; 
+
+  if (idealSavings <= 0 || historyLogs.length === 0) return 0;
+
+  var yearsMap = {}; for (var i = 0; i < historyLogs.length; i++) { yearsMap[historyLogs[i].month] = true; }
+  var uniquePeriods = Object.keys(yearsMap).sort().reverse();
+  
+  var streak = 0;
+  for (var p = 0; p < uniquePeriods.length; p++) {
+    var period = uniquePeriods[p];
+    var periodSavings = 0;
+    historyLogs.forEach(e => {
+      if(e.month === period && getCategoryBucket(e.category) === 'savings') periodSavings += Number(e.amount);
+    });
+    
+    if (periodSavings >= idealSavings) { streak++; } 
+    else { break; }
+  }
+  
+  return streak;
+}
+
+
+// -------------------------------------------
+// AUTO-KSIĘGOWANIE SKARBONKI DO DZIENNIKA
+// -------------------------------------------
+async function autoLogGoalFund(goalName, amount) {
+  if(!customCategories.some(c => c.name === "Oszczędności")) {
+    customCategories.push({ name: "Oszczędności", bucket: "savings" });
+    triggerSettingsSave(); renderCategoryDropdowns();
+  }
+
+  var d = new Date();
+  var selY = d.getFullYear().toString();
+  var selM = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1);
+  var p = selY + '-' + selM;
+  var exactD = selY + '-' + selM + '-' + (d.getDate() < 10 ? '0' : '') + d.getDate();
+  var desc = "Wpłata na cel: " + goalName;
+
+  var newRecord = { month: p, year: selY, month_num: selM, exact_date: exactD, category: "Oszczędności", name: desc, amount: amount };
+
+  if (isLoggedIn && supabase) {
+    const { data, error } = await supabase.from('history_logs').insert([newRecord]).select();
+    if (!error && data) { historyLogs = historyLogs.concat(data); renderHistory(); checkGlobalSavingsJackpot(amount); }
+  } else {
+    newRecord.id = Date.now(); newRecord.monthNum = selM;
+    historyLogs.push(newRecord); renderHistory(); checkGlobalSavingsJackpot(amount);
+  }
 }
 
 // -------------------------------------------
@@ -891,18 +1032,26 @@ function submitFundsToGoal() {
   if (id === 'EMERGENCY') {
     var currentInput = document.getElementById('currentSavings');
     var currentVal = parseFloat(currentInput.value) || 0;
-    currentInput.value = currentVal + amt;
+    var newVal = currentVal + amt;
+    currentInput.value = newVal;
+    
+    var totalInc = getTotalIncome(); var housing = Math.round(totalInc * 0.30); var food = Math.round(totalInc * 0.15); var transport = Math.round(totalInc * 0.05);
+    var survival = housing + food + transport; var emergencyGoal = survival * 6;
+    
     document.getElementById('addFundsModal').style.display = 'none';
     triggerSettingsSave(); 
-    triggerCoinDrop('emergencyBankIcon');
+    autoLogGoalFund("Poduszka Finansowa", amt);
+    triggerCoinDrop('emergencyBankIcon', amt, newVal >= emergencyGoal && emergencyGoal > 0);
     return;
   }
   
   var goal = savingsGoals.find(g => g.id == id);
   if(goal) {
-    goal.saved += amt; document.getElementById('addFundsModal').style.display = 'none';
+    goal.saved += amt; 
+    document.getElementById('addFundsModal').style.display = 'none';
     triggerSettingsSave(); 
-    triggerCoinDrop('goalIcon-' + id);
+    autoLogGoalFund(goal.name, amt);
+    triggerCoinDrop('goalIcon-' + id, amt, goal.saved >= goal.target);
   }
 }
 
@@ -911,61 +1060,59 @@ function renderGoals() {
   var btnAddGoal = document.getElementById('btnAddGoal');
   var rush = document.getElementById('rushEmergencyFund').checked;
 
-  if (rush) {
-    if(btnAddGoal) btnAddGoal.style.display = 'none';
-    var totalInc = getTotalIncome(); var housing = Math.round(totalInc * 0.30); var food = Math.round(totalInc * 0.15); var transport = Math.round(totalInc * 0.05); var other = 0;
-    var survival = housing + food + transport + other; var emergencyGoal = survival * 6;
-    var saved = Math.max(0, parseFloat(document.getElementById('currentSavings').value) || 0);
-    var pct = emergencyGoal > 0 ? Math.min(100, Math.round((saved / emergencyGoal) * 100)) : 0;
-    var isDone = saved >= emergencyGoal && emergencyGoal > 0;
-    var barColor = isDone ? '#10b981' : '#f59e0b'; 
-    var bgClass = isDone ? 'background: #ecfdf5; border-color: #a7f3d0;' : 'background: #fffbeb; border-color: #fde68a;';
-
-    container.innerHTML = `
-      <div class="goal-item" style="${bgClass}">
-        <div class="goal-header">
-          <div class="goal-title" style="position:relative;" id="emergencyBankIcon">
-            <i data-lucide="shield-alert" style="color: #ea580c; width: 18px; margin-right:4px;"></i> Poduszka Finansowa
-            ${isDone ? '<i data-lucide="check-circle-2" style="width:16px; color:#10b981; display:inline-block; vertical-align:-3px;"></i>' : ''}
-          </div>
-          <div class="goal-amounts">${saved.toLocaleString('pl-PL')} / ${emergencyGoal.toLocaleString('pl-PL')} PLN</div>
-        </div>
-        <div class="bar-bg" style="height: 10px;">
-          <div class="bar-fill" style="width: ${pct}%; background: ${barColor};"></div>
-        </div>
-        <div class="goal-actions">
-          <button class="edit-btn" style="flex:1; height: 32px; font-size: 0.8rem; border-radius: 8px; background: #fef3c7; color: #d97706; border: 1px solid #fde68a;" onclick="openAddEmergencyFundsModal()"><i data-lucide="plus" style="width:14px; margin-right:4px;"></i> Wpłać do Poduszki</button>
-        </div>
-      </div>
-      <p style="font-size:0.8rem; color:var(--text-muted); text-align:center; margin-top:12px;">Tryb Szybkiej Poduszki ukrywa inne cele, pomagając Ci skupić się na bezpieczeństwie.</p>
-    `;
-    lucide.createIcons();
-    return;
-  }
-
-  if(btnAddGoal) btnAddGoal.style.display = 'inline-flex';
-
-  if (savingsGoals.length === 0) {
-    container.innerHTML = '<div class="empty-state" style="padding: 20px 10px;"><i data-lucide="target" style="width:40px; height:40px; color:#cbd5e1; margin-bottom:12px;"></i><strong style="font-size:1rem;">Brak celów</strong><p style="font-size:0.85rem; color:var(--text-muted);">Nie stworzyłeś jeszcze żadnej Skarbonki.</p></div>';
-    lucide.createIcons(); return;
-  }
-
-  savingsGoals.forEach(g => {
-    var pct = Math.min(100, Math.round((g.saved / g.target) * 100));
-    var isDone = g.saved >= g.target;
-    var barColor = isDone ? '#10b981' : '#34d399';
-    var bgClass = isDone ? 'background: #ecfdf5; border-color: #a7f3d0;' : '';
-
-    var row = document.createElement('div');
-    row.className = 'goal-item';
-    row.style.cssText = bgClass;
-    row.innerHTML = `
+  var totalInc = getTotalIncome(); var housing = Math.round(totalInc * 0.30); var food = Math.round(totalInc * 0.15); var transport = Math.round(totalInc * 0.05); var other = 0;
+  var survival = housing + food + transport + other; var emergencyGoal = survival * 6;
+  var saved = Math.max(0, parseFloat(document.getElementById('currentSavings').value) || 0);
+  var pct = emergencyGoal > 0 ? Math.min(100, Math.round((saved / emergencyGoal) * 100)) : 0;
+  var isDone = saved >= emergencyGoal && emergencyGoal > 0;
+  var barColor = isDone ? '#10b981' : '#f59e0b'; 
+  
+  var bgClass = rush ? (isDone ? 'background: #ecfdf5; border-color: #a7f3d0;' : 'background: #fffbeb; border-color: #fde68a;') : (isDone ? 'background: #ecfdf5; border-color: #a7f3d0;' : 'background: #f8fafc; border-color: var(--border);');
+    
+  var heroGoalHtml = `
+    <div class="goal-item" style="${bgClass} ${rush ? 'border-width:2px;' : ''}" id="emergencyBankIcon">
       <div class="goal-header">
-        <div class="goal-title" style="position:relative;" id="goalIcon-${g.id}">${g.name} ${isDone ? '<i data-lucide="check-circle-2" style="width:16px; color:#10b981; display:inline-block; vertical-align:-3px;"></i>' : ''}</div>
-        <div class="goal-amounts">${g.saved.toLocaleString('pl-PL')} / ${g.target.toLocaleString('pl-PL')} PLN</div>
+        <div class="goal-title">
+          <i data-lucide="shield-alert" style="color: #ea580c; width: 18px; margin-right:4px;"></i> Poduszka Finansowa
+          ${isDone ? '<i data-lucide="check-circle-2" style="width:16px; color:#10b981; display:inline-block; vertical-align:-3px;"></i>' : ''}
+        </div>
+        <div class="goal-amounts">${saved.toLocaleString('pl-PL')} / ${emergencyGoal.toLocaleString('pl-PL')} PLN</div>
       </div>
       <div class="bar-bg" style="height: 10px;">
         <div class="bar-fill" style="width: ${pct}%; background: ${barColor};"></div>
+      </div>
+      <div class="goal-actions">
+        <button class="edit-btn" style="flex:1; height: 32px; font-size: 0.8rem; border-radius: 8px; background: #fef3c7; color: #d97706; border: 1px solid #fde68a;" onclick="openAddEmergencyFundsModal()"><i data-lucide="plus" style="width:14px; margin-right:4px;"></i> Wpłać do Poduszki</button>
+      </div>
+    </div>
+  `;
+
+  if (rush) {
+    if(btnAddGoal) btnAddGoal.style.display = 'none';
+    container.innerHTML = heroGoalHtml + '<p style="font-size:0.8rem; color:var(--text-muted); text-align:center; margin-top:12px;">Tryb Szybkiej Poduszki ukrywa inne cele, pomagając Ci skupić się na bezpieczeństwie.</p>';
+    lucide.createIcons(); return;
+  }
+
+  if(btnAddGoal) btnAddGoal.style.display = 'inline-flex';
+  container.innerHTML = heroGoalHtml;
+
+  savingsGoals.forEach(g => {
+    var gPct = Math.min(100, Math.round((g.saved / g.target) * 100));
+    var gIsDone = g.saved >= g.target;
+    var gBarColor = gIsDone ? '#10b981' : '#34d399';
+    var gBgClass = gIsDone ? 'background: #ecfdf5; border-color: #a7f3d0;' : '';
+
+    var row = document.createElement('div');
+    row.className = 'goal-item';
+    row.style.cssText = gBgClass;
+    row.id = 'goalIcon-' + g.id;
+    row.innerHTML = `
+      <div class="goal-header">
+        <div class="goal-title">${g.name} ${gIsDone ? '<i data-lucide="check-circle-2" style="width:16px; color:#10b981; display:inline-block; vertical-align:-3px;"></i>' : ''}</div>
+        <div class="goal-amounts">${g.saved.toLocaleString('pl-PL')} / ${g.target.toLocaleString('pl-PL')} PLN</div>
+      </div>
+      <div class="bar-bg" style="height: 10px;">
+        <div class="bar-fill" style="width: ${gPct}%; background: ${gBarColor};"></div>
       </div>
       <div class="goal-actions">
         <button class="edit-btn" style="flex:1; height: 32px; font-size: 0.8rem; border-radius: 8px; background: #f1f5f9; color: var(--text-main);" onclick="openAddFundsModal(${g.id})"><i data-lucide="plus" style="width:14px; margin-right:4px;"></i> Wpłać</button>
@@ -1047,7 +1194,7 @@ async function handleLogin() {
   if (!supabase) initSupabase(); if (!supabase) { errorEl.style.color = 'var(--danger)'; errorEl.textContent = 'Trwa ładowanie zabezpieczeń... Kliknij ponownie.'; return; }
   const email = document.getElementById('emailInput').value.trim(); const password = document.getElementById('passwordInput').value;
   if(!email || !password) { errorEl.style.color = 'var(--danger)'; errorEl.textContent = 'Wpisz email i hasło.'; return; }
-  try { const { error } = await supabase.auth.signInWithPassword({ email, password }); if (error) { errorEl.style.color = 'var(--danger)'; errorEl.textContent = 'Błąd: ' + error.message; } else { window.location.reload(); } } catch (err) {}
+  try { const { error } = await supabase.auth.signInWithPassword({ email, password }); if (error) { errorEl.style.color = 'var(--danger)'; errorEl.textContent = 'Błąd logowania: ' + error.message; } else { window.location.reload(); } } catch (err) {}
 }
 
 async function handleRegister() {
@@ -1169,10 +1316,8 @@ function calculateAll() {
   }
 
   var rush = document.getElementById('rushEmergencyFund').checked;
-
   var housing = Math.round(totalInc * 0.30); var food = Math.round(totalInc * 0.15); var transport = Math.round(totalInc * 0.05); var other = 0;
   var survival = housing + food + transport + other;
-
   var funMoneyTargetPct = rush ? 0.10 : 0.20;
   var funMoney = Math.round(totalInc * funMoneyTargetPct);
   var savings = totalInc - survival - funMoney; 
@@ -1297,12 +1442,13 @@ function updateCategoryChart(periodItems) {
       var bHtml = `
         <div class="bucket-header" onclick="toggleAccordion('${b.id}')">
           <span style="display:flex; align-items:center; gap:8px;">
-            <span style="display:block; width:12px; height:12px; border-radius:50%; background:${b.color};"></span>
-            ${b.name} <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">(${bPct}%)</span>
+            <span style="display:block; width:12px; height:12px; border-radius:50%; background:${b.color}; flex-shrink: 0;"></span>
+            <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:90px;">${b.name}</span>
+            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">(${bPct}%)</span>
           </span>
           <div style="display:flex; align-items:center; gap:12px;">
             <span>${bucketTotals[b.id].toLocaleString('pl-PL')} PLN</span>
-            <i data-lucide="chevron-down" id="icon-${b.id}" style="width:16px; transform:${rotation};"></i>
+            <i data-lucide="chevron-down" id="icon-${b.id}" style="width:16px; transform:${rotation}; flex-shrink: 0;"></i>
           </div>
         </div>
         <div class="bucket-details" id="details-${b.id}" style="${displayStyle}">
@@ -1464,6 +1610,14 @@ function renderReportTab() {
   var idealFun = Math.round(totalInc * realFunTarget);
   var idealSavings = totalInc - idealSurvival - idealFun;
 
+  var savingsStreak = calculateSavingsStreak();
+  var streakDisplay = Math.min(6, savingsStreak);
+  document.getElementById('streakMonthsRatio').textContent = streakDisplay + '/6 m-cy';
+  if(streakDisplay >= 6) {
+    document.getElementById('streakMonthsRatio').style.background = '#10b981';
+    document.getElementById('streakMonthsRatio').textContent = 'Zakończone!';
+  }
+
   var sel = document.getElementById('selectReportPeriod'); var curSel = sel.value;
   var uniquePeriods = [...new Set(historyLogs.map(e => e.month))].sort().reverse(); 
   sel.innerHTML = '';
@@ -1481,13 +1635,14 @@ function renderReportTab() {
   
   var realSurvival = 0;
   var realFun = 0;
+  var realSavingsMonth = 0;
+
   filtered.forEach(item => {
     var b = getCategoryBucket(item.category);
     if (b === 'fun') realFun += Number(item.amount);
     else if (b === 'needs') realSurvival += Number(item.amount);
+    else if (b === 'savings') realSavingsMonth += Number(item.amount);
   });
-  
-  var realSavings = totalInc > 0 ? totalInc - realSurvival - realFun : 0;
   
   var d = new Date();
   var curPeriod = d.getFullYear() + '-' + ((d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1));
@@ -1512,7 +1667,7 @@ function renderReportTab() {
   var leftFun = Math.max(0, totalFunAvailable - realFun);
 
   document.getElementById('forecastSurvivalVal').textContent = realSurvival.toLocaleString('pl-PL') + ' PLN';
-  document.getElementById('forecastSavingsVal').textContent = realSavings.toLocaleString('pl-PL') + ' PLN';
+  document.getElementById('forecastSavingsVal').textContent = realSavingsMonth.toLocaleString('pl-PL') + ' PLN';
   document.getElementById('forecastFunVal').textContent = leftFun.toLocaleString('pl-PL') + ' PLN';
 
   var diffSurv = realSurvival - idealSurvival;
@@ -1520,7 +1675,7 @@ function renderReportTab() {
   if (diffSurv > 0) { badgeSurv.textContent = '+' + diffSurv.toLocaleString('pl-PL') + ' PLN'; badgeSurv.style.background = '#fee2e2'; badgeSurv.style.color = 'var(--danger)'; } 
   else { badgeSurv.textContent = diffSurv.toLocaleString('pl-PL') + ' PLN'; badgeSurv.style.background = '#dcfce7'; badgeSurv.style.color = 'var(--success)'; }
 
-  var diffSav = realSavings - idealSavings;
+  var diffSav = realSavingsMonth - idealSavings;
   var badgeSav = document.getElementById('diffSavingsBadge');
   if (diffSav >= 0) { badgeSav.textContent = '+' + diffSav.toLocaleString('pl-PL') + ' PLN'; badgeSav.style.background = '#dcfce7'; badgeSav.style.color = 'var(--success)'; } 
   else { badgeSav.textContent = diffSav.toLocaleString('pl-PL') + ' PLN'; badgeSav.style.background = '#fee2e2'; badgeSav.style.color = 'var(--danger)'; }
@@ -1614,6 +1769,10 @@ window.onload = async function() {
       if (isLoggedIn && supabase) { const { data, error } = await supabase.from('history_logs').insert(newRecords).select(); if (!error && data) { historyLogs = historyLogs.concat(data); resetExpenseForm(); renderHistory(); } else { alert("Błąd bazy: " + error.message); }
       } else { newRecords.forEach((rec, i) => { rec.id = Date.now() + i; rec.monthNum = rec.month_num; historyLogs.push(rec); }); resetExpenseForm(); renderHistory(); }
     }
+    
+    var totalAddedToSavings = 0;
+    validItemsToSave.forEach(item => { if(getCategoryBucket(item.cat) === 'savings') totalAddedToSavings += item.amt; });
+    if (totalAddedToSavings > 0) checkGlobalSavingsJackpot(totalAddedToSavings);
   };
 
   document.getElementById('cancelEditBtn').onclick = cancelEditMode;
