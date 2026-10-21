@@ -39,8 +39,8 @@
     
     /* MODALE */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 1000; }
-    .auth-card { background: var(--card-bg); padding: 40px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 100%; max-width: 400px; text-align: center; position: relative; border: 1px solid rgba(255,255,255,0.2); }
-    .close-auth-btn { position: absolute; top: 16px; right: 16px; background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); transition: all 0.2s; }
+    .auth-card { background: var(--card-bg); padding: 40px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); width: 100%; max-width: 400px; text-align: center; position: relative; border: 1px solid rgba(255,255,255,0.2); max-height: 90vh; overflow-y: auto; }
+    .close-auth-btn { position: absolute; top: 16px; right: 16px; background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); transition: all 0.2s; z-index: 10; }
     .close-auth-btn:hover { background: #e2e8f0; color: var(--text-main); }
     .auth-card h2 { justify-content: center; font-size: 1.6rem; margin-bottom: 24px; color: var(--text-main); font-weight: 800; display: flex; align-items: center; gap: 8px;}
     .auth-input { width: 100%; padding: 14px 16px; margin-bottom: 16px; border: 1.5px solid var(--border); border-radius: 12px; font-size: 1rem; transition: all 0.2s ease; background: #f8fafc; }
@@ -69,7 +69,7 @@
     /* ZAKŁADKI */
     .nav-tabs { display: flex; gap: 12px; margin-bottom: 28px; border-bottom: 2px solid var(--border); padding-bottom: 12px; overflow-x: auto; scrollbar-width: none; }
     .nav-tabs::-webkit-scrollbar { display: none; }
-    .tab-btn { background: none; border: 1px solid transparent; padding: 12px 24px; font-size: 1rem; font-weight: 700; color: var(--text-muted); cursor: pointer; border-radius: 14px; transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .tab-btn { background: none; border: 1px solid transparent; padding: 12px 24px; font-size: 1rem; font-weight: 700; color: var(--text-muted); cursor: pointer; border-radius: 14px; transition: all 0.2s; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 8px; flex: 1; }
     .tab-btn:hover { color: var(--text-main); background: #f1f5f9; }
     .tab-btn.active { color: var(--primary); background: var(--card-bg); border-color: #bfdbfe; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1); }
     .tab-content { display: none; animation: fadeIn 0.3s ease; }
@@ -277,8 +277,9 @@
       .card, .card-compact { padding: 16px !important; border-radius: 20px !important; }
       .metric-hero { padding: 20px !important; }
       
+      /* TAB-BTN: Zmiana szerokości na flex: 1, żeby 4 przyciski zmieściły się idealnie */
       .nav-tabs { position: fixed; bottom: 0; left: 0; width: 100%; margin: 0; padding: 12px 8px calc(12px + env(safe-area-inset-bottom, 0px)); background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-top: 1px solid rgba(226, 232, 240, 0.8); border-bottom: none; justify-content: space-around; gap: 4px; z-index: 999; box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.05); }
-      .tab-btn { flex-direction: column; font-size: 0.7rem; padding: 8px 4px; border-radius: 12px; width: 33%; gap: 6px; white-space: normal; text-align: center; border: none !important; box-shadow: none !important; background: transparent !important; line-height: 1.1; }
+      .tab-btn { flex: 1; flex-direction: column; font-size: 0.65rem; padding: 8px 2px; border-radius: 12px; gap: 6px; white-space: normal; text-align: center; border: none !important; box-shadow: none !important; background: transparent !important; line-height: 1.1; }
       .tab-btn i, .tab-btn svg { width: 22px; height: 22px; }
       .tab-btn.active { color: var(--primary); }
       .tab-btn.active svg { stroke-width: 2.5px; } 
@@ -403,12 +404,37 @@
   </div>
 </div>
 
+<!-- MENEDŻER SUBSKRYPCJI (DODAWANIE) -->
+<div id="subManagerModal" class="modal-overlay">
+  <div class="auth-card" style="max-width: 400px;">
+    <button class="close-auth-btn" onclick="document.getElementById('subManagerModal').style.display='none'"><i data-lucide="x"></i></button>
+    <h2 style="justify-content: center;" id="subModalTitle"><i data-lucide="calendar-clock" style="color: var(--primary)"></i> Nowa Stała Opłata</h2>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Dodaj rachunek lub subskrypcję, a przypomnimy Ci o jej zapłacie w odpowiednim dniu.</p>
+    
+    <div style="text-align: left;">
+      <label>Nazwa (np. Netflix, Czynsz)</label>
+      <input type="text" id="newSubName" class="auth-input" placeholder="np. Netflix">
+      
+      <label>Kwota (PLN)</label>
+      <input type="number" id="newSubAmount" class="auth-input" placeholder="np. 43">
+      
+      <label>Kategoria przypisania</label>
+      <select id="newSubCategory" class="auth-input split-category"></select>
+      
+      <label>Dzień płatności w miesiącu (1-31)</label>
+      <input type="number" id="newSubDay" class="auth-input" placeholder="np. 12" min="1" max="31">
+      
+      <input type="hidden" id="editingSubId">
+      <button class="btn-add" onclick="saveSubscription()" style="width: 100%;"><i data-lucide="save"></i> Zapisz opłatę</button>
+    </div>
+  </div>
+</div>
+
 <!-- GŁÓWNA APLIKACJA -->
 <div class="container" id="appContainer">
   
   <header>
     <div style="display: flex; align-items: center;">
-      <!-- NOWE LOGO SVG "The Wise W" -->
       <svg width="36" height="36" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 12px; flex-shrink: 0;">
         <rect width="100" height="100" rx="28" fill="url(#wiseGrad)"/>
         <path d="M26 38L40 66L50 48L60 66L74 38" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
@@ -455,12 +481,13 @@
   </div>
 
   <nav class="nav-tabs">
-    <button type="button" class="tab-btn active" onclick="appSwitchTab('calculatorTab', this)"><i data-lucide="calculator"></i> <span class="tab-text">Planer i Budżet</span></button>
+    <button type="button" class="tab-btn active" onclick="appSwitchTab('calculatorTab', this)"><i data-lucide="calculator"></i> <span class="tab-text">Planer</span></button>
     <button type="button" class="tab-btn" onclick="appSwitchTab('historyTab', this)"><i data-lucide="book-open-check"></i> <span class="tab-text">Dziennik</span></button>
     <button type="button" class="tab-btn" onclick="appSwitchTab('reportTab', this)"><i data-lucide="bar-chart-3"></i> <span class="tab-text">Analiza</span></button>
+    <button type="button" class="tab-btn" onclick="appSwitchTab('subsTab', this)"><i data-lucide="repeat"></i> <span class="tab-text">Opłaty</span></button>
   </nav>
 
-  <!-- ZAKŁADKA 1 -->
+  <!-- ZAKŁADKA 1: PLANER -->
   <div id="calculatorTab" class="tab-content active">
     
     <div class="hero-top-row">
@@ -591,7 +618,7 @@
           </div>
         </div>
         
-        <!-- PRZYWRÓCONE WIDŻETY ZAKŁADKI 1 -->
+        <!-- WIDŻETY ZAKŁADKI 1 -->
         <div class="stat-badge-grid">
           <div class="stat-badge">
             <span id="funBadgeLabel"><i data-lucide="party-popper" style="width: 14px;"></i> Zachcianki (Miesiąc)</span>
@@ -738,7 +765,7 @@
 
   </div>
 
-  <!-- ZAKŁADKA 3 -->
+  <!-- ZAKŁADKA 3: ANALIZA -->
   <div id="reportTab" class="tab-content">
   
     <!-- Baner Wyzwania Premium -->
@@ -789,7 +816,7 @@
           <span style="font-size: 0.8rem; color: #86198f; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 6px;"><i data-lucide="party-popper" style="width:16px;"></i> Pozostałe Fun Money</span>
           <strong id="forecastFunVal" style="font-size: 1.6rem; color: #9333ea; display: block; margin-top: 8px; font-weight: 900;">0 PLN</strong>
           <div class="comparison-bar" style="justify-content: flex-end;">
-             <span>Z budżetu: <strong id="idealFunVal" style="color: var(--text-main);">0 PLN</strong></span>
+             <span style="margin-right: auto;">Z budżetu: <strong id="idealFunVal" style="color: var(--text-main);">0 PLN</strong></span>
              <span id="diffFunBadge" class="diff-badge">0 PLN</span>
           </div>
         </div>
@@ -837,12 +864,52 @@
       </div>
     </div>
   </div>
+
+  <!-- ZAKŁADKA 4: OPŁATY I SUBSKRYPCJE -->
+  <div id="subsTab" class="tab-content">
+    
+    <div class="hero-top-row">
+      <div class="metric-hero dark" style="background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%);">
+        <div class="metric-hero-top">
+          <span class="tag" style="color: #93c5fd;"><i data-lucide="repeat" style="width: 16px;"></i> Suma Stałych Opłat</span>
+        </div>
+        <div class="val" style="color: #fff;"><span id="totalSubsVal">0</span> PLN</div>
+        <p class="desc" style="color: #bfdbfe;">Wszystkie subskrypcje w jednym miesiącu.</p>
+      </div>
+
+      <div class="metric-hero light">
+        <div class="metric-hero-top">
+          <span class="tag"><i data-lucide="bell-ring" style="width: 16px;"></i> Powiadomienia PWA</span>
+        </div>
+        <div style="margin-top: 16px;">
+            <p style="font-size: 0.9rem; margin-bottom: 12px; font-weight: 500;">Aplikacja sprawdza płatności każdego dnia. Wymagane zgody na alerty:</p>
+            <button class="btn-add" onclick="window.requestPushPermissions()" style="background: #f1f5f9; color: var(--primary); border: 1.5px solid #bfdbfe; width: 100%; box-shadow: none;"><i data-lucide="bell"></i> Włącz Przypomnienia</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="padding: 24px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; flex-wrap: wrap; gap: 8px;">
+        <h2 style="margin:0;"><i data-lucide="list-checks" style="color: var(--primary);"></i> Kalendarz Płatności</h2>
+        <button type="button" class="btn-add" style="padding: 8px 16px; font-size: 0.85rem;" onclick="openAddSubModal()"><i data-lucide="plus" style="width:14px;"></i> Nowa Opłata</button>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 24px; font-weight: 500;">
+        Dodaj Netflixa, czynsz lub kredyt. Jeśli klikniesz <strong>"Opłać"</strong>, wydatek natychmiast poleci do Dziennika (Tab 2).
+      </p>
+      
+      <div id="subsListContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+        <!-- Generowane dynamicznie kafelki -->
+      </div>
+    </div>
+
+  </div>
+
 </div>
 
 <script>
 lucide.createIcons();
 
-// --- PWA INSTALLATION BANNER ---
+// --- PWA INSTALLATION BANNER & PUSH ---
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault(); deferredPrompt = e;
@@ -858,12 +925,20 @@ document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
   }
 });
 
-// SERVICE WORKER REGISTRATION
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('service-worker.js').catch(err => console.log('SW error:', err));
   });
 }
+
+window.requestPushPermissions = async function() {
+  if (!('Notification' in window)) { alert("Twoja przeglądarka nie wspiera powiadomień."); return false; }
+  const permission = await Notification.requestPermission();
+  if (permission === 'granted') {
+    new Notification("Super!", { body: "Powiadomienia WiseWallet są aktywne. Przypomnimy Ci o rachunkach.", icon: "https://cdn-icons-png.flaticon.com/512/3344/3344055.png" });
+    return true;
+  } else { alert("Aby otrzymywać przypomnienia o rachunkach, musisz zezwolić na powiadomienia w ustawieniach."); return false; }
+};
 
 window.openAccordionState = window.openAccordionState || { needs: false, fun: false, savings: false };
 window.toggleAccordion = function(bucketId) {
@@ -882,6 +957,7 @@ var isLoggedIn = false;
 var historyLogs = [];
 var customCategories = [];
 var savingsGoals = [];
+var subscriptions = []; // NOWOŚĆ: Tablica opłat
 
 var memoryStorage = { items: {}, getItem: function(k) { return this.items[k] || null; }, setItem: function(k, v) { this.items[k] = v; }, removeItem: function(k) { delete this.items[k]; } };
 var safeStorage;
@@ -894,14 +970,7 @@ function initSupabase() {
       var isLocalOrGithub = origin === 'file://' || origin === 'null' || origin.includes('github.io') || origin.includes('127.0.0.1') || origin.includes('localhost');
       var supabaseUrl = isLocalOrGithub ? 'https://kbzspdwizcwpzlvytdzw.supabase.co' : origin + '/baza';
       var supabaseKey = 'sb_publishable_nPfkgQfKOapm-t9OqWZ4KA__KuU0jqB';
-      // WŁĄCZONO PERSISTENT LOGIN (SESJA TRWAŁA NA TELEFONIE)
-      supabase = window.supabase.createClient(supabaseUrl, supabaseKey, { 
-        auth: { 
-          storage: safeStorage, 
-          persistSession: true, 
-          autoRefreshToken: true 
-        } 
-      });
+      supabase = window.supabase.createClient(supabaseUrl, supabaseKey, { auth: { storage: safeStorage, persistSession: true, autoRefreshToken: true } });
       return true;
     }
   } catch (e) {} return false;
@@ -935,36 +1004,19 @@ function calculateRollover() {
 function triggerCoinDrop(containerId, amount, isJackpot = false) {
   var container = containerId === 'body' ? document.body : document.getElementById(containerId);
   if(!container) return;
-  
-  if (containerId !== 'body' && getComputedStyle(container).position === 'static') {
-      container.style.position = 'relative';
-  }
-
+  if (containerId !== 'body' && getComputedStyle(container).position === 'static') { container.style.position = 'relative'; }
   let coinCount = isJackpot ? 30 : (amount >= 500 ? 5 : (amount >= 200 ? 3 : 1));
-
   for (let i = 0; i < coinCount; i++) {
     let coin = document.createElement('div');
     coin.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#fcd34d" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>';
-    
     if (isJackpot) {
-      coin.className = 'coin-jackpot';
-      let angle = (Math.random() * 180) * (Math.PI / 180);
-      let power = 80 + Math.random() * 150;
-      let tx = Math.cos(angle) * power + 'px';
-      let ty = -Math.abs(Math.sin(angle) * power * 1.5) + 'px'; 
-      let rot = (Math.random() * 720 - 360) + 'deg';
-      coin.style.setProperty('--tx', tx);
-      coin.style.setProperty('--ty', ty);
-      coin.style.setProperty('--rot', rot);
-      coin.style.animationDelay = (Math.random() * 0.3) + 's';
+      coin.className = 'coin-jackpot'; let angle = (Math.random() * 180) * (Math.PI / 180); let power = 80 + Math.random() * 150;
+      coin.style.setProperty('--tx', Math.cos(angle) * power + 'px'); coin.style.setProperty('--ty', -Math.abs(Math.sin(angle) * power * 1.5) + 'px'); 
+      coin.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg'); coin.style.animationDelay = (Math.random() * 0.3) + 's';
     } else {
-      coin.className = 'coin-drop';
-      coin.style.right = (10 + Math.random() * 40) + 'px';
-      coin.style.animationDelay = (i * 0.15) + 's';
+      coin.className = 'coin-drop'; coin.style.right = (10 + Math.random() * 40) + 'px'; coin.style.animationDelay = (i * 0.15) + 's';
     }
-    
-    container.appendChild(coin);
-    setTimeout(() => coin.remove(), 2000);
+    container.appendChild(coin); setTimeout(() => coin.remove(), 2000);
   }
 }
 
@@ -972,85 +1024,47 @@ function triggerCoinDrop(containerId, amount, isJackpot = false) {
 // GLOBALNY CEL OSZCZĘDNOŚCIOWY (JACKPOT CHECK)
 // -------------------------------------------
 function checkGlobalSavingsJackpot(addedAmount) {
-  var d = new Date();
-  var curPeriod = d.getFullYear() + '-' + ((d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1));
-  
-  var totalInc = getTotalIncome(); 
-  var rush = document.getElementById('rushEmergencyFund').checked;
+  var d = new Date(); var curPeriod = d.getFullYear() + '-' + ((d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1));
+  var totalInc = getTotalIncome(); var rush = document.getElementById('rushEmergencyFund').checked;
   var housing = Math.round(totalInc * 0.30); var food = Math.round(totalInc * 0.15); var transport = Math.round(totalInc * 0.05); var other = 0;
-  var survival = housing + food + transport + other;
-  var funMoney = Math.round(totalInc * (rush ? 0.10 : 0.20));
+  var survival = housing + food + transport + other; var funMoney = Math.round(totalInc * (rush ? 0.10 : 0.20));
   var idealSavings = totalInc - survival - funMoney; 
 
   if (idealSavings <= 0) return;
-
   var currentSavingsThisMonth = 0;
-  historyLogs.forEach(e => {
-      if(e.month === curPeriod && getCategoryBucket(e.category) === 'savings') {
-          currentSavingsThisMonth += Number(e.amount);
-      }
-  });
-
-  if (currentSavingsThisMonth >= idealSavings && (currentSavingsThisMonth - addedAmount) < idealSavings) {
-      triggerCoinDrop('body', 0, true);
-  }
+  historyLogs.forEach(e => { if(e.month === curPeriod && getCategoryBucket(e.category) === 'savings') currentSavingsThisMonth += Number(e.amount); });
+  if (currentSavingsThisMonth >= idealSavings && (currentSavingsThisMonth - addedAmount) < idealSavings) { triggerCoinDrop('body', 0, true); }
 }
 
-// -------------------------------------------
-// WYZWANIE PREMIUM (MISTRZ OSZCZĘDZANIA)
-// -------------------------------------------
 function calculateSavingsStreak() {
-  var totalInc = getTotalIncome(); 
-  var rush = document.getElementById('rushEmergencyFund').checked;
+  var totalInc = getTotalIncome(); var rush = document.getElementById('rushEmergencyFund').checked;
   var housing = Math.round(totalInc * 0.30); var food = Math.round(totalInc * 0.15); var transport = Math.round(totalInc * 0.05); var other = 0;
-  var survival = housing + food + transport + other;
-  var funMoney = Math.round(totalInc * (rush ? 0.10 : 0.20));
+  var survival = housing + food + transport + other; var funMoney = Math.round(totalInc * (rush ? 0.10 : 0.20));
   var idealSavings = totalInc - survival - funMoney; 
 
   if (idealSavings <= 0 || historyLogs.length === 0) return 0;
-
   var yearsMap = {}; for (var i = 0; i < historyLogs.length; i++) { yearsMap[historyLogs[i].month] = true; }
   var uniquePeriods = Object.keys(yearsMap).sort().reverse();
-  
   var streak = 0;
   for (var p = 0; p < uniquePeriods.length; p++) {
-    var period = uniquePeriods[p];
-    var periodSavings = 0;
-    historyLogs.forEach(e => {
-      if(e.month === period && getCategoryBucket(e.category) === 'savings') periodSavings += Number(e.amount);
-    });
-    
-    if (periodSavings >= idealSavings) { streak++; } 
-    else { break; }
+    var period = uniquePeriods[p]; var periodSavings = 0;
+    historyLogs.forEach(e => { if(e.month === period && getCategoryBucket(e.category) === 'savings') periodSavings += Number(e.amount); });
+    if (periodSavings >= idealSavings) streak++; else break;
   }
-  
   return streak;
 }
 
-// -------------------------------------------
-// AUTO-KSIĘGOWANIE SKARBONKI DO DZIENNIKA
-// -------------------------------------------
 async function autoLogGoalFund(goalName, amount) {
-  if(!customCategories.some(c => c.name === "Oszczędności")) {
-    customCategories.push({ name: "Oszczędności", bucket: "savings" });
-    triggerSettingsSave(); renderCategoryDropdowns();
-  }
-
-  var d = new Date();
-  var selY = d.getFullYear().toString();
-  var selM = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1);
-  var p = selY + '-' + selM;
-  var exactD = selY + '-' + selM + '-' + (d.getDate() < 10 ? '0' : '') + d.getDate();
-  var desc = "Wpłata na cel: " + goalName;
-
-  var newRecord = { month: p, year: selY, month_num: selM, exact_date: exactD, category: "Oszczędności", name: desc, amount: amount };
+  if(!customCategories.some(c => c.name === "Oszczędności")) { customCategories.push({ name: "Oszczędności", bucket: "savings" }); triggerSettingsSave(); renderCategoryDropdowns(); }
+  var d = new Date(); var selY = d.getFullYear().toString(); var selM = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1);
+  var p = selY + '-' + selM; var exactD = selY + '-' + selM + '-' + (d.getDate() < 10 ? '0' : '') + d.getDate();
+  var newRecord = { month: p, year: selY, month_num: selM, exact_date: exactD, category: "Oszczędności", name: "Wpłata na cel: " + goalName, amount: amount };
 
   if (isLoggedIn && supabase) {
     const { data, error } = await supabase.from('history_logs').insert([newRecord]).select();
     if (!error && data) { historyLogs = historyLogs.concat(data); renderHistory(); checkGlobalSavingsJackpot(amount); }
   } else {
-    newRecord.id = Date.now(); newRecord.monthNum = selM;
-    historyLogs.push(newRecord); renderHistory(); checkGlobalSavingsJackpot(amount);
+    newRecord.id = Date.now(); newRecord.monthNum = selM; historyLogs.push(newRecord); renderHistory(); checkGlobalSavingsJackpot(amount);
   }
 }
 
@@ -1058,20 +1072,12 @@ async function autoLogGoalFund(goalName, amount) {
 // SKARBONKI (SAVINGS GOALS) - Z ETA DLA PODUSZKI
 // -------------------------------------------
 function openAddGoalModal(id = null) {
-  var modal = document.getElementById('goalManagerModal');
-  var title = document.getElementById('goalModalTitle');
+  var modal = document.getElementById('goalManagerModal'); var title = document.getElementById('goalModalTitle');
   if (id !== null) {
     var goal = savingsGoals.find(g => g.id === id);
-    if(goal) {
-      document.getElementById('editingGoalId').value = id;
-      document.getElementById('newGoalName').value = goal.name;
-      document.getElementById('newGoalTarget').value = goal.target;
-      document.getElementById('newGoalSaved').value = goal.saved;
-      title.innerHTML = '<i data-lucide="edit" style="color: var(--success)"></i> Edytuj Skarbonkę';
-    }
+    if(goal) { document.getElementById('editingGoalId').value = id; document.getElementById('newGoalName').value = goal.name; document.getElementById('newGoalTarget').value = goal.target; document.getElementById('newGoalSaved').value = goal.saved; title.innerHTML = '<i data-lucide="edit" style="color: var(--success)"></i> Edytuj Skarbonkę'; }
   } else {
-    document.getElementById('editingGoalId').value = ''; document.getElementById('newGoalName').value = ''; document.getElementById('newGoalTarget').value = ''; document.getElementById('newGoalSaved').value = '';
-    title.innerHTML = '<i data-lucide="piggy-bank" style="color: var(--success)"></i> Nowa Skarbonka';
+    document.getElementById('editingGoalId').value = ''; document.getElementById('newGoalName').value = ''; document.getElementById('newGoalTarget').value = ''; document.getElementById('newGoalSaved').value = ''; title.innerHTML = '<i data-lucide="piggy-bank" style="color: var(--success)"></i> Nowa Skarbonka';
   }
   lucide.createIcons(); modal.style.display = 'flex';
 }
@@ -1080,145 +1086,84 @@ function saveGoal() {
   var name = document.getElementById('newGoalName').value.trim(); var target = parseFloat(document.getElementById('newGoalTarget').value); var saved = parseFloat(document.getElementById('newGoalSaved').value) || 0;
   var id = document.getElementById('editingGoalId').value;
   if(!name || isNaN(target) || target <= 0) { alert("Podaj prawidłową nazwę i kwotę docelową."); return; }
-
   if(id) { var goal = savingsGoals.find(g => g.id == id); if(goal) { goal.name = name; goal.target = target; goal.saved = saved; } } 
   else { savingsGoals.push({ id: Date.now(), name: name, target: target, saved: saved }); }
-
   document.getElementById('goalManagerModal').style.display = 'none'; triggerSettingsSave(); 
 }
 
-function deleteGoal(id) {
-  if(confirm("Na pewno usunąć ten cel?")) { savingsGoals = savingsGoals.filter(g => g.id !== id); triggerSettingsSave(); }
-}
+function deleteGoal(id) { if(confirm("Na pewno usunąć ten cel?")) { savingsGoals = savingsGoals.filter(g => g.id !== id); triggerSettingsSave(); } }
 
 function openAddFundsModal(id) {
-  var goal = savingsGoals.find(g => g.id === id);
-  if(!goal) return;
-  document.getElementById('fundingGoalId').value = id;
-  document.getElementById('addFundsGoalName').textContent = "Cel: " + goal.name;
-  document.getElementById('fundsAmount').value = '';
-  document.getElementById('addFundsModal').style.display = 'flex';
+  var goal = savingsGoals.find(g => g.id === id); if(!goal) return;
+  document.getElementById('fundingGoalId').value = id; document.getElementById('addFundsGoalName').textContent = "Cel: " + goal.name;
+  document.getElementById('fundsAmount').value = ''; document.getElementById('addFundsModal').style.display = 'flex';
 }
 
 function openAddEmergencyFundsModal() {
-  document.getElementById('fundingGoalId').value = 'EMERGENCY';
-  document.getElementById('addFundsGoalName').textContent = "Cel: Poduszka Finansowa";
-  document.getElementById('fundsAmount').value = '';
-  document.getElementById('addFundsModal').style.display = 'flex';
+  document.getElementById('fundingGoalId').value = 'EMERGENCY'; document.getElementById('addFundsGoalName').textContent = "Cel: Poduszka Finansowa";
+  document.getElementById('fundsAmount').value = ''; document.getElementById('addFundsModal').style.display = 'flex';
 }
 
 function submitFundsToGoal() {
-  var id = document.getElementById('fundingGoalId').value;
-  var amt = parseFloat(document.getElementById('fundsAmount').value);
+  var id = document.getElementById('fundingGoalId').value; var amt = parseFloat(document.getElementById('fundsAmount').value);
   if(isNaN(amt) || amt <= 0) { alert("Podaj prawidłową kwotę."); return; }
 
   if (id === 'EMERGENCY') {
-    var currentInput = document.getElementById('currentSavings');
-    var currentVal = parseFloat(currentInput.value) || 0;
-    var newVal = currentVal + amt;
-    currentInput.value = newVal;
-    
+    var currentInput = document.getElementById('currentSavings'); var currentVal = parseFloat(currentInput.value) || 0; var newVal = currentVal + amt; currentInput.value = newVal;
     var totalInc = getTotalIncome(); var housing = Math.round(totalInc * 0.30); var food = Math.round(totalInc * 0.15); var transport = Math.round(totalInc * 0.05);
     var survival = housing + food + transport; var emergencyGoal = survival * 6;
     
-    document.getElementById('addFundsModal').style.display = 'none';
-    triggerSettingsSave(); 
-    autoLogGoalFund("Poduszka Finansowa", amt);
-    triggerCoinDrop('emergencyBankIcon', amt, newVal >= emergencyGoal && emergencyGoal > 0);
-    return;
+    document.getElementById('addFundsModal').style.display = 'none'; triggerSettingsSave(); autoLogGoalFund("Poduszka Finansowa", amt); triggerCoinDrop('emergencyBankIcon', amt, newVal >= emergencyGoal && emergencyGoal > 0); return;
   }
   
   var goal = savingsGoals.find(g => g.id == id);
-  if(goal) {
-    goal.saved += amt; 
-    document.getElementById('addFundsModal').style.display = 'none';
-    triggerSettingsSave(); 
-    autoLogGoalFund(goal.name, amt);
-    triggerCoinDrop('goalIcon-' + id, amt, goal.saved >= goal.target);
-  }
+  if(goal) { goal.saved += amt; document.getElementById('addFundsModal').style.display = 'none'; triggerSettingsSave(); autoLogGoalFund(goal.name, amt); triggerCoinDrop('goalIcon-' + id, amt, goal.saved >= goal.target); }
 }
 
 function renderGoals() {
   var container = document.getElementById('goalsListContainer'); container.innerHTML = '';
-  var btnAddGoal = document.getElementById('btnAddGoal');
-  var rush = document.getElementById('rushEmergencyFund').checked;
+  var btnAddGoal = document.getElementById('btnAddGoal'); var rush = document.getElementById('rushEmergencyFund').checked;
 
   var totalInc = getTotalIncome(); var housing = Math.round(totalInc * 0.30); var food = Math.round(totalInc * 0.15); var transport = Math.round(totalInc * 0.05); var other = 0;
   var survival = housing + food + transport + other; var emergencyGoal = survival * 6;
-  
-  var funMoney = Math.round(totalInc * (rush ? 0.10 : 0.20));
-  var monthlySavings = totalInc - survival - funMoney;
+  var funMoney = Math.round(totalInc * (rush ? 0.10 : 0.20)); var monthlySavings = totalInc - survival - funMoney;
   
   var saved = Math.max(0, parseFloat(document.getElementById('currentSavings').value) || 0);
   var pct = emergencyGoal > 0 ? Math.min(100, Math.round((saved / emergencyGoal) * 100)) : 0;
   var isDone = saved >= emergencyGoal && emergencyGoal > 0;
   var barColor = isDone ? '#10b981' : '#f59e0b'; 
-  
   var bgClass = rush ? (isDone ? 'background: #ecfdf5; border-color: #a7f3d0;' : 'background: #fffbeb; border-color: #fde68a;') : (isDone ? 'background: #ecfdf5; border-color: #a7f3d0;' : 'background: #f8fafc; border-color: var(--border);');
   
   var monthsLeftText = "";
-  if (emergencyGoal === 0) {
-      monthsLeftText = "Uzupełnij zarobki";
-  } else if (isDone) {
-      monthsLeftText = "Cel Osiągnięty! 🎉";
-  } else if (monthlySavings > 0) {
-      var m = Math.ceil((emergencyGoal - saved) / monthlySavings);
-      monthsLeftText = "Osiągniesz za: " + m + (m === 1 ? " miesiąc" : (m > 1 && m < 5 ? " miesiące" : " mies."));
-  } else {
-      monthsLeftText = "Zwiększ oszczędności!";
-  }
+  if (emergencyGoal === 0) { monthsLeftText = "Uzupełnij zarobki"; } else if (isDone) { monthsLeftText = "Cel Osiągnięty! 🎉"; } else if (monthlySavings > 0) { var m = Math.ceil((emergencyGoal - saved) / monthlySavings); monthsLeftText = "Osiągniesz za: " + m + (m === 1 ? " miesiąc" : (m > 1 && m < 5 ? " miesiące" : " mies.")); } else { monthsLeftText = "Zwiększ oszczędności!"; }
     
   var heroGoalHtml = `
     <div class="goal-item" style="${bgClass} ${rush ? 'border-width:2px;' : ''}" id="emergencyBankIcon">
       <div class="goal-header" style="align-items: center; margin-bottom: 8px;">
-        <div class="goal-title">
-          <i data-lucide="shield-alert" style="color: #ea580c; width: 18px; margin-right:4px;"></i> Poduszka Finansowa
-          ${isDone ? '<i data-lucide="check-circle-2" style="width:16px; color:#10b981; display:inline-block; vertical-align:-3px;"></i>' : ''}
-        </div>
+        <div class="goal-title"><i data-lucide="shield-alert" style="color: #ea580c; width: 18px; margin-right:4px;"></i> Poduszka Finansowa ${isDone ? '<i data-lucide="check-circle-2" style="width:16px; color:#10b981; display:inline-block; vertical-align:-3px;"></i>' : ''}</div>
         <div class="goal-amounts">${saved.toLocaleString('pl-PL')} / ${emergencyGoal.toLocaleString('pl-PL')} PLN</div>
       </div>
-      
       <div style="font-size: 0.8rem; color: ${isDone ? '#047857' : '#b45309'}; margin-bottom: 12px; font-weight: 600; display:flex; justify-content:space-between; align-items:center;">
           <span>Prędkość: ${monthlySavings > 0 ? monthlySavings.toLocaleString('pl-PL') + ' PLN/mc' : '0 PLN/mc'}</span>
           <span style="background: ${isDone ? '#d1fae5' : '#ffedd5'}; padding: 4px 10px; border-radius: 12px;">${monthsLeftText}</span>
       </div>
-
-      <div class="bar-bg" style="height: 10px;">
-        <div class="bar-fill" style="width: ${pct}%; background: ${barColor};"></div>
-      </div>
-      <div class="goal-actions">
-        <button class="edit-btn" style="flex:1; height: 32px; font-size: 0.8rem; border-radius: 8px; background: #fef3c7; color: #d97706; border: 1px solid #fde68a;" onclick="openAddEmergencyFundsModal()"><i data-lucide="plus" style="width:14px; margin-right:4px;"></i> Wpłać do Poduszki</button>
-      </div>
+      <div class="bar-bg" style="height: 10px;"><div class="bar-fill" style="width: ${pct}%; background: ${barColor};"></div></div>
+      <div class="goal-actions"><button class="edit-btn" style="flex:1; height: 32px; font-size: 0.8rem; border-radius: 8px; background: #fef3c7; color: #d97706; border: 1px solid #fde68a;" onclick="openAddEmergencyFundsModal()"><i data-lucide="plus" style="width:14px; margin-right:4px;"></i> Wpłać do Poduszki</button></div>
     </div>
   `;
 
-  if (rush) {
-    if(btnAddGoal) btnAddGoal.style.display = 'none';
-    container.innerHTML = heroGoalHtml + '<p style="font-size:0.8rem; color:var(--text-muted); text-align:center; margin-top:12px;">Tryb Szybkiej Poduszki ukrywa inne cele, pomagając Ci skupić się na bezpieczeństwie.</p>';
-    lucide.createIcons(); return;
-  }
-
-  if(btnAddGoal) btnAddGoal.style.display = 'inline-flex';
-  container.innerHTML = heroGoalHtml;
+  if (rush) { if(btnAddGoal) btnAddGoal.style.display = 'none'; container.innerHTML = heroGoalHtml + '<p style="font-size:0.8rem; color:var(--text-muted); text-align:center; margin-top:12px;">Tryb Szybkiej Poduszki ukrywa inne cele, pomagając Ci skupić się na bezpieczeństwie.</p>'; lucide.createIcons(); return; }
+  if(btnAddGoal) btnAddGoal.style.display = 'inline-flex'; container.innerHTML = heroGoalHtml;
 
   savingsGoals.forEach(g => {
-    var gPct = Math.min(100, Math.round((g.saved / g.target) * 100));
-    var gIsDone = g.saved >= g.target;
-    var gBarColor = gIsDone ? '#10b981' : '#34d399';
-    var gBgClass = gIsDone ? 'background: #ecfdf5; border-color: #a7f3d0;' : '';
-
-    var row = document.createElement('div');
-    row.className = 'goal-item';
-    row.style.cssText = gBgClass;
-    row.id = 'goalIcon-' + g.id;
+    var gPct = Math.min(100, Math.round((g.saved / g.target) * 100)); var gIsDone = g.saved >= g.target; var gBarColor = gIsDone ? '#10b981' : '#34d399'; var gBgClass = gIsDone ? 'background: #ecfdf5; border-color: #a7f3d0;' : '';
+    var row = document.createElement('div'); row.className = 'goal-item'; row.style.cssText = gBgClass; row.id = 'goalIcon-' + g.id;
     row.innerHTML = `
       <div class="goal-header">
         <div class="goal-title">${g.name} ${gIsDone ? '<i data-lucide="check-circle-2" style="width:16px; color:#10b981; display:inline-block; vertical-align:-3px;"></i>' : ''}</div>
         <div class="goal-amounts">${g.saved.toLocaleString('pl-PL')} / ${g.target.toLocaleString('pl-PL')} PLN</div>
       </div>
-      <div class="bar-bg" style="height: 10px;">
-        <div class="bar-fill" style="width: ${gPct}%; background: ${gBarColor};"></div>
-      </div>
+      <div class="bar-bg" style="height: 10px;"><div class="bar-fill" style="width: ${gPct}%; background: ${gBarColor};"></div></div>
       <div class="goal-actions">
         <button class="edit-btn" style="flex:1; height: 32px; font-size: 0.8rem; border-radius: 8px; background: #f1f5f9; color: var(--text-main);" onclick="openAddFundsModal(${g.id})"><i data-lucide="plus" style="width:14px; margin-right:4px;"></i> Wpłać</button>
         <button class="edit-btn" style="width: 32px; height: 32px; border-radius: 8px; background: transparent; border: 1px solid var(--border);" onclick="openAddGoalModal(${g.id})"><i data-lucide="settings-2" style="width:14px; color:var(--text-muted);"></i></button>
@@ -1228,6 +1173,133 @@ function renderGoals() {
     container.appendChild(row);
   });
   lucide.createIcons();
+}
+
+// -------------------------------------------
+// SUBSKRYPCJE I STAŁE OPŁATY (NOWY MODUŁ)
+// -------------------------------------------
+function openAddSubModal(id = null) {
+  var modal = document.getElementById('subManagerModal');
+  var title = document.getElementById('subModalTitle');
+  if (id !== null) {
+    var sub = subscriptions.find(s => s.id === id);
+    if(sub) {
+      document.getElementById('editingSubId').value = id;
+      document.getElementById('newSubName').value = sub.name;
+      document.getElementById('newSubAmount').value = sub.amount;
+      document.getElementById('newSubCategory').value = sub.category;
+      document.getElementById('newSubDay').value = sub.dayOfMonth;
+      title.innerHTML = '<i data-lucide="edit" style="color: var(--primary)"></i> Edytuj Opłatę';
+    }
+  } else {
+    document.getElementById('editingSubId').value = ''; document.getElementById('newSubName').value = ''; document.getElementById('newSubAmount').value = ''; document.getElementById('newSubDay').value = '';
+    title.innerHTML = '<i data-lucide="calendar-clock" style="color: var(--primary)"></i> Nowa Stała Opłata';
+  }
+  lucide.createIcons(); modal.style.display = 'flex';
+}
+
+function saveSubscription() {
+  var name = document.getElementById('newSubName').value.trim(); var amt = parseFloat(document.getElementById('newSubAmount').value); 
+  var cat = document.getElementById('newSubCategory').value; var day = parseInt(document.getElementById('newSubDay').value);
+  var id = document.getElementById('editingSubId').value;
+  
+  if(!name || isNaN(amt) || amt <= 0 || isNaN(day) || day < 1 || day > 31) { alert("Wypełnij poprawnie wszystkie pola (dzień 1-31)."); return; }
+
+  if(id) { 
+      var sub = subscriptions.find(s => s.id == id); 
+      if(sub) { sub.name = name; sub.amount = amt; sub.category = cat; sub.dayOfMonth = day; } 
+  } else { 
+      subscriptions.push({ id: Date.now(), name: name, amount: amt, category: cat, dayOfMonth: day, lastPaidMonth: null }); 
+  }
+
+  document.getElementById('subManagerModal').style.display = 'none'; triggerSettingsSave(); renderSubscriptions();
+}
+
+function deleteSubscription(id) {
+  if(confirm("Na pewno usunąć tę opłatę?")) { subscriptions = subscriptions.filter(s => s.id !== id); triggerSettingsSave(); renderSubscriptions(); }
+}
+
+async function paySubscription(id) {
+  var sub = subscriptions.find(s => s.id === id);
+  if(!sub) return;
+  
+  var d = new Date(); var selY = d.getFullYear().toString(); var selM = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1);
+  var p = selY + '-' + selM; var exactD = selY + '-' + selM + '-' + (d.getDate() < 10 ? '0' : '') + d.getDate();
+  
+  var newRecord = { month: p, year: selY, month_num: selM, exact_date: exactD, category: sub.category, name: sub.name + " (Subskrypcja)", amount: sub.amount };
+
+  if (isLoggedIn && supabase) {
+    const { data, error } = await supabase.from('history_logs').insert([newRecord]).select();
+    if (!error && data) { historyLogs = historyLogs.concat(data); sub.lastPaidMonth = p; triggerSettingsSave(); renderHistory(); }
+  } else {
+    newRecord.id = Date.now(); newRecord.monthNum = selM; historyLogs.push(newRecord); sub.lastPaidMonth = p; triggerSettingsSave(); renderHistory();
+  }
+}
+
+function renderSubscriptions() {
+  var container = document.getElementById('subsListContainer');
+  if(!container) return;
+  container.innerHTML = '';
+  
+  var d = new Date(); var curPeriod = d.getFullYear() + '-' + ((d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1));
+  var totalSubs = 0;
+
+  subscriptions.sort((a, b) => a.dayOfMonth - b.dayOfMonth).forEach(sub => {
+    totalSubs += sub.amount;
+    var isPaidThisMonth = sub.lastPaidMonth === curPeriod;
+    var b = getCategoryBucket(sub.category);
+    
+    // Obliczanie dni do płatności
+    var dueText = "Dzień płatności: " + sub.dayOfMonth;
+    var isToday = sub.dayOfMonth === d.getDate();
+    if(isToday && !isPaidThisMonth) dueText = "<strong style='color: var(--danger);'>Płatność dzisiaj!</strong>";
+    
+    var statusHtml = isPaidThisMonth ? `<span style="background: #ecfdf5; color: #047857; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 800;"><i data-lucide="check-circle-2" style="width:14px; margin-bottom:-2px;"></i> Opłacono w tym miesiącu</span>` 
+                                     : `<button class="btn-add" style="padding: 6px 12px; font-size: 0.8rem; background: var(--warning); box-shadow: none;" onclick="paySubscription(${sub.id})"><i data-lucide="wallet" style="width:14px;"></i> Opłać teraz</button>`;
+
+    var row = document.createElement('div');
+    row.className = 'goal-item'; row.style.cssText = isPaidThisMonth ? "background: #f8fafc; border-color: var(--border); opacity: 0.85;" : "background: #fff; border-color: #bfdbfe; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.05);";
+    row.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 12px;">
+        <div>
+           <div class="goal-title">${sub.name}</div>
+           <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">${dueText}</div>
+        </div>
+        <div class="goal-amounts" style="font-size: 1.1rem; color: var(--text-main); font-weight: 900;">${sub.amount.toLocaleString('pl-PL')} PLN</div>
+      </div>
+      <span class="cat-badge cat-bucket-${b}" style="margin-bottom: 12px; font-size: 0.65rem;">${sub.category}</span>
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border); padding-top: 12px;">
+        ${statusHtml}
+        <div style="display:flex; gap:6px;">
+          <button class="edit-btn" style="width: 28px; height: 28px; border-radius: 6px; background: #f1f5f9; border: none; margin:0;" onclick="openAddSubModal(${sub.id})"><i data-lucide="settings-2" style="width:12px; color:var(--text-muted);"></i></button>
+          <button class="del-btn" style="width: 28px; height: 28px; border-radius: 6px; background: #fef2f2; border: none; margin:0;" onclick="deleteSubscription(${sub.id})"><i data-lucide="trash" style="width:12px; color:var(--danger);"></i></button>
+        </div>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+  
+  if(subscriptions.length === 0) {
+      container.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;"><i data-lucide="calendar-x" style="width:48px; height:48px; color:#cbd5e1; margin-bottom:12px;"></i><strong>Brak stałych opłat</strong>Dodaj czynsz lub subskrypcje, by o niczym nie zapomnieć.</div>';
+  }
+  
+  document.getElementById('totalSubsVal').textContent = totalSubs.toLocaleString('pl-PL');
+  lucide.createIcons();
+}
+
+function checkSubReminders() {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    var d = new Date(); var today = d.getDate(); var tomorrow = new Date(d); tomorrow.setDate(tomorrow.getDate() + 1); var tmrw = tomorrow.getDate();
+    var curPeriod = d.getFullYear() + '-' + ((d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1));
+    
+    var dueToday = subscriptions.filter(s => s.dayOfMonth === today && s.lastPaidMonth !== curPeriod);
+    var dueTomorrow = subscriptions.filter(s => s.dayOfMonth === tmrw && s.lastPaidMonth !== curPeriod);
+    
+    if (dueToday.length > 0) {
+        new Notification("WiseWallet - Rachunki", { body: `Masz dzisiaj do opłacenia ${dueToday.length} rachunków (m.in. ${dueToday[0].name}). Otwórz aplikację, by zrealizować płatność.`, icon: "https://cdn-icons-png.flaticon.com/512/3344/3344055.png" });
+    } else if (dueTomorrow.length > 0) {
+        new Notification("WiseWallet - Przypomnienie", { body: `Jutro mija termin płatności za: ${dueTomorrow[0].name}. Przygotuj środki.`, icon: "https://cdn-icons-png.flaticon.com/512/3344/3344055.png" });
+    }
 }
 
 // -------------------------------------------
@@ -1316,7 +1388,7 @@ async function handleRegister() {
 }
 
 async function handleLogout() { try { safeStorage.removeItem('walletwise_settings'); } catch(e){} if (supabase) await supabase.auth.signOut(); window.location.reload(); }
-async function loadCloudData() { if (!supabase) return; const { data: hlData, error: hlErr } = await supabase.from('history_logs').select('*'); if(!hlErr && hlData) { historyLogs = hlData; } renderHistory(); calculateAll(); }
+async function loadCloudData() { if (!supabase) return; const { data: hlData, error: hlErr } = await supabase.from('history_logs').select('*'); if(!hlErr && hlData) { historyLogs = hlData; } renderHistory(); calculateAll(); checkSubReminders(); }
 
 var settingsSaveTimeout;
 function applySettings(s) {
@@ -1329,16 +1401,19 @@ function applySettings(s) {
   if(s.rushEmergencyFund !== undefined) document.getElementById('rushEmergencyFund').checked = s.rushEmergencyFund;
   if(s.categories && Array.isArray(s.categories)) customCategories = s.categories;
   if(s.goals && Array.isArray(s.goals)) savingsGoals = s.goals;
+  if(s.subscriptions && Array.isArray(s.subscriptions)) subscriptions = s.subscriptions; // Wczytywanie subskrypcji
   renderCategoryDropdowns();
+  renderSubscriptions();
 }
 
 function triggerSettingsSave() {
   calculateAll();
+  renderSubscriptions(); // Odśwież widok subskrypcji na ekranie
   const s = {
     income: document.getElementById('income').value, kids800: document.getElementById('kids800').value,
     kidsActiveHome: document.getElementById('kidsActiveHome').value, kidsActiveWork: document.getElementById('kidsActiveWork').value,
     currentSavings: document.getElementById('currentSavings').value, rushEmergencyFund: document.getElementById('rushEmergencyFund').checked,
-    categories: customCategories, goals: savingsGoals
+    categories: customCategories, goals: savingsGoals, subscriptions: subscriptions // Zapis subskrypcji
   };
   if (isLoggedIn) {
     try { safeStorage.setItem('walletwise_settings', JSON.stringify(s)); } catch(e){}
@@ -1356,7 +1431,7 @@ async function saveSettingsToCloud() {
       income: document.getElementById('income').value, kids800: document.getElementById('kids800').value,
       kidsActiveHome: document.getElementById('kidsActiveHome').value, kidsActiveWork: document.getElementById('kidsActiveWork').value,
       currentSavings: document.getElementById('currentSavings').value, rushEmergencyFund: document.getElementById('rushEmergencyFund').checked,
-      categories: customCategories, goals: savingsGoals
+      categories: customCategories, goals: savingsGoals, subscriptions: subscriptions
   };
   const { error } = await supabase.auth.updateUser({ data: { budget_settings: s } });
   var syncIcon = document.getElementById('cloudSyncStatus');
@@ -1380,8 +1455,8 @@ async function setupAuthListeners() {
       const cloudSettings = session.user.user_metadata?.budget_settings;
       if (cloudSettings) { applySettings(cloudSettings); try { safeStorage.setItem('walletwise_settings', JSON.stringify(cloudSettings)); } catch(e){} } 
       calculateAll(); loadCloudData();
-    } else { isLoggedIn = false; try { safeStorage.removeItem('walletwise_settings'); } catch(e){} applySettings({ income: '', kids800: '', kidsActiveHome: '', kidsActiveWork: '', currentSavings: '', rushEmergencyFund: false, categories: [], goals: [] }); calculateAll(); }
-  } catch(err) { isLoggedIn = false; try { safeStorage.removeItem('walletwise_settings'); } catch(e){} applySettings({ income: '', kids800: '', kidsActiveHome: '', kidsActiveWork: '', currentSavings: '', rushEmergencyFund: false, categories: [], goals: [] }); calculateAll(); }
+    } else { isLoggedIn = false; try { safeStorage.removeItem('walletwise_settings'); } catch(e){} applySettings({ income: '', kids800: '', kidsActiveHome: '', kidsActiveWork: '', currentSavings: '', rushEmergencyFund: false, categories: [], goals: [], subscriptions: [] }); calculateAll(); }
+  } catch(err) { isLoggedIn = false; try { safeStorage.removeItem('walletwise_settings'); } catch(e){} applySettings({ income: '', kids800: '', kidsActiveHome: '', kidsActiveWork: '', currentSavings: '', rushEmergencyFund: false, categories: [], goals: [], subscriptions: [] }); calculateAll(); }
 }
 
 // -------------------------------------------
@@ -1398,6 +1473,7 @@ function appSwitchTab(tabId, btn) {
   document.getElementById(tabId).classList.add('active'); if (btn) btn.classList.add('active');
   if (tabId === 'historyTab') renderHistoryTable();
   if (tabId === 'reportTab') renderReportTab();
+  if (tabId === 'subsTab') renderSubscriptions();
 }
 
 function getTotalIncome() {
@@ -1898,6 +1974,7 @@ window.onload = async function() {
   document.getElementById('selectReportPeriod').onchange = function() { renderReportTab(); };
 
   calculateAll(); 
+  checkSubReminders();
 };
 </script>
 </body>
