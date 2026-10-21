@@ -146,7 +146,7 @@
     
     .goal-item { background: #f8fafc; border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 12px; transition: all 0.2s; position: relative; }
     .goal-item:hover { border-color: #cbd5e1; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
-    .goal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+    .goal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
     .goal-title { font-weight: 800; color: var(--text-main); font-size: 1.05rem; word-wrap: break-word; }
     .goal-amounts { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-align: right; }
     .goal-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
@@ -256,8 +256,7 @@
 
     .forecast-card { background: linear-gradient(135deg, #faf5ff, #fdf4ff); border: 1px solid #f0abfc; border-radius: 24px; padding: 28px; margin-bottom: 28px; box-shadow: 0 4px 15px rgba(217, 70, 239, 0.05); }
     .metric-box-tab3 { background: #fff; padding: 20px; border-radius: 16px; border: 1px solid #f5d0fe; box-shadow: 0 4px 10px rgba(0,0,0,0.02); display: flex; flex-direction: column; }
-    
-    .metric-box-tab3 .comparison-bar { margin-top: auto; padding-top: 12px; border-top: 1px solid #fdf4ff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; }
+    .metric-box-tab3 .comparison-bar { margin-top: auto; padding-top: 12px; border-top: 1px solid #fdf4ff; display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 4px; }
     .metric-box-tab3 .comparison-bar span { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
     .metric-box-tab3 .diff-badge { padding: 4px 8px; border-radius: 8px; font-weight: 800; font-size: 0.75rem; letter-spacing: 0.02em; }
 
@@ -271,7 +270,7 @@
     .category-manage-btn { font-size: 0.85rem; padding: 8px 16px; background: #eff6ff; color: var(--primary); border: 1.5px solid #bfdbfe; font-weight: 800; border-radius: 12px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
     .category-manage-btn:hover { background: #dbeafe; border-color: #93c5fd; transform: translateY(-1px); }
 
-    /* ==== MOBILNY LAYOUT ==== */
+    /* ==== MOBILNY LAYOUT (Z POPRAWIONYMI TABELAMI GLOBALNIE) ==== */
     @media (max-width: 768px) {
       body { padding: 12px 10px; padding-bottom: 90px; } 
       
@@ -790,7 +789,7 @@
           <span style="font-size: 0.8rem; color: #86198f; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 6px;"><i data-lucide="party-popper" style="width:16px;"></i> Pozostałe Fun Money</span>
           <strong id="forecastFunVal" style="font-size: 1.6rem; color: #9333ea; display: block; margin-top: 8px; font-weight: 900;">0 PLN</strong>
           <div class="comparison-bar" style="justify-content: flex-end;">
-             <!-- PRZYWRÓCONE Z BUDŻETU! -->
+             <!-- Z BUDŻETU JEST TUTAJ! -->
              <span style="margin-right: auto;">Z budżetu: <strong id="idealFunVal" style="color: var(--text-main);">0 PLN</strong></span>
              <span id="diffFunBadge" class="diff-badge">0 PLN</span>
           </div>
@@ -1050,7 +1049,7 @@ async function autoLogGoalFund(goalName, amount) {
 }
 
 // -------------------------------------------
-// SKARBONKI (SAVINGS GOALS)
+// SKARBONKI (SAVINGS GOALS) - Z ETA DLA PODUSZKI
 // -------------------------------------------
 function openAddGoalModal(id = null) {
   var modal = document.getElementById('goalManagerModal');
@@ -1140,22 +1139,47 @@ function renderGoals() {
 
   var totalInc = getTotalIncome(); var housing = Math.round(totalInc * 0.30); var food = Math.round(totalInc * 0.15); var transport = Math.round(totalInc * 0.05); var other = 0;
   var survival = housing + food + transport + other; var emergencyGoal = survival * 6;
+  
+  // Obliczenia do ETA
+  var funMoney = Math.round(totalInc * (rush ? 0.10 : 0.20));
+  var monthlySavings = totalInc - survival - funMoney;
+  
   var saved = Math.max(0, parseFloat(document.getElementById('currentSavings').value) || 0);
   var pct = emergencyGoal > 0 ? Math.min(100, Math.round((saved / emergencyGoal) * 100)) : 0;
   var isDone = saved >= emergencyGoal && emergencyGoal > 0;
   var barColor = isDone ? '#10b981' : '#f59e0b'; 
   
   var bgClass = rush ? (isDone ? 'background: #ecfdf5; border-color: #a7f3d0;' : 'background: #fffbeb; border-color: #fde68a;') : (isDone ? 'background: #ecfdf5; border-color: #a7f3d0;' : 'background: #f8fafc; border-color: var(--border);');
+  
+  // Konstrukcja ETA
+  var monthsLeftText = "";
+  if (emergencyGoal === 0) {
+      monthsLeftText = "Uzupełnij zarobki";
+  } else if (isDone) {
+      monthsLeftText = "Cel Osiągnięty! 🎉";
+  } else if (monthlySavings > 0) {
+      var m = Math.ceil((emergencyGoal - saved) / monthlySavings);
+      monthsLeftText = "Osiągniesz za: " + m + (m === 1 ? " miesiąc" : (m > 1 && m < 5 ? " miesiące" : " mies."));
+  } else {
+      monthsLeftText = "Zwiększ oszczędności!";
+  }
     
   var heroGoalHtml = `
     <div class="goal-item" style="${bgClass} ${rush ? 'border-width:2px;' : ''}" id="emergencyBankIcon">
-      <div class="goal-header">
+      <div class="goal-header" style="align-items: center; margin-bottom: 8px;">
         <div class="goal-title">
           <i data-lucide="shield-alert" style="color: #ea580c; width: 18px; margin-right:4px;"></i> Poduszka Finansowa
           ${isDone ? '<i data-lucide="check-circle-2" style="width:16px; color:#10b981; display:inline-block; vertical-align:-3px;"></i>' : ''}
         </div>
         <div class="goal-amounts">${saved.toLocaleString('pl-PL')} / ${emergencyGoal.toLocaleString('pl-PL')} PLN</div>
       </div>
+      
+      <!-- ETA INFO W KAFELKU -->
+      <div style="font-size: 0.8rem; color: ${isDone ? '#047857' : '#b45309'}; margin-bottom: 12px; font-weight: 600; display:flex; justify-content:space-between; align-items:center;">
+          <span>Prędkość: ${monthlySavings > 0 ? monthlySavings.toLocaleString('pl-PL') + ' PLN/mc' : '0 PLN/mc'}</span>
+          <span style="background: ${isDone ? '#d1fae5' : '#ffedd5'}; padding: 4px 10px; border-radius: 12px;">${monthsLeftText}</span>
+      </div>
+
       <div class="bar-bg" style="height: 10px;">
         <div class="bar-fill" style="width: ${pct}%; background: ${barColor};"></div>
       </div>
@@ -1750,6 +1774,7 @@ function renderReportTab() {
   var totalFunAvailable = idealFun + rollover;
   var leftFun = Math.max(0, totalFunAvailable - realFun);
   
+  // WSTRZYKNIĘCIE OBLICZONEJ KWOTY "Z BUDŻETU" DO HTML!
   var idealFunEl = document.getElementById('idealFunVal');
   if (idealFunEl) {
       idealFunEl.textContent = totalFunAvailable.toLocaleString('pl-PL') + ' PLN';
