@@ -277,7 +277,6 @@
       .card, .card-compact { padding: 16px !important; border-radius: 20px !important; }
       .metric-hero { padding: 20px !important; }
       
-      /* TAB-BTN: Zmiana szerokości na flex: 1, żeby 4 przyciski zmieściły się idealnie */
       .nav-tabs { position: fixed; bottom: 0; left: 0; width: 100%; margin: 0; padding: 12px 8px calc(12px + env(safe-area-inset-bottom, 0px)); background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-top: 1px solid rgba(226, 232, 240, 0.8); border-bottom: none; justify-content: space-around; gap: 4px; z-index: 999; box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.05); }
       .tab-btn { flex: 1; flex-direction: column; font-size: 0.65rem; padding: 8px 2px; border-radius: 12px; gap: 6px; white-space: normal; text-align: center; border: none !important; box-shadow: none !important; background: transparent !important; line-height: 1.1; }
       .tab-btn i, .tab-btn svg { width: 22px; height: 22px; }
@@ -1213,8 +1212,31 @@ function saveSubscription() {
   document.getElementById('subManagerModal').style.display = 'none'; triggerSettingsSave(); renderSubscriptions();
 }
 
-function deleteSubscription(id) {
-  if(confirm("Na pewno usunąć tę opłatę?")) { subscriptions = subscriptions.filter(s => s.id !== id); triggerSettingsSave(); renderSubscriptions(); }
+async function deleteSubscription(id) {
+  var sub = subscriptions.find(s => s.id === id);
+  if (!sub) return;
+  
+  if (confirm("Na pewno usunąć tę stałą opłatę?")) {
+    var targetName = sub.name + " (Opłata stała)";
+    var relatedLogs = historyLogs.filter(e => e.name === targetName);
+    
+    if (relatedLogs.length > 0) {
+      if (confirm("Znaleziono opłacone rachunki powiązane z tą subskrypcją (" + relatedLogs.length + " wpisów). Czy chcesz wykasować je również z Dziennika, aby odzyskać środki w budżecie?")) {
+        if (isLoggedIn && supabase) {
+          for (let i = 0; i < relatedLogs.length; i++) {
+            await supabase.from('history_logs').delete().eq('id', relatedLogs[i].id);
+          }
+        }
+        var idsToRemove = relatedLogs.map(l => l.id);
+        historyLogs = historyLogs.filter(e => !idsToRemove.includes(e.id));
+      }
+    }
+    
+    subscriptions = subscriptions.filter(s => s.id !== id);
+    triggerSettingsSave();
+    renderSubscriptions();
+    renderHistory();
+  }
 }
 
 async function paySubscription(id) {
@@ -1234,6 +1256,31 @@ async function paySubscription(id) {
   }
 }
 
+async function unpaySubscription(id) {
+  var sub = subscriptions.find(s => s.id === id);
+  if(!sub) return;
+  
+  var d = new Date(); var selY = d.getFullYear().toString(); var selM = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1);
+  var p = selY + '-' + selM;
+  
+  if (sub.lastPaidMonth !== p) return; // Można cofać tylko w tym samym miesiącu
+
+  var targetName = sub.name + " (Opłata stała)";
+  var logEntry = historyLogs.find(e => e.month === p && e.name === targetName && e.amount == sub.amount);
+
+  if (logEntry) {
+    if (isLoggedIn && supabase) {
+      const { error } = await supabase.from('history_logs').delete().eq('id', logEntry.id);
+      if (error) { alert("Błąd usuwania wpisu z bazy: " + error.message); return; }
+    }
+    historyLogs = historyLogs.filter(e => e.id !== logEntry.id);
+  }
+
+  sub.lastPaidMonth = null;
+  triggerSettingsSave(); 
+  renderHistory();
+}
+
 function renderSubscriptions() {
   var container = document.getElementById('subsListContainer');
   if(!container) return;
@@ -1251,8 +1298,12 @@ function renderSubscriptions() {
     var isToday = sub.dayOfMonth === d.getDate();
     if(isToday && !isPaidThisMonth) dueText = "<strong style='color: var(--danger);'>Płatność dzisiaj!</strong>";
     
-    var statusHtml = isPaidThisMonth ? `<span style="background: #ecfdf5; color: #047857; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 800;"><i data-lucide="check-circle-2" style="width:14px; margin-bottom:-2px;"></i> Opłacono w tym miesiącu</span>` 
-                                     : `<button class="btn-add" style="padding: 6px 12px; font-size: 0.8rem; background: var(--warning); box-shadow: none;" onclick="paySubscription(${sub.id})"><i data-lucide="wallet" style="width:14px;"></i> Opłać teraz</button>`;
+    var statusHtml = isPaidThisMonth 
+        ? `<div style="display:flex; align-items:center; gap: 8px;">
+             <span style="background: #ecfdf5; color: #047857; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 800;"><i data-lucide="check-circle-2" style="width:14px; margin-bottom:-2px;"></i> Opłacono</span>
+             <button onclick="unpaySubscription(${sub.id})" class="edit-btn" style="width: 26px; height: 26px; border-radius: 6px; background: transparent; border: 1px solid #fca5a5; margin:0; color: var(--danger);" title="Cofnij płatność"><i data-lucide="rotate-ccw" style="width:12px;"></i></button>
+           </div>` 
+        : `<button class="btn-add" style="padding: 6px 12px; font-size: 0.8rem; background: var(--warning); box-shadow: none;" onclick="paySubscription(${sub.id})"><i data-lucide="wallet" style="width:14px;"></i> Opłać teraz</button>`;
 
     var row = document.createElement('div');
     row.className = 'goal-item'; row.style.cssText = isPaidThisMonth ? "background: #f8fafc; border-color: var(--border); opacity: 0.85;" : "background: #fff; border-color: #bfdbfe; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.05);";
@@ -1420,7 +1471,9 @@ function triggerSettingsSave() {
       if(syncIcon) { syncIcon.style.display = 'flex'; syncIcon.innerHTML = '<i data-lucide="loader" class="lucide-spin" style="width:14px; color: var(--text-muted);"></i> Zapisuję...'; syncIcon.style.color = 'var(--text-muted)'; lucide.createIcons(); }
       clearTimeout(settingsSaveTimeout); settingsSaveTimeout = setTimeout(saveSettingsToCloud, 1000);
     }
-  } else { try { safeStorage.removeItem('walletwise_settings'); } catch(e){} }
+  } else { 
+      try { safeStorage.removeItem('walletwise_settings'); } catch(e){} 
+  }
 }
 
 async function saveSettingsToCloud() {
