@@ -277,6 +277,7 @@
       .card, .card-compact { padding: 16px !important; border-radius: 20px !important; }
       .metric-hero { padding: 20px !important; }
       
+      /* TAB-BTN: Zmiana szerokości na flex: 1, żeby 4 przyciski zmieściły się idealnie */
       .nav-tabs { position: fixed; bottom: 0; left: 0; width: 100%; margin: 0; padding: 12px 8px calc(12px + env(safe-area-inset-bottom, 0px)); background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-top: 1px solid rgba(226, 232, 240, 0.8); border-bottom: none; justify-content: space-around; gap: 4px; z-index: 999; box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.05); }
       .tab-btn { flex: 1; flex-direction: column; font-size: 0.65rem; padding: 8px 2px; border-radius: 12px; gap: 6px; white-space: normal; text-align: center; border: none !important; box-shadow: none !important; background: transparent !important; line-height: 1.1; }
       .tab-btn i, .tab-btn svg { width: 22px; height: 22px; }
@@ -1263,7 +1264,7 @@ async function unpaySubscription(id) {
   var d = new Date(); var selY = d.getFullYear().toString(); var selM = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1);
   var p = selY + '-' + selM;
   
-  if (sub.lastPaidMonth !== p) return; // Można cofać tylko w tym samym miesiącu
+  if (sub.lastPaidMonth !== p) return;
 
   var targetName = sub.name + " (Opłata stała)";
   var logEntry = historyLogs.find(e => e.month === p && e.name === targetName && e.amount == sub.amount);
@@ -1471,9 +1472,7 @@ function triggerSettingsSave() {
       if(syncIcon) { syncIcon.style.display = 'flex'; syncIcon.innerHTML = '<i data-lucide="loader" class="lucide-spin" style="width:14px; color: var(--text-muted);"></i> Zapisuję...'; syncIcon.style.color = 'var(--text-muted)'; lucide.createIcons(); }
       clearTimeout(settingsSaveTimeout); settingsSaveTimeout = setTimeout(saveSettingsToCloud, 1000);
     }
-  } else { 
-      try { safeStorage.removeItem('walletwise_settings'); } catch(e){} 
-  }
+  } else { try { safeStorage.removeItem('walletwise_settings'); } catch(e){} }
 }
 
 async function saveSettingsToCloud() {
@@ -1791,15 +1790,21 @@ function renderHistory() {
   
   var spentFunThisMonth = 0;
   var funDays = new Set();
-  
+  var curMonthLogs = [];
+
   historyLogs.forEach(e => {
-    if(e.month === curPeriod && getCategoryBucket(e.category) === 'fun') {
-      spentFunThisMonth += Number(e.amount);
-      if(e.exact_date) { var parts = e.exact_date.split('-'); if(parts.length === 3) funDays.add(parseInt(parts[2], 10)); }
+    if(e.month === curPeriod) {
+      curMonthLogs.push(e);
+      if (getCategoryBucket(e.category) === 'fun') {
+        spentFunThisMonth += Number(e.amount);
+        if(e.exact_date) { 
+           var parts = e.exact_date.split('-'); 
+           if(parts.length === 3) funDays.add(parseInt(parts[2], 10)); 
+        }
+      }
     }
   });
 
-  // DODANIE ZABLOKOWANYCH ŚRODKÓW Z SUBSKRYPCJI
   subscriptions.forEach(sub => {
       if (sub.lastPaidMonth !== curPeriod && getCategoryBucket(sub.category) === 'fun') {
           spentFunThisMonth += Number(sub.amount);
@@ -1819,10 +1824,26 @@ function renderHistory() {
     else bar.style.backgroundColor = 'var(--danger)';
   }
 
-  // PASS (STREAK)
+  // PASS (STREAK) - POPRAWIONA LOGIKA INTELIGENTNEJ PASSY
   var todayDay = d.getDate(); 
   var streak = 0;
-  for (var i = todayDay; i >= 1; i--) { if (funDays.has(i)) break; streak++; }
+
+  if (curMonthLogs.length === 0) {
+    streak = 0;
+  } else {
+    var firstLogDay = todayDay;
+    curMonthLogs.forEach(e => {
+      if(e.exact_date) {
+         var day = parseInt(e.exact_date.split('-')[2], 10);
+         if (day < firstLogDay) firstLogDay = day;
+      }
+    });
+
+    for (var i = todayDay; i >= firstLogDay; i--) { 
+      if (funDays.has(i)) break; 
+      streak++; 
+    }
+  }
   
   var badgeEl = document.getElementById('noSpendBadgeVal');
   if(badgeEl) badgeEl.innerHTML = streak + (streak === 1 ? ' Dzień' : ' Dni'); 
