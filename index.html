@@ -170,7 +170,7 @@
     }
 
     .coin-drop { position: absolute; right: 20px; top: 10px; animation: dropCoinAnim 1s ease-in-out forwards; z-index: 9999; pointer-events: none; }
-    .coin-jackpot { fixed; left: 50vw; top: 50vh; animation: jackpotAnim 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; z-index: 99999; pointer-events: none; }
+    .coin-jackpot { position: fixed; left: 50vw; top: 50vh; animation: jackpotAnim 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; z-index: 99999; pointer-events: none; }
 
     /* STATYSTYKI Z GRYWALIZACJĄ */
     .stat-badge-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
@@ -270,13 +270,14 @@
     .category-manage-btn { font-size: 0.85rem; padding: 8px 16px; background: #eff6ff; color: var(--primary); border: 1.5px solid #bfdbfe; font-weight: 800; border-radius: 12px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
     .category-manage-btn:hover { background: #dbeafe; border-color: #93c5fd; transform: translateY(-1px); }
 
-    /* ==== MOBILNY LAYOUT ==== */
+    /* ==== MOBILNY LAYOUT (Z POPRAWIONYMI TABELAMI GLOBALNIE) ==== */
     @media (max-width: 768px) {
       body { padding: 12px 10px; padding-bottom: 90px; } 
       
       .card, .card-compact { padding: 16px !important; border-radius: 20px !important; }
       .metric-hero { padding: 20px !important; }
       
+      /* TAB-BTN: Zmiana szerokości na flex: 1, żeby 4 przyciski zmieściły się idealnie */
       .nav-tabs { position: fixed; bottom: 0; left: 0; width: 100%; margin: 0; padding: 12px 8px calc(12px + env(safe-area-inset-bottom, 0px)); background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-top: 1px solid rgba(226, 232, 240, 0.8); border-bottom: none; justify-content: space-around; gap: 4px; z-index: 999; box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.05); }
       .tab-btn { flex: 1; flex-direction: column; font-size: 0.65rem; padding: 8px 2px; border-radius: 12px; gap: 6px; white-space: normal; text-align: center; border: none !important; box-shadow: none !important; background: transparent !important; line-height: 1.1; }
       .tab-btn i, .tab-btn svg { width: 22px; height: 22px; }
@@ -434,7 +435,6 @@
   
   <header>
     <div style="display: flex; align-items: center;">
-      <!-- LOGO SVG -->
       <svg width="36" height="36" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 12px; flex-shrink: 0;">
         <rect width="100" height="100" rx="28" fill="url(#wiseGrad)"/>
         <path d="M26 38L40 66L50 48L60 66L74 38" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
@@ -483,8 +483,8 @@
   <nav class="nav-tabs">
     <button type="button" class="tab-btn active" onclick="appSwitchTab('calculatorTab', this)"><i data-lucide="calculator"></i> <span class="tab-text">Planer</span></button>
     <button type="button" class="tab-btn" onclick="appSwitchTab('historyTab', this)"><i data-lucide="book-open-check"></i> <span class="tab-text">Dziennik</span></button>
-    <button type="button" class="tab-btn" onclick="appSwitchTab('reportTab', this)"><i data-lucide="bar-chart-3"></i> <span class="tab-text">Analiza</span></button>
     <button type="button" class="tab-btn" onclick="appSwitchTab('subsTab', this)"><i data-lucide="repeat"></i> <span class="tab-text">Opłaty</span></button>
+    <button type="button" class="tab-btn" onclick="appSwitchTab('reportTab', this)"><i data-lucide="bar-chart-3"></i> <span class="tab-text">Analiza</span></button>
   </nav>
 
   <!-- ZAKŁADKA 1: PLANER -->
@@ -617,7 +617,8 @@
             <!-- Dynamic goals will be rendered here -->
           </div>
         </div>
-
+        
+        <!-- WIDŻETY ZAKŁADKI 1 -->
         <div class="stat-badge-grid">
           <div class="stat-badge">
             <span id="funBadgeLabel"><i data-lucide="party-popper" style="width: 14px;"></i> Zachcianki (Miesiąc)</span>
@@ -763,8 +764,47 @@
     </div>
 
   </div>
+  
+  <!-- ZAKŁADKA 3: OPŁATY I SUBSKRYPCJE -->
+  <div id="subsTab" class="tab-content">
+    
+    <div class="hero-top-row">
+      <div class="metric-hero dark" style="background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%);">
+        <div class="metric-hero-top">
+          <span class="tag" style="color: #93c5fd;"><i data-lucide="repeat" style="width: 16px;"></i> Suma Stałych Opłat</span>
+        </div>
+        <div class="val" style="color: #fff;"><span id="totalSubsVal">0</span> PLN</div>
+        <p class="desc" style="color: #bfdbfe;">Wszystkie subskrypcje w jednym miesiącu.</p>
+      </div>
 
-  <!-- ZAKŁADKA 3: ANALIZA -->
+      <div class="metric-hero light">
+        <div class="metric-hero-top">
+          <span class="tag"><i data-lucide="bell-ring" style="width: 16px;"></i> Powiadomienia PWA</span>
+        </div>
+        <div style="margin-top: 16px;">
+            <p style="font-size: 0.9rem; margin-bottom: 12px; font-weight: 500;">Aplikacja sprawdza płatności każdego dnia. Wymagane zgody na alerty:</p>
+            <button class="btn-add" onclick="window.requestPushPermissions()" style="background: #f1f5f9; color: var(--primary); border: 1.5px solid #bfdbfe; width: 100%; box-shadow: none;"><i data-lucide="bell"></i> Włącz Przypomnienia</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="padding: 24px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; flex-wrap: wrap; gap: 8px;">
+        <h2 style="margin:0;"><i data-lucide="list-checks" style="color: var(--primary);"></i> Kalendarz Płatności</h2>
+        <button type="button" class="btn-add" style="padding: 8px 16px; font-size: 0.85rem;" onclick="openAddSubModal()"><i data-lucide="plus" style="width:14px;"></i> Nowa Opłata</button>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 24px; font-weight: 500;">
+        Dodaj Netflixa, czynsz lub kredyt. Niezapłacone subskrypcje blokują środki w "Analizie". Jeśli klikniesz <strong>"Opłać"</strong>, wydatek natychmiast poleci do Dziennika.
+      </p>
+      
+      <div id="subsListContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+        <!-- Generowane dynamicznie kafelki -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ZAKŁADKA 4: ANALIZA -->
   <div id="reportTab" class="tab-content">
   
     <div id="premiumChallengeBanner" class="goal-banner" style="margin-bottom: 24px; background: linear-gradient(135deg, #fffbeb, #fef3c7); border-color: #fde68a;">
@@ -783,7 +823,7 @@
         <span id="forecastBasisTag" style="font-size: 0.75rem; background: #fae8ff; color: #a21caf; padding: 6px 14px; border-radius: 50px; font-weight: 800; text-transform: uppercase;">Zderzenie Danych</span>
       </div>
       <p style="font-size: 0.95rem; color: #701a75; margin-bottom: 24px; font-weight: 500; line-height: 1.5;">
-        Zestawiamy Twój budżet z wybranym miesiącem. Zobacz, czy trzymasz się swoich założeń.
+        Zestawiamy Twój budżet z wybranym miesiącem. <strong>Oczekujące subskrypcje</strong> blokują tutaj Twoje środki automatycznie!
       </p>
       
       <div id="rolloverBadgeTab3" class="rollover-badge" style="display:none; margin-bottom:24px;">
@@ -841,7 +881,7 @@
 
       <div style="background: #f8fafc; border: 1px dashed var(--border); border-radius: 16px; padding: 20px; margin-bottom: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: baseline;">
-          <span style="font-size: 1rem; color: var(--text-muted); font-weight: 600;">Suma poniesionych wydatków:</span>
+          <span style="font-size: 1rem; color: var(--text-muted); font-weight: 600;">Suma poniesionych i oczekujących:</span>
           <strong id="monthTotalExpense" style="font-size: 1.8rem; color: var(--text-main); font-weight: 900;">0 PLN</strong>
         </div>
       </div>
@@ -850,9 +890,8 @@
         <table class="styled-table">
           <thead>
             <tr>
-              <th class="col-okres">Data</th>
               <th class="col-cat">Kategoria</th>
-              <th class="col-opis">Opis wydatku</th>
+              <th class="col-opis">Opis wydatku / Opłata</th>
               <th class="col-amount">Kwota</th>
               <th style="text-align: center;">Udział</th>
             </tr>
@@ -861,45 +900,6 @@
         </table>
       </div>
     </div>
-  </div>
-
-  <!-- ZAKŁADKA 4: OPŁATY I SUBSKRYPCJE -->
-  <div id="subsTab" class="tab-content">
-    
-    <div class="hero-top-row">
-      <div class="metric-hero dark" style="background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%);">
-        <div class="metric-hero-top">
-          <span class="tag" style="color: #93c5fd;"><i data-lucide="repeat" style="width: 16px;"></i> Suma Stałych Opłat</span>
-        </div>
-        <div class="val" style="color: #fff;"><span id="totalSubsVal">0</span> PLN</div>
-        <p class="desc" style="color: #bfdbfe;">Wszystkie subskrypcje w jednym miesiącu.</p>
-      </div>
-
-      <div class="metric-hero light">
-        <div class="metric-hero-top">
-          <span class="tag"><i data-lucide="bell-ring" style="width: 16px;"></i> Powiadomienia PWA</span>
-        </div>
-        <div style="margin-top: 16px;">
-            <p style="font-size: 0.9rem; margin-bottom: 12px; font-weight: 500;">Aplikacja sprawdza płatności każdego dnia. Wymagane zgody na alerty:</p>
-            <button class="btn-add" onclick="window.requestPushPermissions()" style="background: #f1f5f9; color: var(--primary); border: 1.5px solid #bfdbfe; width: 100%; box-shadow: none;"><i data-lucide="bell"></i> Włącz Przypomnienia</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="card" style="padding: 24px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; flex-wrap: wrap; gap: 8px;">
-        <h2 style="margin:0;"><i data-lucide="list-checks" style="color: var(--primary);"></i> Kalendarz Płatności</h2>
-        <button type="button" class="btn-add" style="padding: 8px 16px; font-size: 0.85rem;" onclick="openAddSubModal()"><i data-lucide="plus" style="width:14px;"></i> Nowa Opłata</button>
-      </div>
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 24px; font-weight: 500;">
-        Dodaj Netflixa, czynsz lub kredyt. Jeśli klikniesz <strong>"Opłać"</strong>, wydatek natychmiast poleci do Dziennika (Tab 2).
-      </p>
-      
-      <div id="subsListContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
-        <!-- Generowane dynamicznie kafelki -->
-      </div>
-    </div>
-
   </div>
 
 </div>
@@ -1067,7 +1067,7 @@ async function autoLogGoalFund(goalName, amount) {
 }
 
 // -------------------------------------------
-// SKARBONKI (SAVINGS GOALS) - Z ETA DLA PODUSZKI
+// SKARBONKI (SAVINGS GOALS)
 // -------------------------------------------
 function openAddGoalModal(id = null) {
   var modal = document.getElementById('goalManagerModal'); var title = document.getElementById('goalModalTitle');
@@ -1224,7 +1224,7 @@ async function paySubscription(id) {
   var d = new Date(); var selY = d.getFullYear().toString(); var selM = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1);
   var p = selY + '-' + selM; var exactD = selY + '-' + selM + '-' + (d.getDate() < 10 ? '0' : '') + d.getDate();
   
-  var newRecord = { month: p, year: selY, month_num: selM, exact_date: exactD, category: sub.category, name: sub.name + " (Subskrypcja)", amount: sub.amount };
+  var newRecord = { month: p, year: selY, month_num: selM, exact_date: exactD, category: sub.category, name: sub.name + " (Opłata stała)", amount: sub.amount };
 
   if (isLoggedIn && supabase) {
     const { data, error } = await supabase.from('history_logs').insert([newRecord]).select();
@@ -1399,7 +1399,7 @@ function applySettings(s) {
   if(s.rushEmergencyFund !== undefined) document.getElementById('rushEmergencyFund').checked = s.rushEmergencyFund;
   if(s.categories && Array.isArray(s.categories)) customCategories = s.categories;
   if(s.goals && Array.isArray(s.goals)) savingsGoals = s.goals;
-  if(s.subscriptions && Array.isArray(s.subscriptions)) subscriptions = s.subscriptions;
+  if(s.subscriptions && Array.isArray(s.subscriptions)) subscriptions = s.subscriptions; 
   renderCategoryDropdowns();
   renderSubscriptions();
 }
@@ -1411,9 +1411,8 @@ function triggerSettingsSave() {
     income: document.getElementById('income').value, kids800: document.getElementById('kids800').value,
     kidsActiveHome: document.getElementById('kidsActiveHome').value, kidsActiveWork: document.getElementById('kidsActiveWork').value,
     currentSavings: document.getElementById('currentSavings').value, rushEmergencyFund: document.getElementById('rushEmergencyFund').checked,
-    categories: customCategories, goals: savingsGoals, subscriptions: subscriptions
+    categories: customCategories, goals: savingsGoals, subscriptions: subscriptions 
   };
-  
   if (isLoggedIn) {
     try { safeStorage.setItem('walletwise_settings', JSON.stringify(s)); } catch(e){}
     if (supabase) {
@@ -1421,10 +1420,7 @@ function triggerSettingsSave() {
       if(syncIcon) { syncIcon.style.display = 'flex'; syncIcon.innerHTML = '<i data-lucide="loader" class="lucide-spin" style="width:14px; color: var(--text-muted);"></i> Zapisuję...'; syncIcon.style.color = 'var(--text-muted)'; lucide.createIcons(); }
       clearTimeout(settingsSaveTimeout); settingsSaveTimeout = setTimeout(saveSettingsToCloud, 1000);
     }
-  } else { 
-      // BLOKADA TRYBU GOŚCIA: Nie zapisujemy w Local Storage, jeśli nie jesteś zalogowany.
-      try { safeStorage.removeItem('walletwise_settings'); } catch(e){} 
-  }
+  } else { try { safeStorage.removeItem('walletwise_settings'); } catch(e){} }
 }
 
 async function saveSettingsToCloud() {
@@ -1458,10 +1454,9 @@ async function setupAuthListeners() {
       if (cloudSettings) { applySettings(cloudSettings); try { safeStorage.setItem('walletwise_settings', JSON.stringify(cloudSettings)); } catch(e){} } 
       calculateAll(); loadCloudData();
     } else { 
-        // BLOKADA TRYBU GOŚCIA - Twardy reset podczas inicjalizacji (F5) bez sesji
         isLoggedIn = false; 
         try { safeStorage.removeItem('walletwise_settings'); } catch(e){} 
-        historyLogs = []; // Twardy reset logów w RAM
+        historyLogs = [];
         applySettings({ income: '', kids800: '', kidsActiveHome: '', kidsActiveWork: '', currentSavings: '', rushEmergencyFund: false, categories: [], goals: [], subscriptions: [] }); 
         renderHistory();
         calculateAll(); 
@@ -1750,6 +1745,13 @@ function renderHistory() {
       if(e.exact_date) { var parts = e.exact_date.split('-'); if(parts.length === 3) funDays.add(parseInt(parts[2], 10)); }
     }
   });
+
+  // DODANIE ZABLOKOWANYCH ŚRODKÓW Z SUBSKRYPCJI
+  subscriptions.forEach(sub => {
+      if (sub.lastPaidMonth !== curPeriod && getCategoryBucket(sub.category) === 'fun') {
+          spentFunThisMonth += Number(sub.amount);
+      }
+  });
   
   var leftFun = Math.max(0, totalFunMoneyThisMonth - spentFunThisMonth);
   var pct = totalFunMoneyThisMonth > 0 ? Math.max(0, Math.min(100, (leftFun / totalFunMoneyThisMonth) * 100)) : 0;
@@ -1835,22 +1837,37 @@ function renderReportTab() {
     filtered = historyLogs.filter(e => e.month === sel.value);
   }
   
-  var tot = filtered.reduce((acc, curr) => acc + Number(curr.amount), 0);
+  var d = new Date();
+  var curPeriod = d.getFullYear() + '-' + ((d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1));
+  var isCurrentMonth = (sel.value === curPeriod);
+
+  // DODANIE ZABLOKOWANYCH ŚRODKÓW Z SUBSKRYPCJI DO ANALIZY
+  var allReportItems = [...filtered];
+  if (isCurrentMonth) {
+      subscriptions.forEach(sub => {
+          if (sub.lastPaidMonth !== curPeriod) {
+              allReportItems.push({
+                  category: sub.category,
+                  name: sub.name,
+                  amount: sub.amount,
+                  isPending: true
+              });
+          }
+      });
+  }
+
+  var tot = allReportItems.reduce((acc, curr) => acc + Number(curr.amount), 0);
   
   var realSurvival = 0;
   var realFun = 0;
   var realSavingsMonth = 0;
 
-  filtered.forEach(item => {
+  allReportItems.forEach(item => {
     var b = getCategoryBucket(item.category);
     if (b === 'fun') realFun += Number(item.amount);
     else if (b === 'needs') realSurvival += Number(item.amount);
     else if (b === 'savings') realSavingsMonth += Number(item.amount);
   });
-  
-  var d = new Date();
-  var curPeriod = d.getFullYear() + '-' + ((d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1));
-  var isCurrentMonth = (sel.value === curPeriod);
   
   var rollover = 0;
   var rolloverBadge = document.getElementById('rolloverBadgeTab3');
@@ -1914,14 +1931,20 @@ function renderReportTab() {
   document.getElementById('monthTotalExpense').textContent = tot.toLocaleString('pl-PL') + ' PLN';
   var tbody = document.getElementById('monthDetailsBody'); tbody.innerHTML = '';
 
-  if (uniquePeriods.length === 0 || filtered.length === 0) {
+  if (allReportItems.length === 0) {
     tbody.innerHTML = '<tr><td colspan="4" style="border:none;"><div class="empty-state"><i data-lucide="search-x"></i><strong>Brak wydatków w tym miesiącu</strong>Zanotuj coś w Dzienniku.</div></td></tr>';
   } else {
-    filtered.forEach(item => {
+    allReportItems.forEach(item => {
       var cat = item.category; var b = getCategoryBucket(cat); var pct = tot > 0 ? Math.round((Number(item.amount) / tot) * 100) : 0;
       var tr = document.createElement('tr');
+      
+      var bgRow = item.isPending ? 'background: #fffbeb; border: 1px dashed #fcd34d;' : '';
+      var namePrefix = item.isPending ? '<i data-lucide="clock" style="width:14px; margin-right:4px; margin-bottom:-2px; color:#d97706;"></i>' : '';
+      var pendingLabel = item.isPending ? '<span style="display:block; font-size:0.75rem; color:#d97706; margin-top:4px;">Oczekująca opłata</span>' : '';
+      
+      tr.style.cssText = bgRow;
       tr.innerHTML = '<td class="col-cat" data-label="Kategoria"><span class="cat-badge cat-bucket-' + b + '">' + cat + '</span></td>' +
-                     '<td class="col-opis" data-label="Opis"><strong>' + item.name + '</strong></td>' +
+                     '<td class="col-opis" data-label="Opis/Sklep"><strong>' + namePrefix + item.name + '</strong>' + pendingLabel + '</td>' +
                      '<td class="col-amount" data-label="Kwota">' + Number(item.amount).toLocaleString('pl-PL') + ' PLN</td>' +
                      '<td style="text-align: right; color: var(--text-muted); font-weight: 700;" data-label="Udział w m-cu">' + pct + '%</td>';
       tbody.appendChild(tr);
@@ -1933,8 +1956,6 @@ function renderReportTab() {
 
 window.onload = async function() {
   
-  // Próba odczytu z localStorage, ale działa to tylko dla zalogowanych! 
-  // (Poniżej w setupAuthListeners jeśli nie ma sesji, czyścimy to)
   try { const raw = safeStorage.getItem('walletwise_settings'); if(raw) { applySettings(JSON.parse(raw)); calculateAll(); } } catch(e) {}
   
   renderCategoryDropdowns();
@@ -1991,8 +2012,6 @@ window.onload = async function() {
   document.getElementById('excelFile').onchange = handleExcelUpload;
   ['histFilterYear', 'histFilterMonth', 'histFilterCategory', 'histSortOrder'].forEach(id => { document.getElementById(id).onchange = renderHistoryTable; });
   document.getElementById('selectReportPeriod').onchange = function() { renderReportTab(); };
-
-  // Usuwamy wymuszony calculateAll(), bo załatwi to setupAuthListeners.
 };
 </script>
 </body>
