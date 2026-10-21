@@ -256,7 +256,7 @@
 
     .forecast-card { background: linear-gradient(135deg, #faf5ff, #fdf4ff); border: 1px solid #f0abfc; border-radius: 24px; padding: 28px; margin-bottom: 28px; box-shadow: 0 4px 15px rgba(217, 70, 239, 0.05); }
     .metric-box-tab3 { background: #fff; padding: 20px; border-radius: 16px; border: 1px solid #f5d0fe; box-shadow: 0 4px 10px rgba(0,0,0,0.02); display: flex; flex-direction: column; }
-    .metric-box-tab3 .comparison-bar { margin-top: auto; padding-top: 12px; border-top: 1px solid #fdf4ff; display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 4px; }
+    .metric-box-tab3 .comparison-bar { margin-top: auto; padding-top: 12px; border-top: 1px solid #fdf4ff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; }
     .metric-box-tab3 .comparison-bar span { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
     .metric-box-tab3 .diff-badge { padding: 4px 8px; border-radius: 8px; font-weight: 800; font-size: 0.75rem; letter-spacing: 0.02em; }
 
@@ -590,7 +590,7 @@
             <!-- Dynamic goals will be rendered here -->
           </div>
         </div>
-
+        
         <!-- PRZYWRÓCONE WIDŻETY ZAKŁADKI 1 -->
         <div class="stat-badge-grid">
           <div class="stat-badge">
@@ -789,8 +789,7 @@
           <span style="font-size: 0.8rem; color: #86198f; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 6px;"><i data-lucide="party-popper" style="width:16px;"></i> Pozostałe Fun Money</span>
           <strong id="forecastFunVal" style="font-size: 1.6rem; color: #9333ea; display: block; margin-top: 8px; font-weight: 900;">0 PLN</strong>
           <div class="comparison-bar" style="justify-content: flex-end;">
-             <!-- Z BUDŻETU JEST TUTAJ! -->
-             <span style="margin-right: auto;">Z budżetu: <strong id="idealFunVal" style="color: var(--text-main);">0 PLN</strong></span>
+             <span>Z budżetu: <strong id="idealFunVal" style="color: var(--text-main);">0 PLN</strong></span>
              <span id="diffFunBadge" class="diff-badge">0 PLN</span>
           </div>
         </div>
@@ -895,7 +894,14 @@ function initSupabase() {
       var isLocalOrGithub = origin === 'file://' || origin === 'null' || origin.includes('github.io') || origin.includes('127.0.0.1') || origin.includes('localhost');
       var supabaseUrl = isLocalOrGithub ? 'https://kbzspdwizcwpzlvytdzw.supabase.co' : origin + '/baza';
       var supabaseKey = 'sb_publishable_nPfkgQfKOapm-t9OqWZ4KA__KuU0jqB';
-      supabase = window.supabase.createClient(supabaseUrl, supabaseKey, { auth: { storage: safeStorage, persistSession: safeStorage !== memoryStorage } });
+      // WŁĄCZONO PERSISTENT LOGIN (SESJA TRWAŁA NA TELEFONIE)
+      supabase = window.supabase.createClient(supabaseUrl, supabaseKey, { 
+        auth: { 
+          storage: safeStorage, 
+          persistSession: true, 
+          autoRefreshToken: true 
+        } 
+      });
       return true;
     }
   } catch (e) {} return false;
@@ -1140,7 +1146,6 @@ function renderGoals() {
   var totalInc = getTotalIncome(); var housing = Math.round(totalInc * 0.30); var food = Math.round(totalInc * 0.15); var transport = Math.round(totalInc * 0.05); var other = 0;
   var survival = housing + food + transport + other; var emergencyGoal = survival * 6;
   
-  // Obliczenia do ETA
   var funMoney = Math.round(totalInc * (rush ? 0.10 : 0.20));
   var monthlySavings = totalInc - survival - funMoney;
   
@@ -1151,7 +1156,6 @@ function renderGoals() {
   
   var bgClass = rush ? (isDone ? 'background: #ecfdf5; border-color: #a7f3d0;' : 'background: #fffbeb; border-color: #fde68a;') : (isDone ? 'background: #ecfdf5; border-color: #a7f3d0;' : 'background: #f8fafc; border-color: var(--border);');
   
-  // Konstrukcja ETA
   var monthsLeftText = "";
   if (emergencyGoal === 0) {
       monthsLeftText = "Uzupełnij zarobki";
@@ -1174,7 +1178,6 @@ function renderGoals() {
         <div class="goal-amounts">${saved.toLocaleString('pl-PL')} / ${emergencyGoal.toLocaleString('pl-PL')} PLN</div>
       </div>
       
-      <!-- ETA INFO W KAFELKU -->
       <div style="font-size: 0.8rem; color: ${isDone ? '#047857' : '#b45309'}; margin-bottom: 12px; font-weight: 600; display:flex; justify-content:space-between; align-items:center;">
           <span>Prędkość: ${monthlySavings > 0 ? monthlySavings.toLocaleString('pl-PL') + ' PLN/mc' : '0 PLN/mc'}</span>
           <span style="background: ${isDone ? '#d1fae5' : '#ffedd5'}; padding: 4px 10px; border-radius: 12px;">${monthsLeftText}</span>
@@ -1774,7 +1777,6 @@ function renderReportTab() {
   var totalFunAvailable = idealFun + rollover;
   var leftFun = Math.max(0, totalFunAvailable - realFun);
   
-  // WSTRZYKNIĘCIE OBLICZONEJ KWOTY "Z BUDŻETU" DO HTML!
   var idealFunEl = document.getElementById('idealFunVal');
   if (idealFunEl) {
       idealFunEl.textContent = totalFunAvailable.toLocaleString('pl-PL') + ' PLN';
