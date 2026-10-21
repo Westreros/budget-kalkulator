@@ -45,7 +45,7 @@
     .auth-card h2 { justify-content: center; font-size: 1.6rem; margin-bottom: 24px; color: var(--text-main); font-weight: 800; display: flex; align-items: center; gap: 8px;}
     .auth-input { width: 100%; padding: 14px 16px; margin-bottom: 16px; border: 1.5px solid var(--border); border-radius: 12px; font-size: 1rem; transition: all 0.2s ease; background: #f8fafc; }
     .auth-input:focus { background: #fff; border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
-    .auth-btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: margin-bottom: 12px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .auth-btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-bottom: 12px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .btn-login { background: var(--primary); color: #fff; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
     .btn-login:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3); }
     .btn-register { background: #f1f5f9; color: var(--text-muted); border: 1.5px solid var(--border); }
@@ -186,7 +186,7 @@
     .bar-fill { height: 100%; border-radius: 6px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
     .fill-slate { background: #475569; } .fill-amber { background: var(--warning); } .fill-emerald { background: var(--success); } .fill-blue { background: var(--primary); } .fill-purple { background: #a855f7; }
 
-    /* TABELE (Responsywne Karty na Mobile) */
+    /* TABELE */
     .table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 16px; border-radius: 16px; border: 1px solid var(--border); background: #fff; }
     .styled-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
     .styled-table th { background: #f8fafc; color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.05em; border-bottom: 2px solid var(--border); padding: 16px; text-align: center; }
@@ -257,7 +257,6 @@
     .forecast-card { background: linear-gradient(135deg, #faf5ff, #fdf4ff); border: 1px solid #f0abfc; border-radius: 24px; padding: 28px; margin-bottom: 28px; box-shadow: 0 4px 15px rgba(217, 70, 239, 0.05); }
     .metric-box-tab3 { background: #fff; padding: 20px; border-radius: 16px; border: 1px solid #f5d0fe; box-shadow: 0 4px 10px rgba(0,0,0,0.02); display: flex; flex-direction: column; }
     
-    /* GŁÓWNA ZMIANA: comparison-bar wyśrodkowany do krawędzi (Z budżetu po lewej, Wydano po prawej) */
     .metric-box-tab3 .comparison-bar { margin-top: auto; padding-top: 12px; border-top: 1px solid #fdf4ff; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; }
     .metric-box-tab3 .comparison-bar span { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
     .metric-box-tab3 .diff-badge { padding: 4px 8px; border-radius: 8px; font-weight: 800; font-size: 0.75rem; letter-spacing: 0.02em; }
@@ -593,6 +592,18 @@
           </div>
         </div>
 
+        <!-- PRZYWRÓCONE WIDŻETY ZAKŁADKI 1 -->
+        <div class="stat-badge-grid">
+          <div class="stat-badge">
+            <span id="funBadgeLabel"><i data-lucide="party-popper" style="width: 14px;"></i> Zachcianki (Miesiąc)</span>
+            <strong id="monthlyFunVal" style="color: #9333ea;">0 PLN</strong>
+          </div>
+          <div class="stat-badge">
+            <span><i data-lucide="sun" style="width: 14px;"></i> Bazowy Luz/Dzień</span>
+            <strong id="dailyFunVal" style="color: var(--primary);">0 PLN/dzień</strong>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -778,9 +789,9 @@
         <div class="metric-box-tab3">
           <span style="font-size: 0.8rem; color: #86198f; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 6px;"><i data-lucide="party-popper" style="width:16px;"></i> Pozostałe Fun Money</span>
           <strong id="forecastFunVal" style="font-size: 1.6rem; color: #9333ea; display: block; margin-top: 8px; font-weight: 900;">0 PLN</strong>
-          <div class="comparison-bar">
-             <!-- Z BUDŻETU JEST TUTAJ! -->
-             <span>Z budżetu: <strong id="idealFunVal" style="color: var(--text-main);">0 PLN</strong></span>
+          <div class="comparison-bar" style="justify-content: flex-end;">
+             <!-- PRZYWRÓCONE Z BUDŻETU! -->
+             <span style="margin-right: auto;">Z budżetu: <strong id="idealFunVal" style="color: var(--text-main);">0 PLN</strong></span>
              <span id="diffFunBadge" class="diff-badge">0 PLN</span>
           </div>
         </div>
@@ -1399,12 +1410,18 @@ function calculateAll() {
   else { if(rolloverBadge) rolloverBadge.style.display = 'none'; }
 
   var fbLabel = document.getElementById('funBadgeLabel');
-  fbLabel.innerHTML = rush ? '<i data-lucide="party-popper" style="width: 14px;"></i> Zachcianki (10% budżetu)' : '<i data-lucide="party-popper" style="width: 14px;"></i> Zachcianki (20% budżetu)';
+  if(fbLabel) {
+    fbLabel.innerHTML = rush ? '<i data-lucide="party-popper" style="width: 14px;"></i> Zachcianki (10% budżetu)' : '<i data-lucide="party-popper" style="width: 14px;"></i> Zachcianki (20% budżetu)';
+  }
   lucide.createIcons();
 
   document.getElementById('survivalTotal').textContent = survival.toLocaleString('pl-PL');
-  document.getElementById('monthlyFunVal').textContent = totalFunWithRollover.toLocaleString('pl-PL') + ' PLN';
-  document.getElementById('dailyFunVal').textContent = dailyFun + ' PLN/dzień';
+  
+  var monthlyFunValEl = document.getElementById('monthlyFunVal');
+  if(monthlyFunValEl) monthlyFunValEl.textContent = totalFunWithRollover.toLocaleString('pl-PL') + ' PLN';
+  
+  var dailyFunValEl = document.getElementById('dailyFunVal');
+  if(dailyFunValEl) dailyFunValEl.textContent = dailyFun + ' PLN/dzień';
 
   var hPct = Math.round((housing / safeInc) * 100); var fPct = Math.round((food / safeInc) * 100); var tPct = Math.round((transport / safeInc) * 100);
   var oPct = Math.round((other / safeInc) * 100); var sPct = Math.round((savings / safeInc) * 100); var fmPct = Math.round((funMoney / safeInc) * 100);
@@ -1730,7 +1747,6 @@ function renderReportTab() {
     if(rolloverBadge) rolloverBadge.style.display = 'none';
   }
 
-  // WSTRZYKNIĘCIE OBLICZONEJ KWOTY "Z BUDŻETU" DO HTML!
   var totalFunAvailable = idealFun + rollover;
   var leftFun = Math.max(0, totalFunAvailable - realFun);
   
