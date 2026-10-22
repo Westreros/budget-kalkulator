@@ -170,7 +170,7 @@
     }
 
     .coin-drop { position: absolute; right: 20px; top: 10px; animation: dropCoinAnim 1s ease-in-out forwards; z-index: 9999; pointer-events: none; }
-    .coin-jackpot { position: fixed; left: 50vw; top: 50vh; animation: jackpotAnim 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; z-index: 99999; pointer-events: none; }
+    .coin-jackpot { fixed; left: 50vw; top: 50vh; animation: jackpotAnim 1.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; z-index: 99999; pointer-events: none; }
 
     /* STATYSTYKI Z GRYWALIZACJĄ */
     .stat-badge-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
@@ -1084,7 +1084,7 @@ function calculateSavingsStreak() {
 }
 
 async function autoLogGoalFund(goalName, amount, isWithdrawal = false) {
-  if(!customCategories.some(c => c.name === "Oszczędności")) { customCategories.push({ name: "Oszczędności", bucket: "savings" }); renderCategoryDropdowns(); }
+  if(!customCategories.some(c => c.name === "Oszczędności")) { customCategories.push({ name: "Oszczędności", bucket: "savings" }); triggerSettingsSave(); renderCategoryDropdowns(); }
   var d = new Date(); var selY = d.getFullYear().toString(); var selM = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1);
   var p = selY + '-' + selM; var exactD = selY + '-' + selM + '-' + (d.getDate() < 10 ? '0' : '') + d.getDate();
   
@@ -1093,20 +1093,9 @@ async function autoLogGoalFund(goalName, amount, isWithdrawal = false) {
 
   if (isLoggedIn && supabase) {
     const { data, error } = await supabase.from('history_logs').insert([newRecord]).select();
-    if (!error && data) { 
-        historyLogs = historyLogs.concat(data); 
-        renderHistory(); 
-        calculateAll(); 
-        triggerSettingsSave(); 
-        if(!isWithdrawal) checkGlobalSavingsJackpot(amount); 
-    }
+    if (!error && data) { historyLogs = historyLogs.concat(data); renderHistory(); if(!isWithdrawal) checkGlobalSavingsJackpot(amount); }
   } else {
-    newRecord.id = Date.now(); newRecord.monthNum = selM; 
-    historyLogs.push(newRecord); 
-    renderHistory(); 
-    calculateAll(); 
-    triggerSettingsSave(); 
-    if(!isWithdrawal) checkGlobalSavingsJackpot(amount);
+    newRecord.id = Date.now(); newRecord.monthNum = selM; historyLogs.push(newRecord); renderHistory(); if(!isWithdrawal) checkGlobalSavingsJackpot(amount);
   }
 }
 
@@ -1159,19 +1148,11 @@ function submitFundsToGoal() {
     var totalInc = getTotalIncome(); var housing = Math.round(totalInc * 0.30); var food = Math.round(totalInc * 0.15); var transport = Math.round(totalInc * 0.05);
     var survival = housing + food + transport; var emergencyGoal = survival * 6;
     
-    document.getElementById('addFundsModal').style.display = 'none'; 
-    autoLogGoalFund("Poduszka Finansowa", amt, false); 
-    triggerCoinDrop('emergencyBankIcon', amt, newVal >= emergencyGoal && emergencyGoal > 0); 
-    return;
+    document.getElementById('addFundsModal').style.display = 'none'; triggerSettingsSave(); autoLogGoalFund("Poduszka Finansowa", amt, false); triggerCoinDrop('emergencyBankIcon', amt, newVal >= emergencyGoal && emergencyGoal > 0); return;
   }
   
   var goal = savingsGoals.find(g => g.id == id);
-  if(goal) { 
-      goal.saved += amt; 
-      document.getElementById('addFundsModal').style.display = 'none'; 
-      autoLogGoalFund(goal.name, amt, false); 
-      triggerCoinDrop('goalIcon-' + id, amt, goal.saved >= goal.target); 
-  }
+  if(goal) { goal.saved += amt; document.getElementById('addFundsModal').style.display = 'none'; triggerSettingsSave(); autoLogGoalFund(goal.name, amt, false); triggerCoinDrop('goalIcon-' + id, amt, goal.saved >= goal.target); }
 }
 
 function openWithdrawEmergencyFundsModal() {
@@ -1202,6 +1183,7 @@ function submitWithdrawFromGoal() {
     currentInput.value = newVal;
 
     document.getElementById('withdrawFundsModal').style.display = 'none';
+    triggerSettingsSave();
     autoLogGoalFund("Poduszka Finansowa", -amt, true);
     return;
   }
@@ -1211,6 +1193,7 @@ function submitWithdrawFromGoal() {
     if(amt > goal.saved) { alert("Nie masz tylu środków w tej skarbonce."); return; }
     goal.saved -= amt;
     document.getElementById('withdrawFundsModal').style.display = 'none';
+    triggerSettingsSave();
     autoLogGoalFund(goal.name, -amt, true);
   }
 }
@@ -1442,24 +1425,29 @@ function renderSubscriptions() {
   lucide.createIcons();
 }
 
-function checkSubReminders() {
-    if (!('Notification' in window) || Notification.permission !== 'granted') return;
-    var d = new Date(); var today = d.getDate(); var tomorrow = new Date(d); tomorrow.setDate(tomorrow.getDate() + 1); var tmrw = tomorrow.getDate();
-    var curPeriod = d.getFullYear() + '-' + ((d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1));
-    
-    var dueToday = subscriptions.filter(s => s.dayOfMonth === today && s.lastPaidMonth !== curPeriod);
-    var dueTomorrow = subscriptions.filter(s => s.dayOfMonth === tmrw && s.lastPaidMonth !== curPeriod);
-    
-    if (dueToday.length > 0) {
-        new Notification("WiseWallet - Rachunki", { body: `Masz dzisiaj do opłacenia ${dueToday.length} rachunków (m.in. ${dueToday[0].name}). Otwórz aplikację, by zrealizować płatność.`, icon: "https://cdn-icons-png.flaticon.com/512/3344/3344055.png" });
-    } else if (dueTomorrow.length > 0) {
-        new Notification("WiseWallet - Przypomnienie", { body: `Jutro mija termin płatności za: ${dueTomorrow[0].name}. Przygotuj środki.`, icon: "https://cdn-icons-png.flaticon.com/512/3344/3344055.png" });
-    }
+// -------------------------------------------
+// GŁÓWNA LOGIKA APLIKACJI I NAWIGACJA
+// -------------------------------------------
+function appSwitchTab(tabId, btn) {
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  
+  document.getElementById(tabId).classList.add('active'); 
+  
+  if (btn) { 
+      btn.classList.add('active'); 
+  } else { 
+      var fallbackBtn = document.querySelector(`.tab-btn[onclick*="${tabId}"]`); 
+      if(fallbackBtn) fallbackBtn.classList.add('active'); 
+  }
+  
+  if (tabId === 'historyTab') renderHistoryTable();
+  if (tabId === 'reportTab') renderReportTab();
+  if (tabId === 'subsTab') renderSubscriptions();
+  
+  try { safeStorage.setItem('walletwise_activeTab', tabId); } catch(e) {}
 }
 
-// -------------------------------------------
-// SYSTEM WIADEREK (BUCKET SYSTEM)
-// -------------------------------------------
 function getCategoryBucket(catName) { var c = customCategories.find(x => x.name === catName); return c ? c.bucket : 'needs'; }
 function generateCategoryOptionsHTML() { if(customCategories.length === 0) return '<option value="" disabled selected>Brak kategorii</option>'; return customCategories.map(c => `<option value="${c.name}">${c.name}</option>`).join(''); }
 
@@ -1505,9 +1493,6 @@ function addCustomCategory() {
 
 function deleteCustomCategory(name) { customCategories = customCategories.filter(c => c.name !== name); triggerSettingsSave(); renderCategoryDropdowns(); renderCategoryManagerList(); renderHistory(); }
 
-// -------------------------------------------
-// LOGOWANIE I CHMURA
-// -------------------------------------------
 var isRegisterMode = false;
 document.getElementById('toggleAuthBtn').onclick = function() {
   isRegisterMode = !isRegisterMode;
@@ -1613,17 +1598,15 @@ async function setupAuthListeners() {
       if (cloudSettings) { applySettings(cloudSettings); try { safeStorage.setItem('walletwise_settings', JSON.stringify(cloudSettings)); } catch(e){} } 
       
       document.getElementById('guestWarningBanner').style.display = 'none';
-      
       calculateAll(); loadCloudData();
     } else { 
         isLoggedIn = false; 
-        
         if (APP_CONFIG.guestBannerActive) {
             document.getElementById('guestWarningBanner').style.display = 'flex';
         } else {
             document.getElementById('guestWarningBanner').style.display = 'none';
         }
-
+        // USUNIĘTO resetowanie Dziennika i Ustawień – tryb Gościa żyje!
         renderHistory();
         calculateAll(); 
     }
@@ -1634,178 +1617,9 @@ async function setupAuthListeners() {
   }
 }
 
-function formatPeriodToPL(ym) { if (!ym || ym.indexOf('-') === -1) return ym; var p = ym.split('-'); return MONTH_NAMES_PL[parseInt(p[1], 10) - 1] + " " + p[0]; }
-
-function updateHistoryFilterDropdowns() {
-  var fYear = document.getElementById('histFilterYear'); var fMonth = document.getElementById('histFilterMonth');
-  if (!fYear || !fMonth) return;
-  var curYear = fYear.value; var curMonth = fMonth.value;
-
-  var yearsMap = {}; for (var i = 0; i < historyLogs.length; i++) { yearsMap[historyLogs[i].year || historyLogs[i].month.split('-')[0]] = true; }
-  var uniqueYears = Object.keys(yearsMap).sort().reverse();
-
-  fYear.innerHTML = '<option value="ALL">Wszystkie lata</option>';
-  for (var j = 0; j < uniqueYears.length; j++) { var opt = document.createElement('option'); opt.value = uniqueYears[j]; opt.textContent = uniqueYears[j]; fYear.appendChild(opt); }
-  fYear.value = yearsMap[curYear] ? curYear : (uniqueYears[0] || 'ALL');
-
-  fMonth.innerHTML = '<option value="ALL">Wszystkie miesiące</option>';
-  for (var m = 0; m < MONTH_NAMES_PL.length; m++) { var mOpt = document.createElement('option'); mOpt.value = (m + 1 < 10 ? '0' : '') + (m + 1); mOpt.textContent = MONTH_NAMES_PL[m]; fMonth.appendChild(mOpt); }
-  var d = new Date(); var currentMonthNum = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1);
-  fMonth.value = curMonth === 'ALL' || !curMonth ? currentMonthNum : curMonth;
-}
-
-function updateCategoryChart(periodItems) {
-  var canvas = document.getElementById('categoryPieChart'); var legendEl = document.getElementById('categoryLegendList');
-  if (!canvas || !legendEl) return;
-  
-  var bucketTotals = { needs: 0, fun: 0, savings: 0 }; var catTotals = { needs: {}, fun: {}, savings: {} }; var grandTotal = 0;
-
-  for (var i = 0; i < periodItems.length; i++) { 
-    var cat = periodItems[i].category; var amt = Number(periodItems[i].amount) || 0; var b = getCategoryBucket(cat);
-    bucketTotals[b] += amt; if(!catTotals[b][cat]) catTotals[b][cat] = 0; catTotals[b][cat] += amt; grandTotal += amt; 
-  }
-
-  var activeBucket = Object.keys(window.openAccordionState).find(k => window.openAccordionState[k]);
-  
-  var subTitleEl = document.getElementById('chartSubtitle');
-  if(subTitleEl) {
-    if(activeBucket) { subTitleEl.innerHTML = 'Kliknij wykres, by <strong>wrócić do ogółu</strong>.'; subTitleEl.style.color = 'var(--primary)'; } 
-    else { subTitleEl.innerHTML = 'Kliknij wykres, by rozwinąć szczegóły. Wybierz z legendy, by filtrować.'; subTitleEl.style.color = 'var(--text-muted)'; }
-  }
-
-  var labels = []; var dataVals = []; var bgColors = [];
-  var palettes = {
-    needs: ['#2563eb', '#93c5fd', '#1e3a8a', '#60a5fa', '#172554', '#3b82f6', '#bfdbfe', '#1d4ed8', '#1e40af'],
-    fun: ['#9333ea', '#d8b4fe', '#4c1d95', '#c084fc', '#3b0764', '#a855f7', '#e9d5ff', '#7e22ce', '#581c87'],
-    savings: ['#10b981', '#6ee7b7', '#064e3b', '#34d399', '#022c22', '#059669', '#a7f3d0', '#047857', '#065f46']
-  };
-
-  if (!activeBucket) {
-    if(bucketTotals.needs > 0) { labels.push('Koszty Życia'); dataVals.push(bucketTotals.needs); bgColors.push('#3b82f6'); }
-    if(bucketTotals.fun > 0) { labels.push('Zachcianki'); dataVals.push(bucketTotals.fun); bgColors.push('#a855f7'); }
-    if(bucketTotals.savings > 0) { labels.push('Oszczędności'); dataVals.push(bucketTotals.savings); bgColors.push('#10b981'); }
-  } else {
-    var subCats = Object.keys(catTotals[activeBucket]).sort((x, y) => catTotals[activeBucket][y] - catTotals[activeBucket][x]);
-    subCats.forEach((cName, idx) => { labels.push(cName); dataVals.push(catTotals[activeBucket][cName]); bgColors.push(palettes[activeBucket][idx % palettes[activeBucket].length]); });
-  }
-
-  if (pieChartInstance) pieChartInstance.destroy();
-  if (grandTotal === 0) { legendEl.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-weight: 500; padding: 12px 0;">Brak danych do wykresu.</div>'; return; }
-
-  pieChartInstance = new Chart(canvas, {
-    type: 'doughnut', data: { labels: labels, datasets: [{ data: dataVals, backgroundColor: bgColors, borderWidth: 3, borderColor: '#ffffff', hoverOffset: 4 }] },
-    options: { 
-      responsive: true, cutout: '75%', plugins: { legend: { display: false }, tooltip: { padding: 12, cornerRadius: 8, bodyFont: { family: 'Plus Jakarta Sans', size: 14 } } },
-      onHover: (event, elements) => { event.native.target.style.cursor = elements.length ? 'pointer' : 'default'; },
-      onClick: (event, elements) => {
-        if (elements.length > 0) {
-          if (activeBucket) { window.toggleAccordion(activeBucket); } else {
-            const index = elements[0].index; const label = pieChartInstance.data.labels[index]; let bId = '';
-            if (label === 'Koszty Życia') bId = 'needs'; if (label === 'Zachcianki') bId = 'fun'; if (label === 'Oszczędności') bId = 'savings';
-            if (bId) window.toggleAccordion(bId);
-          }
-        }
-      }
-    }
-  });
-
-  var fCat = document.getElementById('histFilterCategory').value; legendEl.innerHTML = '';
-  var bucketConfig = [ { id: 'needs', name: 'Koszty Życia', color: '#3b82f6' }, { id: 'fun', name: 'Zachcianki', color: '#a855f7' }, { id: 'savings', name: 'Oszczędności', color: '#10b981' } ];
-
-  bucketConfig.forEach(b => {
-    if(bucketTotals[b.id] > 0) {
-      var bPct = Math.round((bucketTotals[b.id] / grandTotal) * 100);
-      var isOpen = window.openAccordionState[b.id];
-      var displayStyle = isOpen ? 'display: grid;' : 'display: none;';
-      var rotation = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
-      
-      var bHtml = `
-        <div class="bucket-header" onclick="toggleAccordion('${b.id}')">
-          <span style="display:flex; align-items:center; gap:8px;">
-            <span style="display:block; width:12px; height:12px; border-radius:50%; background:${b.color}; flex-shrink: 0;"></span>
-            <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:90px;">${b.name}</span>
-            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">(${bPct}%)</span>
-          </span>
-          <div style="display:flex; align-items:center; gap:12px;">
-            <span>${bucketTotals[b.id].toLocaleString('pl-PL')} PLN</span>
-            <i data-lucide="chevron-down" id="icon-${b.id}" style="width:16px; transform:${rotation}; flex-shrink: 0;"></i>
-          </div>
-        </div>
-        <div class="bucket-details" id="details-${b.id}" style="${displayStyle}">
-      `;
-      
-      var subCats = Object.keys(catTotals[b.id]).sort((x, y) => catTotals[b.id][y] - catTotals[b.id][x]);
-      subCats.forEach(cName => {
-        var cVal = catTotals[b.id][cName]; var isActive = fCat === cName ? ' active-filter' : '';
-        bHtml += `
-          <div class="bucket-sub-item${isActive}" onclick="document.getElementById('histFilterCategory').value = '${cName}'; renderHistoryTable();">
-            <span class="cat-name" title="${cName}">${cName}</span>
-            <span class="cat-amt">${cVal.toLocaleString('pl-PL')} PLN</span>
-          </div>
-        `;
-      });
-      bHtml += `</div>`; legendEl.innerHTML += bHtml;
-    }
-  });
-  lucide.createIcons();
-}
-
-function renderHistoryTable() {
-  var tbody = document.getElementById('historyTableBody'); if (!tbody) return; tbody.innerHTML = '';
-  var fYear = document.getElementById('histFilterYear').value; var fMonth = document.getElementById('histFilterMonth').value;
-  var fCat = document.getElementById('histFilterCategory').value; var sortOrder = document.getElementById('histSortOrder').value;
-
-  var periodItems = historyLogs.filter(e => { var itemYear = String(e.year || e.month.split('-')[0]); var itemMonth = String(e.month_num || e.monthNum || e.month.split('-')[1]); return (fYear === 'ALL' || itemYear === fYear) && (fMonth === 'ALL' || itemMonth === fMonth); });
-  updateCategoryChart(periodItems);
-  var tableItems = periodItems.filter(e => fCat==='ALL' || e.category===fCat);
-  tableItems.sort((a, b) => sortOrder === 'asc' ? a.id - b.id : b.id - a.id);
-
-  var sum = tableItems.reduce((acc, curr) => acc + Number(curr.amount), 0);
-  document.getElementById('filteredMonthSum').textContent = sum.toLocaleString('pl-PL') + ' PLN';
-
-  if (tableItems.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="border:none;"><div class="empty-state"><i data-lucide="receipt"></i><strong>Brak wydatków na liście</strong>Zanotuj swój pierwszy wydatek u góry.</div></td></tr>'; setTimeout(() => lucide.createIcons(), 10); return; }
-
-  for (var k = 0; k < tableItems.length; k++) {
-    var cat = tableItems[k].category; var b = getCategoryBucket(cat); var displayDate = tableItems[k].exact_date ? tableItems[k].exact_date : formatPeriodToPL(tableItems[k].month);
-    var tr = document.createElement('tr');
-    tr.innerHTML = '<td class="col-okres" data-label="Data wydatku">' + displayDate + '</td>' +
-                   '<td class="col-cat" data-label="Kategoria"><span class="cat-badge cat-bucket-' + b + '">' + cat + '</span></td>' +
-                   '<td class="col-opis" data-label="Opis/Sklep"><strong>' + tableItems[k].name + '</strong></td>' +
-                   '<td class="col-amount" data-label="Kwota">' + Number(tableItems[k].amount).toLocaleString('pl-PL') + ' PLN</td>' +
-                   '<td class="col-actions" data-label="Akcje">' +
-                     '<button type="button" class="edit-btn" title="Edytuj" onclick="startEditEntry(' + tableItems[k].id + ')"><i data-lucide="pencil" style="width:16px;"></i></button>' +
-                     '<button type="button" class="del-btn" title="Usuń" onclick="deleteHistoryEntry(' + tableItems[k].id + ')"><i data-lucide="trash-2" style="width:16px;"></i></button>' +
-                   '</td>';
-    tbody.appendChild(tr);
-  }
-  setTimeout(() => lucide.createIcons(), 10);
-}
-
-function resetExpenseForm() {
-  document.getElementById('histName').value = ''; document.getElementById('histInputDate').valueAsDate = new Date();
-  document.getElementById('splitItemsContainer').innerHTML = ''; 
-  var catSelect = document.querySelector('.split-category'); if(catSelect && catSelect.options.length > 0) catSelect.selectedIndex = 0;
-  var amtInput = document.querySelector('.split-amount'); if (amtInput) amtInput.value = '';
-  var addBtn = document.getElementById('addSplitBtn'); if (addBtn) addBtn.style.display = 'inline-flex';
-  lucide.createIcons();
-}
-
-function startEditEntry(id) {
-  var entry = historyLogs.find(e => e.id === id); if (!entry) return; editingEntryId = id; resetExpenseForm();
-  if(entry.exact_date) { document.getElementById('histInputDate').value = entry.exact_date; } else { var itemMonth = entry.month_num || entry.monthNum || entry.month.split('-')[1]; var itemYear = entry.year || entry.month.split('-')[0]; document.getElementById('histInputDate').value = itemYear + '-' + itemMonth + '-01'; }
-  document.getElementById('histName').value = entry.name; 
-  var catSel = document.querySelector('.split-category'); if(catSel) catSel.value = entry.category;
-  var amtSel = document.querySelector('.split-amount'); if(amtSel) amtSel.value = entry.amount;
-  document.getElementById('addSplitBtn').style.display = 'none'; document.getElementById('formTitle').innerHTML = '<i data-lucide="pencil" style="color:var(--primary)"></i> Edytujesz wydatek'; document.getElementById('addHistBtn').innerHTML = '<i data-lucide="save" style="width:18px;"></i> Zapisz'; document.getElementById('cancelEditBtn').style.display = 'inline-flex'; document.getElementById('expenseFormCard').style.backgroundColor = '#fdf8f6'; document.getElementById('expenseFormCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  lucide.createIcons();
-}
-
-function cancelEditMode() {
-  editingEntryId = null; document.getElementById('formTitle').innerHTML = '<i data-lucide="pen-tool"></i> Dodaj wydatek'; document.getElementById('addHistBtn').innerHTML = '<i data-lucide="plus-circle" style="width:18px;"></i> Zapisz'; document.getElementById('cancelEditBtn').style.display = 'none'; document.getElementById('expenseFormCard').style.backgroundColor = '#ffffff'; resetExpenseForm();
-}
-
 window.onload = async function() {
   
+  // NAJPIERW wczytujemy dane lokalne, aby gość od razu je zobaczył
   try { const raw = safeStorage.getItem('walletwise_settings'); if(raw) { applySettings(JSON.parse(raw)); calculateAll(); } } catch(e) {}
   
   renderCategoryDropdowns();
@@ -1867,6 +1681,7 @@ window.onload = async function() {
   ['histFilterYear', 'histFilterMonth', 'histFilterCategory', 'histSortOrder'].forEach(id => { document.getElementById(id).onchange = renderHistoryTable; });
   document.getElementById('selectReportPeriod').onchange = function() { renderReportTab(); };
 
+  // PRZYWRACANIE OSTATNIO OTWARTEJ ZAKŁADKI
   try {
     var savedTab = safeStorage.getItem('walletwise_activeTab');
     if(savedTab && document.getElementById(savedTab)) {
