@@ -924,8 +924,8 @@
 <script>
 // --- FEATURE FLAGS (CENTRUM DOWODZENIA) ---
 const APP_CONFIG = {
-  guestBannerActive: true, // WŁĄCZONE
-  guestLimitsActive: false, // Opcja 3: Blokady ilościowe dla gości (ustaw 'true' by włączyć)
+  guestBannerActive: true, 
+  guestLimitsActive: false, 
   maxGuestExpenses: 15,
   maxGuestGoals: 2,
   maxGuestSubs: 1
@@ -1000,9 +1000,6 @@ function initSupabase() {
   } catch (e) {} return false;
 }
 
-// -------------------------------------------
-// ROLLOVER (EFEKT ŚNIEŻNEJ KULI)
-// -------------------------------------------
 function getPreviousMonthPrefix() {
   var d = new Date(); d.setMonth(d.getMonth() - 1); var m = d.getMonth() + 1;
   return d.getFullYear() + '-' + (m < 10 ? '0' : '') + m;
@@ -1022,9 +1019,6 @@ function calculateRollover() {
   return Math.max(0, targetFun - spentPrevFun);
 }
 
-// -------------------------------------------
-// ZAAWANSOWANE ANIMACJE DOPAMINOWE (MONETY)
-// -------------------------------------------
 function triggerCoinDrop(containerId, amount, isJackpot = false) {
   var container = containerId === 'body' ? document.body : document.getElementById(containerId);
   if(!container) return;
@@ -1044,9 +1038,6 @@ function triggerCoinDrop(containerId, amount, isJackpot = false) {
   }
 }
 
-// -------------------------------------------
-// GLOBALNY CEL OSZCZĘDNOŚCIOWY (JACKPOT CHECK)
-// -------------------------------------------
 function checkGlobalSavingsJackpot(addedAmount) {
   var d = new Date(); var curPeriod = d.getFullYear() + '-' + ((d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1));
   var totalInc = getTotalIncome(); var rush = document.getElementById('rushEmergencyFund').checked;
@@ -1420,24 +1411,30 @@ function renderSubscriptions() {
   lucide.createIcons();
 }
 
-function checkSubReminders() {
-    if (!('Notification' in window) || Notification.permission !== 'granted') return;
-    var d = new Date(); var today = d.getDate(); var tomorrow = new Date(d); tomorrow.setDate(tomorrow.getDate() + 1); var tmrw = tomorrow.getDate();
-    var curPeriod = d.getFullYear() + '-' + ((d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1));
-    
-    var dueToday = subscriptions.filter(s => s.dayOfMonth === today && s.lastPaidMonth !== curPeriod);
-    var dueTomorrow = subscriptions.filter(s => s.dayOfMonth === tmrw && s.lastPaidMonth !== curPeriod);
-    
-    if (dueToday.length > 0) {
-        new Notification("WiseWallet - Rachunki", { body: `Masz dzisiaj do opłacenia ${dueToday.length} rachunków (m.in. ${dueToday[0].name}). Otwórz aplikację, by zrealizować płatność.`, icon: "https://cdn-icons-png.flaticon.com/512/3344/3344055.png" });
-    } else if (dueTomorrow.length > 0) {
-        new Notification("WiseWallet - Przypomnienie", { body: `Jutro mija termin płatności za: ${dueTomorrow[0].name}. Przygotuj środki.`, icon: "https://cdn-icons-png.flaticon.com/512/3344/3344055.png" });
-    }
+// -------------------------------------------
+// GŁÓWNA LOGIKA APLIKACJI I NAWIGACJA
+// -------------------------------------------
+function appSwitchTab(tabId, btn) {
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  
+  document.getElementById(tabId).classList.add('active'); 
+  
+  if (btn) { 
+      btn.classList.add('active'); 
+  } else { 
+      var fallbackBtn = document.querySelector(`.tab-btn[onclick*="${tabId}"]`); 
+      if(fallbackBtn) fallbackBtn.classList.add('active'); 
+  }
+  
+  if (tabId === 'historyTab') renderHistoryTable();
+  if (tabId === 'reportTab') renderReportTab();
+  if (tabId === 'subsTab') renderSubscriptions();
+  
+  // Zapisz aktywną zakładkę do pamięci
+  try { safeStorage.setItem('walletwise_activeTab', tabId); } catch(e) {}
 }
 
-// -------------------------------------------
-// SYSTEM WIADEREK (BUCKET SYSTEM)
-// -------------------------------------------
 function getCategoryBucket(catName) { var c = customCategories.find(x => x.name === catName); return c ? c.bucket : 'needs'; }
 function generateCategoryOptionsHTML() { if(customCategories.length === 0) return '<option value="" disabled selected>Brak kategorii</option>'; return customCategories.map(c => `<option value="${c.name}">${c.name}</option>`).join(''); }
 
@@ -1483,9 +1480,6 @@ function addCustomCategory() {
 
 function deleteCustomCategory(name) { customCategories = customCategories.filter(c => c.name !== name); triggerSettingsSave(); renderCategoryDropdowns(); renderCategoryManagerList(); renderHistory(); }
 
-// -------------------------------------------
-// LOGOWANIE I CHMURA
-// -------------------------------------------
 var isRegisterMode = false;
 document.getElementById('toggleAuthBtn').onclick = function() {
   isRegisterMode = !isRegisterMode;
@@ -1612,89 +1606,10 @@ async function setupAuthListeners() {
   }
 }
 
-// -------------------------------------------
-// GŁÓWNA LOGIKA APLIKACJI
-// -------------------------------------------
 var MONTH_NAMES_PL = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"];
 var pieChartInstance = null; var editingEntryId = null;
 
 function formatPeriodToPL(ym) { if (!ym || ym.indexOf('-') === -1) return ym; var p = ym.split('-'); return MONTH_NAMES_PL[parseInt(p[1], 10) - 1] + " " + p[0]; }
-
-function appSwitchTab(tabId, btn) {
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(tabId).classList.add('active'); if (btn) btn.classList.add('active');
-  if (tabId === 'historyTab') renderHistoryTable();
-  if (tabId === 'reportTab') renderReportTab();
-  if (tabId === 'subsTab') renderSubscriptions();
-}
-
-function getTotalIncome() {
-  var base = Math.max(0, parseFloat(document.getElementById('income').value) || 0);
-  var k800 = Math.max(0, parseInt(document.getElementById('kids800').value) || 0);
-  var kHome = Math.max(0, parseInt(document.getElementById('kidsActiveHome').value) || 0);
-  var kWork = Math.max(0, parseInt(document.getElementById('kidsActiveWork').value) || 0);
-  return base + (k800 * 800) + (kHome * 500) + (kWork * 1500);
-}
-
-function calculateAll() {
-  var totalInc = getTotalIncome();
-  var baseInc = Math.max(0, parseFloat(document.getElementById('income').value) || 0);
-  var benefitsInc = totalInc - baseInc;
-
-  document.getElementById('totalIncomeDisplayHero').textContent = totalInc.toLocaleString('pl-PL');
-  var breakdownHeroEl = document.getElementById('incomeBreakdownDisplayHero');
-  if(breakdownHeroEl) {
-    if(benefitsInc > 0) { breakdownHeroEl.textContent = baseInc.toLocaleString('pl-PL') + ' PLN pensji + ' + benefitsInc.toLocaleString('pl-PL') + ' PLN świadczeń'; } 
-    else { breakdownHeroEl.textContent = 'Sama pensja (brak świadczeń)'; }
-  }
-
-  var rush = document.getElementById('rushEmergencyFund').checked;
-  var housing = Math.round(totalInc * 0.30); var food = Math.round(totalInc * 0.15); var transport = Math.round(totalInc * 0.05); var other = 0;
-  var survival = housing + food + transport + other;
-  var funMoneyTargetPct = rush ? 0.10 : 0.20;
-  var funMoney = Math.round(totalInc * funMoneyTargetPct);
-  var savings = totalInc - survival - funMoney; 
-  var safeInc = Math.max(totalInc, 1); 
-
-  var rolloverAmt = calculateRollover();
-  var totalFunWithRollover = funMoney + rolloverAmt;
-  var dailyFun = Math.round(totalFunWithRollover / 30);
-
-  var rolloverBadge = document.getElementById('rolloverBadgeTab1');
-  if(rolloverAmt > 0) { document.getElementById('rolloverAmountTab1').textContent = rolloverAmt.toLocaleString('pl-PL'); if(rolloverBadge) rolloverBadge.style.display = 'inline-flex'; } 
-  else { if(rolloverBadge) rolloverBadge.style.display = 'none'; }
-
-  var fbLabel = document.getElementById('funBadgeLabel');
-  if(fbLabel) {
-    fbLabel.innerHTML = rush ? '<i data-lucide="party-popper" style="width: 14px;"></i> Zachcianki (10% budżetu)' : '<i data-lucide="party-popper" style="width: 14px;"></i> Zachcianki (20% budżetu)';
-  }
-  lucide.createIcons();
-
-  document.getElementById('survivalTotal').textContent = survival.toLocaleString('pl-PL');
-  
-  var monthlyFunValEl = document.getElementById('monthlyFunVal');
-  if(monthlyFunValEl) monthlyFunValEl.textContent = totalFunWithRollover.toLocaleString('pl-PL') + ' PLN';
-  
-  var dailyFunValEl = document.getElementById('dailyFunVal');
-  if(dailyFunValEl) dailyFunValEl.textContent = dailyFun + ' PLN/dzień';
-
-  var hPct = Math.round((housing / safeInc) * 100); var fPct = Math.round((food / safeInc) * 100); var tPct = Math.round((transport / safeInc) * 100);
-  var oPct = Math.round((other / safeInc) * 100); var sPct = Math.round((savings / safeInc) * 100); var fmPct = Math.round((funMoney / safeInc) * 100);
-
-  document.getElementById('barHousingVal').textContent = housing.toLocaleString('pl-PL') + ' PLN (' + hPct + '%)';
-  document.getElementById('barFoodVal').textContent = food.toLocaleString('pl-PL') + ' PLN (' + fPct + '%)';
-  document.getElementById('barTransportVal').textContent = transport.toLocaleString('pl-PL') + ' PLN (' + tPct + '%)';
-  document.getElementById('barOtherVal').textContent = other.toLocaleString('pl-PL') + ' PLN (' + oPct + '%)';
-  document.getElementById('barSavingsVal').textContent = savings.toLocaleString('pl-PL') + ' PLN (' + sPct + '%)';
-  document.getElementById('barFunVal').textContent = funMoney.toLocaleString('pl-PL') + ' PLN (' + fmPct + '%)';
-
-  var setBar = function(id, val) { document.getElementById(id).style.width = totalInc > 0 ? (Math.min(100, (val / safeInc) * 100) + '%') : '0%'; };
-  setBar('barHousing', housing); setBar('barFood', food); setBar('barTransport', transport); setBar('barOther', other); setBar('barSavings', savings); setBar('barFun', funMoney);
-  
-  renderGoals();
-  renderReportTab();
-}
 
 function updateHistoryFilterDropdowns() {
   var fYear = document.getElementById('histFilterYear'); var fMonth = document.getElementById('histFilterMonth');
@@ -1864,293 +1779,6 @@ function cancelEditMode() {
   editingEntryId = null; document.getElementById('formTitle').innerHTML = '<i data-lucide="pen-tool"></i> Dodaj wydatek'; document.getElementById('addHistBtn').innerHTML = '<i data-lucide="plus-circle" style="width:18px;"></i> Zapisz'; document.getElementById('cancelEditBtn').style.display = 'none'; document.getElementById('expenseFormCard').style.backgroundColor = '#ffffff'; resetExpenseForm();
 }
 
-function renderHistory() {
-  updateHistoryFilterDropdowns(); 
-  renderHistoryTable();
-  
-  var d = new Date();
-  var curPeriod = d.getFullYear() + '-' + ((d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1));
-  
-  var totalInc = getTotalIncome(); 
-  var rush = document.getElementById('rushEmergencyFund').checked;
-  var baseIdealFun = Math.round(totalInc * (rush ? 0.10 : 0.20));
-  var rollover = calculateRollover();
-  var totalFunMoneyThisMonth = baseIdealFun + rollover;
-  
-  var spentFunThisMonth = 0;
-  var funDays = new Set();
-  var curMonthLogs = [];
-
-  historyLogs.forEach(e => {
-    if(e.month === curPeriod) {
-      curMonthLogs.push(e);
-      if (getCategoryBucket(e.category) === 'fun') {
-        spentFunThisMonth += Number(e.amount);
-        if(e.exact_date) { 
-           var parts = e.exact_date.split('-'); 
-           if(parts.length === 3) funDays.add(parseInt(parts[2], 10)); 
-        }
-      }
-    }
-  });
-
-  subscriptions.forEach(sub => {
-      if (sub.lastPaidMonth !== curPeriod && getCategoryBucket(sub.category) === 'fun') {
-          spentFunThisMonth += Number(sub.amount);
-      }
-  });
-  
-  var leftFun = Math.max(0, totalFunMoneyThisMonth - spentFunThisMonth);
-  var pct = totalFunMoneyThisMonth > 0 ? Math.max(0, Math.min(100, (leftFun / totalFunMoneyThisMonth) * 100)) : 0;
-  
-  var elVal = document.getElementById('leftFunMoneyValTab2');
-  if(elVal) elVal.textContent = leftFun.toLocaleString('pl-PL') + ' PLN';
-  var bar = document.getElementById('leftFunProgressBar');
-  if(bar) {
-    bar.style.width = pct + '%';
-    if(pct > 50) bar.style.backgroundColor = 'var(--primary)';
-    else if(pct > 20) bar.style.backgroundColor = 'var(--warning)';
-    else bar.style.backgroundColor = 'var(--danger)';
-  }
-
-  var todayDay = d.getDate(); 
-  var streak = 0;
-
-  if (curMonthLogs.length === 0) {
-    streak = 0;
-  } else {
-    var firstLogDay = todayDay;
-    curMonthLogs.forEach(e => {
-      if(e.exact_date) {
-         var day = parseInt(e.exact_date.split('-')[2], 10);
-         if (day < firstLogDay) firstLogDay = day;
-      }
-    });
-
-    for (var i = todayDay; i >= firstLogDay; i--) { 
-      if (funDays.has(i)) break; 
-      streak++; 
-    }
-  }
-  
-  var badgeEl = document.getElementById('noSpendBadgeVal');
-  if(badgeEl) badgeEl.innerHTML = streak + (streak === 1 ? ' Dzień' : ' Dni'); 
-  
-  var streakBar = document.getElementById('streakProgressBar'); var badgeContainer = document.getElementById('streakBadgeContainer'); var titleLabel = document.getElementById('streakTitleLabel');
-  if(streakBar && badgeContainer && titleLabel) {
-    var streakPct = Math.min(100, (streak / 30) * 100); streakBar.style.width = streakPct + '%';
-    var color = '#f97316'; var bgGrad = 'linear-gradient(135deg, #fffbeb, #fff)'; var borderCol = '#fdba74';
-    if (streak === 0) { color = '#94a3b8'; borderCol = '#e2e8f0'; bgGrad = '#f8fafc'; }
-    else if (streak <= 3) { color = '#fb923c'; borderCol = '#fdba74'; }
-    else if (streak <= 7) { color = '#ea580c'; borderCol = '#f97316'; }
-    else if (streak <= 14) { color = '#c2410c'; borderCol = '#ea580c'; bgGrad = 'linear-gradient(135deg, #ffedd5, #fff)'; }
-    else { color = '#9a3412'; borderCol = '#c2410c'; bgGrad = 'linear-gradient(135deg, #ffedd5, #fff)'; }
-    streakBar.style.backgroundColor = color; badgeEl.style.color = color; titleLabel.style.color = color; badgeContainer.style.borderColor = borderCol; badgeContainer.style.background = bgGrad;
-  }
-}
-
-async function deleteHistoryEntry(id) { 
-  if (editingEntryId === id) cancelEditMode(); 
-  
-  var entry = historyLogs.find(e => e.id === id);
-  if (entry) {
-    if (entry.name.startsWith("Wpłata na cel: ")) {
-      let gName = entry.name.replace("Wpłata na cel: ", "").trim();
-      if (gName === "Poduszka Finansowa") {
-        let el = document.getElementById('currentSavings');
-        el.value = Math.max(0, (parseFloat(el.value) || 0) - Number(entry.amount));
-        triggerSettingsSave();
-      } else {
-        let g = savingsGoals.find(x => x.name === gName);
-        if (g) { g.saved = Math.max(0, g.saved - Number(entry.amount)); triggerSettingsSave(); }
-      }
-    } else if (entry.name.startsWith("Wypłata z celu: ")) {
-      let gName = entry.name.replace("Wypłata z celu: ", "").trim();
-      let absAmount = Math.abs(Number(entry.amount)); 
-      if (gName === "Poduszka Finansowa") {
-        let el = document.getElementById('currentSavings');
-        el.value = (parseFloat(el.value) || 0) + absAmount;
-        triggerSettingsSave();
-      } else {
-        let g = savingsGoals.find(x => x.name === gName);
-        if (g) { g.saved += absAmount; triggerSettingsSave(); }
-      }
-    }
-  }
-
-  if (isLoggedIn && supabase) { 
-    const { error } = await supabase.from('history_logs').delete().eq('id', id); 
-    if (error) { alert("Błąd usuwania: " + error.message); return; } 
-  } 
-  
-  historyLogs = historyLogs.filter(e => e.id !== id); 
-  renderHistory(); 
-}
-
-async function handleExcelUpload(e) {
-  var file = e.target.files[0]; if (!file) return;
-  var reader = new FileReader();
-  reader.onload = async function(evt) {
-    try {
-      var data = new Uint8Array(evt.target.result); var workbook = XLSX.read(data, { type: 'array' }); var worksheet = workbook.Sheets[workbook.SheetNames[0]]; var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-      var newItems = []; var d = new Date(); var pYear = d.getFullYear(); var pMonth = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1); var p = pYear + '-' + pMonth; var exactD = pYear + '-' + pMonth + '-' + (d.getDate() < 10 ? '0' : '') + d.getDate(); 
-      for (var r = 0; r < jsonData.length; r++) {
-        var row = jsonData[r]; if (!row || row.length < 2) continue; var nameCandidate = null; var amountCandidate = null;
-        for (var c = 0; c < row.length; c++) {
-          var cell = row[c]; if (cell == null) continue; var strVal = String(cell).trim(); var cleanedNum = parseFloat(strVal.replace(/\s+/g, '').replace('zł', '').replace('PLN', '').replace(',', '.'));
-          if (!isNaN(cleanedNum) && cleanedNum > 0 && amountCandidate === null) amountCandidate = cleanedNum; else if (isNaN(Number(strVal)) && strVal.length > 1 && nameCandidate === null) nameCandidate = strVal;
-        }
-        if (nameCandidate && amountCandidate !== null) { var low = nameCandidate.toLowerCase(); if (low !== 'nazwa' && low !== 'kategoria' && low !== 'kwota' && low !== 'opis') { newItems.push({ month: p, year: pYear.toString(), month_num: pMonth, exact_date: exactD, category: customCategories.length > 0 ? customCategories[0].name : 'Inne', name: nameCandidate, amount: amountCandidate }); } }
-      }
-      if (newItems.length > 0) { if (isLoggedIn && supabase) { const { data: inserted, error } = await supabase.from('history_logs').insert(newItems).select(); if (!error && inserted) { historyLogs = historyLogs.concat(inserted); alert('Wgrano ' + inserted.length + ' rachunków z Excela do chmury!'); renderHistory(); } } else { for(let i=0; i<newItems.length; i++) { newItems[i].id = Date.now() + i; newItems[i].monthNum = newItems[i].month_num; } historyLogs = historyLogs.concat(newItems); alert('Wgrano ' + newItems.length + ' rachunków (Tryb Gościa).'); renderHistory(); } } else { alert('Nie rozpoznałem kwot ani opisów. Sprawdź plik.'); }
-    } catch (err) { alert('Błąd odczytu pliku.'); } e.target.value = '';
-  }; reader.readAsArrayBuffer(file);
-}
-
-function renderReportTab() {
-  var totalInc = getTotalIncome(); var rush = document.getElementById('rushEmergencyFund').checked;
-  var realFunTarget = rush ? 0.10 : 0.20; 
-  var idealSurvival = Math.round(totalInc * 0.50);
-  var idealFun = Math.round(totalInc * realFunTarget);
-  var idealSavings = totalInc - idealSurvival - idealFun;
-
-  var savingsStreak = calculateSavingsStreak();
-  var streakDisplay = Math.min(6, savingsStreak);
-  document.getElementById('streakMonthsRatio').textContent = streakDisplay + '/6 m-cy';
-  if(streakDisplay >= 6) {
-    document.getElementById('streakMonthsRatio').style.background = '#10b981';
-    document.getElementById('streakMonthsRatio').textContent = 'Zakończone!';
-  }
-
-  var sel = document.getElementById('selectReportPeriod'); var curSel = sel.value;
-  var uniquePeriods = [...new Set(historyLogs.map(e => e.month))].sort().reverse(); 
-  sel.innerHTML = '';
-
-  var filtered = [];
-  if (uniquePeriods.length === 0) {
-    sel.innerHTML = '<option value="">Brak danych</option>'; 
-  } else {
-    uniquePeriods.forEach(p => { var opt = document.createElement('option'); opt.value = p; opt.textContent = formatPeriodToPL(p); sel.appendChild(opt); });
-    sel.value = uniquePeriods.includes(curSel) ? curSel : uniquePeriods[0];
-    filtered = historyLogs.filter(e => e.month === sel.value);
-  }
-  
-  var d = new Date();
-  var curPeriod = d.getFullYear() + '-' + ((d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1));
-  var isCurrentMonth = (sel.value === curPeriod);
-
-  var allReportItems = [...filtered];
-  if (isCurrentMonth) {
-      subscriptions.forEach(sub => {
-          if (sub.lastPaidMonth !== curPeriod) {
-              allReportItems.push({
-                  category: sub.category,
-                  name: sub.name,
-                  amount: sub.amount,
-                  isPending: true
-              });
-          }
-      });
-  }
-
-  var tot = allReportItems.reduce((acc, curr) => acc + Number(curr.amount), 0);
-  
-  var realSurvival = 0;
-  var realFun = 0;
-  var realSavingsMonth = 0;
-
-  allReportItems.forEach(item => {
-    var b = getCategoryBucket(item.category);
-    if (b === 'fun') realFun += Number(item.amount);
-    else if (b === 'needs') realSurvival += Number(item.amount);
-    else if (b === 'savings') realSavingsMonth += Number(item.amount);
-  });
-  
-  var rollover = 0;
-  var rolloverBadge = document.getElementById('rolloverBadgeTab3');
-  
-  if(isCurrentMonth) {
-    rollover = calculateRollover();
-    if(rollover > 0) {
-      if(rolloverBadge) rolloverBadge.style.display = 'inline-flex';
-      document.getElementById('rolloverAmountTab3').textContent = rollover.toLocaleString('pl-PL');
-    } else {
-      if(rolloverBadge) rolloverBadge.style.display = 'none';
-    }
-  } else {
-    if(rolloverBadge) rolloverBadge.style.display = 'none';
-  }
-
-  var totalFunAvailable = idealFun + rollover;
-  var leftFun = Math.max(0, totalFunAvailable - realFun);
-  
-  var idealFunEl = document.getElementById('idealFunVal');
-  if (idealFunEl) {
-      idealFunEl.textContent = totalFunAvailable.toLocaleString('pl-PL') + ' PLN';
-  }
-
-  document.getElementById('forecastSurvivalVal').textContent = realSurvival.toLocaleString('pl-PL') + ' PLN';
-  document.getElementById('forecastSavingsVal').textContent = realSavingsMonth.toLocaleString('pl-PL') + ' PLN';
-  document.getElementById('forecastFunVal').textContent = leftFun.toLocaleString('pl-PL') + ' PLN';
-
-  var diffSurv = realSurvival - idealSurvival;
-  var badgeSurv = document.getElementById('diffSurvivalBadge');
-  if (diffSurv > 0) { badgeSurv.textContent = '+' + diffSurv.toLocaleString('pl-PL') + ' PLN'; badgeSurv.style.background = '#fee2e2'; badgeSurv.style.color = 'var(--danger)'; } 
-  else { badgeSurv.textContent = diffSurv.toLocaleString('pl-PL') + ' PLN'; badgeSurv.style.background = '#dcfce7'; badgeSurv.style.color = 'var(--success)'; }
-
-  var diffSav = realSavingsMonth - idealSavings;
-  var badgeSav = document.getElementById('diffSavingsBadge');
-  if (diffSav >= 0) { badgeSav.textContent = '+' + diffSav.toLocaleString('pl-PL') + ' PLN'; badgeSav.style.background = '#dcfce7'; badgeSav.style.color = 'var(--success)'; } 
-  else { badgeSav.textContent = diffSav.toLocaleString('pl-PL') + ' PLN'; badgeSav.style.background = '#fee2e2'; badgeSav.style.color = 'var(--danger)'; }
-
-  var badgeFun = document.getElementById('diffFunBadge');
-  badgeFun.textContent = 'Wydano ' + realFun.toLocaleString('pl-PL') + ' PLN';
-  badgeFun.style.background = '#f1f5f9'; badgeFun.style.color = 'var(--text-muted)'; 
-
-  var subTitle = '';
-  var dailyLuz = 0;
-
-  if(isCurrentMonth) {
-    var daysInMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-    var daysLeft = daysInMonth - d.getDate() + 1; 
-    dailyLuz = Math.round(leftFun / daysLeft);
-    subTitle = 'Na resztę m-ca (' + daysLeft + ' dni)';
-  } else {
-    var parts = sel.value ? sel.value.split('-') : ['2023', '01'];
-    var daysInMonth = new Date(parts[0], parts[1], 0).getDate();
-    dailyLuz = Math.round(idealFun / daysInMonth);
-    subTitle = 'Założenie bazowe';
-  }
-
-  document.getElementById('forecastDailyFunVal').textContent = dailyLuz.toLocaleString('pl-PL') + ' PLN / dzień';
-  document.getElementById('dailyFunSubtitle').textContent = subTitle;
-
-  document.getElementById('monthTotalExpense').textContent = tot.toLocaleString('pl-PL') + ' PLN';
-  var tbody = document.getElementById('monthDetailsBody'); tbody.innerHTML = '';
-
-  if (allReportItems.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" style="border:none;"><div class="empty-state"><i data-lucide="search-x"></i><strong>Brak wydatków w tym miesiącu</strong>Zanotuj coś w Dzienniku.</div></td></tr>';
-  } else {
-    allReportItems.forEach(item => {
-      var cat = item.category; var b = getCategoryBucket(cat); var pct = tot > 0 ? Math.round((Number(item.amount) / tot) * 100) : 0;
-      var tr = document.createElement('tr');
-      
-      var bgRow = item.isPending ? 'background: #fffbeb; border: 1px dashed #fcd34d;' : '';
-      var namePrefix = item.isPending ? '<i data-lucide="clock" style="width:14px; margin-right:4px; margin-bottom:-2px; color:#d97706;"></i>' : '';
-      var pendingLabel = item.isPending ? '<span style="display:block; font-size:0.75rem; color:#d97706; margin-top:4px;">Oczekująca opłata</span>' : '';
-      
-      tr.style.cssText = bgRow;
-      tr.innerHTML = '<td class="col-cat" data-label="Kategoria"><span class="cat-badge cat-bucket-' + b + '">' + cat + '</span></td>' +
-                     '<td class="col-opis" data-label="Opis/Sklep"><strong>' + namePrefix + item.name + '</strong>' + pendingLabel + '</td>' +
-                     '<td class="col-amount" data-label="Kwota">' + Number(item.amount).toLocaleString('pl-PL') + ' PLN</td>' +
-                     '<td style="text-align: right; color: var(--text-muted); font-weight: 700;" data-label="Udział w m-cu">' + pct + '%</td>';
-      tbody.appendChild(tr);
-    });
-  }
-  
-  setTimeout(() => lucide.createIcons(), 10);
-}
-
 window.onload = async function() {
   
   try { const raw = safeStorage.getItem('walletwise_settings'); if(raw) { applySettings(JSON.parse(raw)); calculateAll(); } } catch(e) {}
@@ -2213,6 +1841,14 @@ window.onload = async function() {
   document.getElementById('excelFile').onchange = handleExcelUpload;
   ['histFilterYear', 'histFilterMonth', 'histFilterCategory', 'histSortOrder'].forEach(id => { document.getElementById(id).onchange = renderHistoryTable; });
   document.getElementById('selectReportPeriod').onchange = function() { renderReportTab(); };
+
+  // PRZYWRACANIE OSTATNIO OTWARTEJ ZAKŁADKI Z PAMIĘCI
+  try {
+    var savedTab = safeStorage.getItem('walletwise_activeTab');
+    if(savedTab && document.getElementById(savedTab)) {
+      appSwitchTab(savedTab, null);
+    }
+  } catch(e) {}
 };
 </script>
 </body>
