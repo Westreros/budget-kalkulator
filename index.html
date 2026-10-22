@@ -270,7 +270,7 @@
     .category-manage-btn { font-size: 0.85rem; padding: 8px 16px; background: #eff6ff; color: var(--primary); border: 1.5px solid #bfdbfe; font-weight: 800; border-radius: 12px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
     .category-manage-btn:hover { background: #dbeafe; border-color: #93c5fd; transform: translateY(-1px); }
 
-    /* ==== MOBILNY LAYOUT ==== */
+    /* ==== MOBILNY LAYOUT (Z POPRAWIONYMI TABELAMI GLOBALNIE) ==== */
     @media (max-width: 768px) {
       body { padding: 12px 10px; padding-bottom: 90px; } 
       
@@ -415,6 +415,22 @@
   </div>
 </div>
 
+<!-- WYPŁATA ZE SKARBONKI -->
+<div id="withdrawFundsModal" class="modal-overlay">
+  <div class="auth-card" style="max-width: 350px;">
+    <button class="close-auth-btn" onclick="document.getElementById('withdrawFundsModal').style.display='none'"><i data-lucide="x"></i></button>
+    <h2 style="justify-content: center;"><i data-lucide="banknote" style="color: var(--danger)"></i> Wypłać Środki</h2>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;" id="withdrawFundsGoalName">Nazwa celu</p>
+    
+    <div style="text-align: left;">
+      <label>Kwota wypłaty (PLN)</label>
+      <input type="number" id="withdrawAmount" class="auth-input" placeholder="np. 150" min="1">
+      <input type="hidden" id="withdrawingGoalId">
+      <button class="btn-add" onclick="submitWithdrawFromGoal()" style="width: 100%; background: var(--danger);"><i data-lucide="minus"></i> Potwierdź wypłatę</button>
+    </div>
+  </div>
+</div>
+
 <!-- MENEDŻER SUBSKRYPCJI -->
 <div id="subManagerModal" class="modal-overlay">
   <div class="auth-card" style="max-width: 400px;">
@@ -475,13 +491,11 @@
     </div>
   </header>
 
-  <!-- NOWY OSTRZEGAWCZY BANER DLA GOŚCI (Domyślnie ukryty przez feature flag) -->
   <div id="guestWarningBanner" style="display: none; background: #fef9c3; border: 1px solid #fde047; margin-bottom: 24px; border-radius: 16px; padding: 12px 16px; align-items: center; gap: 12px; color: #a16207; font-size: 0.85rem;">
     <i data-lucide="alert-triangle" style="width: 20px; height: 20px; flex-shrink: 0;"></i>
     <span style="line-height: 1.4;"><strong>Tryb Gościa.</strong> Twoje dane są tymczasowe i znikną po odświeżeniu. <a href="#" onclick="document.getElementById('authScreen').style.display='flex'; return false;" style="color: #854d0e; text-decoration: underline; font-weight: 800;">Zarejestruj darmowe konto</a>, aby włączyć backup w chmurze.</span>
   </div>
 
-  <!-- Baner instalacji PWA -->
   <div id="pwaInstallBanner" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; margin-bottom: 20px; border-radius: 16px; padding: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
     <div style="display: flex; align-items: center; gap: 12px;">
       <i data-lucide="download-cloud" style="color: var(--primary);"></i>
@@ -649,7 +663,6 @@
   <div id="historyTab" class="tab-content">
     
     <div class="stat-badge-grid" style="margin-bottom: 24px;">
-      <!-- Pasek Postępu Passy -->
       <div class="stat-badge" id="streakBadgeContainer" style="border: 2px solid #fdba74; background: linear-gradient(135deg, #fffbeb, #fff); transition: all 0.5s;">
         <span id="streakTitleLabel" style="color: #ea580c; transition: color 0.5s;"><i data-lucide="flame" style="width: 16px;"></i> Passa bez zachcianek</span>
         <strong class="streak-fire" id="noSpendBadgeVal" style="margin-top: 0; color: #f97316; transition: color 0.5s;">0 Dni</strong>
@@ -658,7 +671,6 @@
         </div>
       </div>
       
-      <!-- Pozostało na Zachcianki w tym miesiącu -->
       <div class="stat-badge">
         <span style="color: var(--primary);"><i data-lucide="wallet" style="width: 16px;"></i> Pozostało na Zachcianki</span>
         <strong id="leftFunMoneyValTab2" style="color: var(--text-main); margin-top: 0;">0 PLN</strong>
@@ -668,11 +680,9 @@
       </div>
     </div>
 
-    <!-- MASONRY GRID -->
     <div class="history-top-grid">
       <div class="history-left-stack">
         
-        <!-- Formularz Dodawania -->
         <div class="card card-compact" id="expenseFormCard" style="transition: background-color 0.3s; margin-bottom: 0;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
              <h2 id="formTitle" style="margin: 0;"><i data-lucide="pen-tool"></i> Dodaj wydatek</h2>
@@ -1068,17 +1078,19 @@ function calculateSavingsStreak() {
   return streak;
 }
 
-async function autoLogGoalFund(goalName, amount) {
+async function autoLogGoalFund(goalName, amount, isWithdrawal = false) {
   if(!customCategories.some(c => c.name === "Oszczędności")) { customCategories.push({ name: "Oszczędności", bucket: "savings" }); triggerSettingsSave(); renderCategoryDropdowns(); }
   var d = new Date(); var selY = d.getFullYear().toString(); var selM = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1);
   var p = selY + '-' + selM; var exactD = selY + '-' + selM + '-' + (d.getDate() < 10 ? '0' : '') + d.getDate();
-  var newRecord = { month: p, year: selY, month_num: selM, exact_date: exactD, category: "Oszczędności", name: "Wpłata na cel: " + goalName, amount: amount };
+  
+  var desc = isWithdrawal ? "Wypłata z celu: " + goalName : "Wpłata na cel: " + goalName;
+  var newRecord = { month: p, year: selY, month_num: selM, exact_date: exactD, category: "Oszczędności", name: desc, amount: amount };
 
   if (isLoggedIn && supabase) {
     const { data, error } = await supabase.from('history_logs').insert([newRecord]).select();
-    if (!error && data) { historyLogs = historyLogs.concat(data); renderHistory(); checkGlobalSavingsJackpot(amount); }
+    if (!error && data) { historyLogs = historyLogs.concat(data); renderHistory(); if(!isWithdrawal) checkGlobalSavingsJackpot(amount); }
   } else {
-    newRecord.id = Date.now(); newRecord.monthNum = selM; historyLogs.push(newRecord); renderHistory(); checkGlobalSavingsJackpot(amount);
+    newRecord.id = Date.now(); newRecord.monthNum = selM; historyLogs.push(newRecord); renderHistory(); if(!isWithdrawal) checkGlobalSavingsJackpot(amount);
   }
 }
 
@@ -1086,7 +1098,6 @@ async function autoLogGoalFund(goalName, amount) {
 // SKARBONKI (SAVINGS GOALS)
 // -------------------------------------------
 function openAddGoalModal(id = null) {
-  // GUEST LIMIT GUARD
   if (!isLoggedIn && APP_CONFIG.guestLimitsActive && savingsGoals.length >= APP_CONFIG.maxGuestGoals) {
       if (id === null) { document.getElementById('guestLimitModal').style.display = 'flex'; return; }
   }
@@ -1132,11 +1143,55 @@ function submitFundsToGoal() {
     var totalInc = getTotalIncome(); var housing = Math.round(totalInc * 0.30); var food = Math.round(totalInc * 0.15); var transport = Math.round(totalInc * 0.05);
     var survival = housing + food + transport; var emergencyGoal = survival * 6;
     
-    document.getElementById('addFundsModal').style.display = 'none'; triggerSettingsSave(); autoLogGoalFund("Poduszka Finansowa", amt); triggerCoinDrop('emergencyBankIcon', amt, newVal >= emergencyGoal && emergencyGoal > 0); return;
+    document.getElementById('addFundsModal').style.display = 'none'; triggerSettingsSave(); autoLogGoalFund("Poduszka Finansowa", amt, false); triggerCoinDrop('emergencyBankIcon', amt, newVal >= emergencyGoal && emergencyGoal > 0); return;
   }
   
   var goal = savingsGoals.find(g => g.id == id);
-  if(goal) { goal.saved += amt; document.getElementById('addFundsModal').style.display = 'none'; triggerSettingsSave(); autoLogGoalFund(goal.name, amt); triggerCoinDrop('goalIcon-' + id, amt, goal.saved >= goal.target); }
+  if(goal) { goal.saved += amt; document.getElementById('addFundsModal').style.display = 'none'; triggerSettingsSave(); autoLogGoalFund(goal.name, amt, false); triggerCoinDrop('goalIcon-' + id, amt, goal.saved >= goal.target); }
+}
+
+// NOWE: WYPŁACANIE
+function openWithdrawEmergencyFundsModal() {
+  document.getElementById('withdrawingGoalId').value = 'EMERGENCY';
+  document.getElementById('withdrawFundsGoalName').textContent = "Cel: Poduszka Finansowa";
+  document.getElementById('withdrawAmount').value = '';
+  document.getElementById('withdrawFundsModal').style.display = 'flex';
+}
+
+function openWithdrawFundsModal(id) {
+  var goal = savingsGoals.find(g => g.id === id); if(!goal) return;
+  document.getElementById('withdrawingGoalId').value = id;
+  document.getElementById('withdrawFundsGoalName').textContent = "Cel: " + goal.name;
+  document.getElementById('withdrawAmount').value = '';
+  document.getElementById('withdrawFundsModal').style.display = 'flex';
+}
+
+function submitWithdrawFromGoal() {
+  var id = document.getElementById('withdrawingGoalId').value;
+  var amt = parseFloat(document.getElementById('withdrawAmount').value);
+  if(isNaN(amt) || amt <= 0) { alert("Podaj prawidłową kwotę."); return; }
+
+  if (id === 'EMERGENCY') {
+    var currentInput = document.getElementById('currentSavings');
+    var currentVal = parseFloat(currentInput.value) || 0;
+    if(amt > currentVal) { alert("Nie masz tylu środków w Poduszce Finansowej."); return; }
+    var newVal = currentVal - amt;
+    currentInput.value = newVal;
+
+    document.getElementById('withdrawFundsModal').style.display = 'none';
+    triggerSettingsSave();
+    autoLogGoalFund("Poduszka Finansowa", -amt, true);
+    return;
+  }
+
+  var goal = savingsGoals.find(g => g.id == id);
+  if(goal) {
+    if(amt > goal.saved) { alert("Nie masz tylu środków w tej skarbonce."); return; }
+    goal.saved -= amt;
+    document.getElementById('withdrawFundsModal').style.display = 'none';
+    triggerSettingsSave();
+    autoLogGoalFund(goal.name, -amt, true);
+  }
 }
 
 function renderGoals() {
@@ -1167,7 +1222,10 @@ function renderGoals() {
           <span style="background: ${isDone ? '#d1fae5' : '#ffedd5'}; padding: 4px 10px; border-radius: 12px;">${monthsLeftText}</span>
       </div>
       <div class="bar-bg" style="height: 10px;"><div class="bar-fill" style="width: ${pct}%; background: ${barColor};"></div></div>
-      <div class="goal-actions"><button class="edit-btn" style="flex:1; height: 32px; font-size: 0.8rem; border-radius: 8px; background: #fef3c7; color: #d97706; border: 1px solid #fde68a;" onclick="openAddEmergencyFundsModal()"><i data-lucide="plus" style="width:14px; margin-right:4px;"></i> Wpłać do Poduszki</button></div>
+      <div class="goal-actions">
+        <button class="edit-btn" style="flex:1; height: 32px; font-size: 0.8rem; border-radius: 8px; background: #fef3c7; color: #d97706; border: 1px solid #fde68a;" onclick="openAddEmergencyFundsModal()"><i data-lucide="plus" style="width:14px; margin-right:4px;"></i> Wpłać</button>
+        <button class="edit-btn" style="flex:1; height: 32px; font-size: 0.8rem; border-radius: 8px; background: #fef2f2; color: var(--danger); border: 1px solid #fecaca;" onclick="openWithdrawEmergencyFundsModal()"><i data-lucide="minus" style="width:14px; margin-right:4px;"></i> Wypłać</button>
+      </div>
     </div>
   `;
 
@@ -1185,6 +1243,7 @@ function renderGoals() {
       <div class="bar-bg" style="height: 10px;"><div class="bar-fill" style="width: ${gPct}%; background: ${gBarColor};"></div></div>
       <div class="goal-actions">
         <button class="edit-btn" style="flex:1; height: 32px; font-size: 0.8rem; border-radius: 8px; background: #f1f5f9; color: var(--text-main);" onclick="openAddFundsModal(${g.id})"><i data-lucide="plus" style="width:14px; margin-right:4px;"></i> Wpłać</button>
+        <button class="edit-btn" style="flex:1; height: 32px; font-size: 0.8rem; border-radius: 8px; background: #fef2f2; color: var(--danger);" onclick="openWithdrawFundsModal(${g.id})"><i data-lucide="minus" style="width:14px; margin-right:4px;"></i> Wypłać</button>
         <button class="edit-btn" style="width: 32px; height: 32px; border-radius: 8px; background: transparent; border: 1px solid var(--border);" onclick="openAddGoalModal(${g.id})"><i data-lucide="settings-2" style="width:14px; color:var(--text-muted);"></i></button>
         <button class="del-btn" style="width: 32px; height: 32px; border-radius: 8px; background: transparent; border: 1px solid #fecaca;" onclick="deleteGoal(${g.id})"><i data-lucide="trash" style="width:14px; color:var(--danger);"></i></button>
       </div>
@@ -1198,7 +1257,6 @@ function renderGoals() {
 // SUBSKRYPCJE I STAŁE OPŁATY
 // -------------------------------------------
 function openAddSubModal(id = null) {
-  // GUEST LIMIT GUARD
   if (!isLoggedIn && APP_CONFIG.guestLimitsActive && subscriptions.length >= APP_CONFIG.maxGuestSubs) {
       if (id === null) { document.getElementById('guestLimitModal').style.display = 'flex'; return; }
   }
@@ -1531,14 +1589,12 @@ async function setupAuthListeners() {
       const cloudSettings = session.user.user_metadata?.budget_settings;
       if (cloudSettings) { applySettings(cloudSettings); try { safeStorage.setItem('walletwise_settings', JSON.stringify(cloudSettings)); } catch(e){} } 
       
-      // Jeżeli zalogowany - ukryj baner
       document.getElementById('guestWarningBanner').style.display = 'none';
       
       calculateAll(); loadCloudData();
     } else { 
         isLoggedIn = false; 
         
-        // POKAŻ BANER GUEST MODE JEŚLI WŁĄCZONY
         if (APP_CONFIG.guestBannerActive) {
             document.getElementById('guestWarningBanner').style.display = 'flex';
         } else {
@@ -1862,7 +1918,6 @@ function renderHistory() {
     else bar.style.backgroundColor = 'var(--danger)';
   }
 
-  // PASS (STREAK)
   var todayDay = d.getDate(); 
   var streak = 0;
 
@@ -1899,7 +1954,44 @@ function renderHistory() {
   }
 }
 
-async function deleteHistoryEntry(id) { if (editingEntryId === id) cancelEditMode(); if (isLoggedIn && supabase) { const { error } = await supabase.from('history_logs').delete().eq('id', id); if (error) { alert("Błąd usuwania: " + error.message); return; } } historyLogs = historyLogs.filter(e => e.id !== id); renderHistory(); }
+// NOWE: KASKADOWE WYCOFYWANIE ŚRODKÓW Z CELÓW
+async function deleteHistoryEntry(id) { 
+  if (editingEntryId === id) cancelEditMode(); 
+  
+  var entry = historyLogs.find(e => e.id === id);
+  if (entry) {
+    if (entry.name.startsWith("Wpłata na cel: ")) {
+      let gName = entry.name.replace("Wpłata na cel: ", "").trim();
+      if (gName === "Poduszka Finansowa") {
+        let el = document.getElementById('currentSavings');
+        el.value = Math.max(0, (parseFloat(el.value) || 0) - Number(entry.amount));
+        triggerSettingsSave();
+      } else {
+        let g = savingsGoals.find(x => x.name === gName);
+        if (g) { g.saved = Math.max(0, g.saved - Number(entry.amount)); triggerSettingsSave(); }
+      }
+    } else if (entry.name.startsWith("Wypłata z celu: ")) {
+      let gName = entry.name.replace("Wypłata z celu: ", "").trim();
+      let absAmount = Math.abs(Number(entry.amount)); 
+      if (gName === "Poduszka Finansowa") {
+        let el = document.getElementById('currentSavings');
+        el.value = (parseFloat(el.value) || 0) + absAmount;
+        triggerSettingsSave();
+      } else {
+        let g = savingsGoals.find(x => x.name === gName);
+        if (g) { g.saved += absAmount; triggerSettingsSave(); }
+      }
+    }
+  }
+
+  if (isLoggedIn && supabase) { 
+    const { error } = await supabase.from('history_logs').delete().eq('id', id); 
+    if (error) { alert("Błąd usuwania: " + error.message); return; } 
+  } 
+  
+  historyLogs = historyLogs.filter(e => e.id !== id); 
+  renderHistory(); 
+}
 
 async function handleExcelUpload(e) {
   var file = e.target.files[0]; if (!file) return;
@@ -2096,7 +2188,6 @@ window.onload = async function() {
   };
 
   document.getElementById('addHistBtn').onclick = async function() {
-    // GUEST LIMIT GUARD
     if (!isLoggedIn && APP_CONFIG.guestLimitsActive && historyLogs.length >= APP_CONFIG.maxGuestExpenses) {
         if (editingEntryId === null) { document.getElementById('guestLimitModal').style.display = 'flex'; return; }
     }
