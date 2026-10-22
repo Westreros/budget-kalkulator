@@ -270,7 +270,7 @@
     .category-manage-btn { font-size: 0.85rem; padding: 8px 16px; background: #eff6ff; color: var(--primary); border: 1.5px solid #bfdbfe; font-weight: 800; border-radius: 12px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
     .category-manage-btn:hover { background: #dbeafe; border-color: #93c5fd; transform: translateY(-1px); }
 
-    /* ==== MOBILNY LAYOUT (Z POPRAWIONYMI TABELAMI GLOBALNIE) ==== */
+    /* ==== MOBILNY LAYOUT ==== */
     @media (max-width: 768px) {
       body { padding: 12px 10px; padding-bottom: 90px; } 
       
@@ -491,9 +491,9 @@
     </div>
   </header>
 
-  <div id="guestWarningBanner" style="display: none; background: #fef9c3; border: 1px solid #fde047; margin-bottom: 24px; border-radius: 16px; padding: 12px 16px; align-items: center; gap: 12px; color: #a16207; font-size: 0.85rem;">
-    <i data-lucide="alert-triangle" style="width: 20px; height: 20px; flex-shrink: 0;"></i>
-    <span style="line-height: 1.4;"><strong>Tryb Gościa.</strong> Twoje dane są tymczasowe i znikną po odświeżeniu. <a href="#" onclick="document.getElementById('authScreen').style.display='flex'; return false;" style="color: #854d0e; text-decoration: underline; font-weight: 800;">Zarejestruj darmowe konto</a>, aby włączyć backup w chmurze.</span>
+  <div id="guestWarningBanner" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; margin-bottom: 24px; border-radius: 16px; padding: 16px; align-items: center; gap: 12px; color: #1e3a8a; font-size: 0.85rem; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.05);">
+    <i data-lucide="cloud-off" style="width: 24px; height: 24px; flex-shrink: 0; color: var(--primary);"></i>
+    <span style="line-height: 1.5;"><strong>Świetnie planujesz swój budżet! 🚀</strong> Jesteś w Trybie Gościa – Twoje dane są zapisane tylko na tym urządzeniu. <a href="#" onclick="document.getElementById('authScreen').style.display='flex'; return false;" style="color: var(--primary); text-decoration: underline; font-weight: 800;">Zarejestruj darmowe konto</a>, by włączyć bezpieczny backup w chmurze i nigdy nie stracić historii.</span>
   </div>
 
   <div id="pwaInstallBanner" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; margin-bottom: 20px; border-radius: 16px; padding: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
@@ -924,7 +924,7 @@
 <script>
 // --- FEATURE FLAGS (CENTRUM DOWODZENIA) ---
 const APP_CONFIG = {
-  guestBannerActive: false, // Opcja 2: Ostrzeżenie na górze (ustaw 'true' by włączyć)
+  guestBannerActive: true, // WŁĄCZONE
   guestLimitsActive: false, // Opcja 3: Blokady ilościowe dla gości (ustaw 'true' by włączyć)
   maxGuestExpenses: 15,
   maxGuestGoals: 2,
@@ -1150,7 +1150,6 @@ function submitFundsToGoal() {
   if(goal) { goal.saved += amt; document.getElementById('addFundsModal').style.display = 'none'; triggerSettingsSave(); autoLogGoalFund(goal.name, amt, false); triggerCoinDrop('goalIcon-' + id, amt, goal.saved >= goal.target); }
 }
 
-// NOWE: WYPŁACANIE
 function openWithdrawEmergencyFundsModal() {
   document.getElementById('withdrawingGoalId').value = 'EMERGENCY';
   document.getElementById('withdrawFundsGoalName').textContent = "Cel: Poduszka Finansowa";
@@ -1536,6 +1535,7 @@ function applySettings(s) {
   if(s.categories && Array.isArray(s.categories)) customCategories = s.categories;
   if(s.goals && Array.isArray(s.goals)) savingsGoals = s.goals;
   if(s.subscriptions && Array.isArray(s.subscriptions)) subscriptions = s.subscriptions; 
+  if(s.historyLogs && Array.isArray(s.historyLogs)) historyLogs = s.historyLogs; 
   renderCategoryDropdowns();
   renderSubscriptions();
 }
@@ -1547,16 +1547,17 @@ function triggerSettingsSave() {
     income: document.getElementById('income').value, kids800: document.getElementById('kids800').value,
     kidsActiveHome: document.getElementById('kidsActiveHome').value, kidsActiveWork: document.getElementById('kidsActiveWork').value,
     currentSavings: document.getElementById('currentSavings').value, rushEmergencyFund: document.getElementById('rushEmergencyFund').checked,
-    categories: customCategories, goals: savingsGoals, subscriptions: subscriptions 
+    categories: customCategories, goals: savingsGoals, subscriptions: subscriptions,
+    historyLogs: historyLogs 
   };
-  if (isLoggedIn) {
-    try { safeStorage.setItem('walletwise_settings', JSON.stringify(s)); } catch(e){}
-    if (supabase) {
+  
+  try { safeStorage.setItem('walletwise_settings', JSON.stringify(s)); } catch(e){}
+  
+  if (isLoggedIn && supabase) {
       var syncIcon = document.getElementById('cloudSyncStatus');
       if(syncIcon) { syncIcon.style.display = 'flex'; syncIcon.innerHTML = '<i data-lucide="loader" class="lucide-spin" style="width:14px; color: var(--text-muted);"></i> Zapisuję...'; syncIcon.style.color = 'var(--text-muted)'; lucide.createIcons(); }
       clearTimeout(settingsSaveTimeout); settingsSaveTimeout = setTimeout(saveSettingsToCloud, 1000);
-    }
-  } else { try { safeStorage.removeItem('walletwise_settings'); } catch(e){} }
+  }
 }
 
 async function saveSettingsToCloud() {
@@ -1601,17 +1602,11 @@ async function setupAuthListeners() {
             document.getElementById('guestWarningBanner').style.display = 'none';
         }
 
-        try { safeStorage.removeItem('walletwise_settings'); } catch(e){} 
-        historyLogs = [];
-        applySettings({ income: '', kids800: '', kidsActiveHome: '', kidsActiveWork: '', currentSavings: '', rushEmergencyFund: false, categories: [], goals: [], subscriptions: [] }); 
         renderHistory();
         calculateAll(); 
     }
   } catch(err) { 
       isLoggedIn = false; 
-      try { safeStorage.removeItem('walletwise_settings'); } catch(e){} 
-      historyLogs = [];
-      applySettings({ income: '', kids800: '', kidsActiveHome: '', kidsActiveWork: '', currentSavings: '', rushEmergencyFund: false, categories: [], goals: [], subscriptions: [] }); 
       renderHistory();
       calculateAll(); 
   }
@@ -1954,7 +1949,6 @@ function renderHistory() {
   }
 }
 
-// NOWE: KASKADOWE WYCOFYWANIE ŚRODKÓW Z CELÓW
 async function deleteHistoryEntry(id) { 
   if (editingEntryId === id) cancelEditMode(); 
   
@@ -2045,7 +2039,6 @@ function renderReportTab() {
   var curPeriod = d.getFullYear() + '-' + ((d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1));
   var isCurrentMonth = (sel.value === curPeriod);
 
-  // DODANIE ZABLOKOWANYCH ŚRODKÓW Z SUBSKRYPCJI DO ANALIZY
   var allReportItems = [...filtered];
   if (isCurrentMonth) {
       subscriptions.forEach(sub => {
