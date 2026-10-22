@@ -922,6 +922,11 @@
 </div>
 
 <script>
+// --- ZMIENNE GLOBALNE ---
+var MONTH_NAMES_PL = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"];
+var pieChartInstance = null; 
+var editingEntryId = null;
+
 // --- FEATURE FLAGS (CENTRUM DOWODZENIA) ---
 const APP_CONFIG = {
   guestBannerActive: true, 
@@ -1079,7 +1084,7 @@ function calculateSavingsStreak() {
 }
 
 async function autoLogGoalFund(goalName, amount, isWithdrawal = false) {
-  if(!customCategories.some(c => c.name === "Oszczędności")) { customCategories.push({ name: "Oszczędności", bucket: "savings" }); triggerSettingsSave(); renderCategoryDropdowns(); }
+  if(!customCategories.some(c => c.name === "Oszczędności")) { customCategories.push({ name: "Oszczędności", bucket: "savings" }); renderCategoryDropdowns(); }
   var d = new Date(); var selY = d.getFullYear().toString(); var selM = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1);
   var p = selY + '-' + selM; var exactD = selY + '-' + selM + '-' + (d.getDate() < 10 ? '0' : '') + d.getDate();
   
@@ -1088,9 +1093,20 @@ async function autoLogGoalFund(goalName, amount, isWithdrawal = false) {
 
   if (isLoggedIn && supabase) {
     const { data, error } = await supabase.from('history_logs').insert([newRecord]).select();
-    if (!error && data) { historyLogs = historyLogs.concat(data); renderHistory(); if(!isWithdrawal) checkGlobalSavingsJackpot(amount); }
+    if (!error && data) { 
+        historyLogs = historyLogs.concat(data); 
+        renderHistory(); 
+        calculateAll(); 
+        triggerSettingsSave(); 
+        if(!isWithdrawal) checkGlobalSavingsJackpot(amount); 
+    }
   } else {
-    newRecord.id = Date.now(); newRecord.monthNum = selM; historyLogs.push(newRecord); renderHistory(); if(!isWithdrawal) checkGlobalSavingsJackpot(amount);
+    newRecord.id = Date.now(); newRecord.monthNum = selM; 
+    historyLogs.push(newRecord); 
+    renderHistory(); 
+    calculateAll(); 
+    triggerSettingsSave(); 
+    if(!isWithdrawal) checkGlobalSavingsJackpot(amount);
   }
 }
 
@@ -1143,11 +1159,19 @@ function submitFundsToGoal() {
     var totalInc = getTotalIncome(); var housing = Math.round(totalInc * 0.30); var food = Math.round(totalInc * 0.15); var transport = Math.round(totalInc * 0.05);
     var survival = housing + food + transport; var emergencyGoal = survival * 6;
     
-    document.getElementById('addFundsModal').style.display = 'none'; triggerSettingsSave(); autoLogGoalFund("Poduszka Finansowa", amt, false); triggerCoinDrop('emergencyBankIcon', amt, newVal >= emergencyGoal && emergencyGoal > 0); return;
+    document.getElementById('addFundsModal').style.display = 'none'; 
+    autoLogGoalFund("Poduszka Finansowa", amt, false); 
+    triggerCoinDrop('emergencyBankIcon', amt, newVal >= emergencyGoal && emergencyGoal > 0); 
+    return;
   }
   
   var goal = savingsGoals.find(g => g.id == id);
-  if(goal) { goal.saved += amt; document.getElementById('addFundsModal').style.display = 'none'; triggerSettingsSave(); autoLogGoalFund(goal.name, amt, false); triggerCoinDrop('goalIcon-' + id, amt, goal.saved >= goal.target); }
+  if(goal) { 
+      goal.saved += amt; 
+      document.getElementById('addFundsModal').style.display = 'none'; 
+      autoLogGoalFund(goal.name, amt, false); 
+      triggerCoinDrop('goalIcon-' + id, amt, goal.saved >= goal.target); 
+  }
 }
 
 function openWithdrawEmergencyFundsModal() {
@@ -1178,7 +1202,6 @@ function submitWithdrawFromGoal() {
     currentInput.value = newVal;
 
     document.getElementById('withdrawFundsModal').style.display = 'none';
-    triggerSettingsSave();
     autoLogGoalFund("Poduszka Finansowa", -amt, true);
     return;
   }
@@ -1188,7 +1211,6 @@ function submitWithdrawFromGoal() {
     if(amt > goal.saved) { alert("Nie masz tylu środków w tej skarbonce."); return; }
     goal.saved -= amt;
     document.getElementById('withdrawFundsModal').style.display = 'none';
-    triggerSettingsSave();
     autoLogGoalFund(goal.name, -amt, true);
   }
 }
@@ -1612,204 +1634,174 @@ async function setupAuthListeners() {
   }
 }
 
-// -------------------------------------------
-// GŁÓWNA LOGIKA APLIKACJI I NAWIGACJA
-// -------------------------------------------
-var MONTH_NAMES_PL = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"];
-var pieChartInstance = null; var editingEntryId = null;
-
 function formatPeriodToPL(ym) { if (!ym || ym.indexOf('-') === -1) return ym; var p = ym.split('-'); return MONTH_NAMES_PL[parseInt(p[1], 10) - 1] + " " + p[0]; }
 
-function appSwitchTab(tabId, btn) {
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  
-  document.getElementById(tabId).classList.add('active'); 
-  
-  if (btn) { 
-      btn.classList.add('active'); 
-  } else { 
-      var fallbackBtn = document.querySelector(`.tab-btn[onclick*="${tabId}"]`); 
-      if(fallbackBtn) fallbackBtn.classList.add('active'); 
-  }
-  
-  if (tabId === 'historyTab') renderHistoryTable();
-  if (tabId === 'reportTab') renderReportTab();
-  if (tabId === 'subsTab') renderSubscriptions();
-  
-  // Zapisz aktywną zakładkę do pamięci
-  try { safeStorage.setItem('walletwise_activeTab', tabId); } catch(e) {}
+function updateHistoryFilterDropdowns() {
+  var fYear = document.getElementById('histFilterYear'); var fMonth = document.getElementById('histFilterMonth');
+  if (!fYear || !fMonth) return;
+  var curYear = fYear.value; var curMonth = fMonth.value;
+
+  var yearsMap = {}; for (var i = 0; i < historyLogs.length; i++) { yearsMap[historyLogs[i].year || historyLogs[i].month.split('-')[0]] = true; }
+  var uniqueYears = Object.keys(yearsMap).sort().reverse();
+
+  fYear.innerHTML = '<option value="ALL">Wszystkie lata</option>';
+  for (var j = 0; j < uniqueYears.length; j++) { var opt = document.createElement('option'); opt.value = uniqueYears[j]; opt.textContent = uniqueYears[j]; fYear.appendChild(opt); }
+  fYear.value = yearsMap[curYear] ? curYear : (uniqueYears[0] || 'ALL');
+
+  fMonth.innerHTML = '<option value="ALL">Wszystkie miesiące</option>';
+  for (var m = 0; m < MONTH_NAMES_PL.length; m++) { var mOpt = document.createElement('option'); mOpt.value = (m + 1 < 10 ? '0' : '') + (m + 1); mOpt.textContent = MONTH_NAMES_PL[m]; fMonth.appendChild(mOpt); }
+  var d = new Date(); var currentMonthNum = (d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1);
+  fMonth.value = curMonth === 'ALL' || !curMonth ? currentMonthNum : curMonth;
 }
 
-function getCategoryBucket(catName) { var c = customCategories.find(x => x.name === catName); return c ? c.bucket : 'needs'; }
-function generateCategoryOptionsHTML() { if(customCategories.length === 0) return '<option value="" disabled selected>Brak kategorii</option>'; return customCategories.map(c => `<option value="${c.name}">${c.name}</option>`).join(''); }
-
-function renderCategoryDropdowns() {
-  var ops = generateCategoryOptionsHTML();
-  document.querySelectorAll('.split-category').forEach(el => { var val = el.value; el.innerHTML = ops; if(val && customCategories.some(c=>c.name===val)) el.value = val; });
+function updateCategoryChart(periodItems) {
+  var canvas = document.getElementById('categoryPieChart'); var legendEl = document.getElementById('categoryLegendList');
+  if (!canvas || !legendEl) return;
   
-  var filter = document.getElementById('histFilterCategory');
-  if(filter) {
-    var filterVal = filter.value;
-    if(customCategories.length === 0) filter.innerHTML = '<option value="ALL">Wszystkie kategorie</option>';
-    else filter.innerHTML = '<option value="ALL">Wszystkie kategorie</option>' + ops;
-    if(filterVal && filterVal !== "ALL" && customCategories.some(c=>c.name===filterVal)) filter.value = filterVal; else filter.value = "ALL";
+  var bucketTotals = { needs: 0, fun: 0, savings: 0 }; var catTotals = { needs: {}, fun: {}, savings: {} }; var grandTotal = 0;
+
+  for (var i = 0; i < periodItems.length; i++) { 
+    var cat = periodItems[i].category; var amt = Number(periodItems[i].amount) || 0; var b = getCategoryBucket(cat);
+    bucketTotals[b] += amt; if(!catTotals[b][cat]) catTotals[b][cat] = 0; catTotals[b][cat] += amt; grandTotal += amt; 
   }
+
+  var activeBucket = Object.keys(window.openAccordionState).find(k => window.openAccordionState[k]);
   
-  var formContent = document.getElementById('expenseFormContent'); var noCatMsg = document.getElementById('noCategoriesMessage');
-  if(customCategories.length === 0) { if(formContent) formContent.style.display = 'none'; if(noCatMsg) noCatMsg.style.display = 'block'; } else { if(formContent) formContent.style.display = 'block'; if(noCatMsg) noCatMsg.style.display = 'none'; }
-}
+  var subTitleEl = document.getElementById('chartSubtitle');
+  if(subTitleEl) {
+    if(activeBucket) { subTitleEl.innerHTML = 'Kliknij wykres, by <strong>wrócić do ogółu</strong>.'; subTitleEl.style.color = 'var(--primary)'; } 
+    else { subTitleEl.innerHTML = 'Kliknij wykres, by rozwinąć szczegóły. Wybierz z legendy, by filtrować.'; subTitleEl.style.color = 'var(--text-muted)'; }
+  }
 
-function openCategoryManager() { document.getElementById('categoryManagerModal').style.display = 'flex'; renderCategoryManagerList(); }
+  var labels = []; var dataVals = []; var bgColors = [];
+  var palettes = {
+    needs: ['#2563eb', '#93c5fd', '#1e3a8a', '#60a5fa', '#172554', '#3b82f6', '#bfdbfe', '#1d4ed8', '#1e40af'],
+    fun: ['#9333ea', '#d8b4fe', '#4c1d95', '#c084fc', '#3b0764', '#a855f7', '#e9d5ff', '#7e22ce', '#581c87'],
+    savings: ['#10b981', '#6ee7b7', '#064e3b', '#34d399', '#022c22', '#059669', '#a7f3d0', '#047857', '#065f46']
+  };
 
-function renderCategoryManagerList() {
-  var cList = document.getElementById('categoryListContainer'); cList.innerHTML = '';
-  if (customCategories.length === 0) cList.innerHTML = '<span style="color:var(--text-muted); font-size:0.9rem;">Brak kategorii. Stwórz pierwszą!</span>';
-  customCategories.forEach(c => {
-    var bLabel = c.bucket === 'needs' ? 'Potrzeba' : (c.bucket === 'fun' ? 'Fun' : 'Oszczędność');
-    var row = document.createElement('div');
-    row.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px;";
-    row.innerHTML = `<div><strong>${c.name}</strong> <span class="cat-badge cat-bucket-${c.bucket}" style="margin-left:8px; font-size:0.7rem; padding: 2px 8px;">${bLabel}</span></div>
-                     <button class="del-btn" style="width:30px; height:30px; padding:0;" onclick="deleteCustomCategory('${c.name}')"><i data-lucide="trash-2" style="width:14px;"></i></button>`;
-    cList.appendChild(row);
+  if (!activeBucket) {
+    if(bucketTotals.needs > 0) { labels.push('Koszty Życia'); dataVals.push(bucketTotals.needs); bgColors.push('#3b82f6'); }
+    if(bucketTotals.fun > 0) { labels.push('Zachcianki'); dataVals.push(bucketTotals.fun); bgColors.push('#a855f7'); }
+    if(bucketTotals.savings > 0) { labels.push('Oszczędności'); dataVals.push(bucketTotals.savings); bgColors.push('#10b981'); }
+  } else {
+    var subCats = Object.keys(catTotals[activeBucket]).sort((x, y) => catTotals[activeBucket][y] - catTotals[activeBucket][x]);
+    subCats.forEach((cName, idx) => { labels.push(cName); dataVals.push(catTotals[activeBucket][cName]); bgColors.push(palettes[activeBucket][idx % palettes[activeBucket].length]); });
+  }
+
+  if (pieChartInstance) pieChartInstance.destroy();
+  if (grandTotal === 0) { legendEl.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-weight: 500; padding: 12px 0;">Brak danych do wykresu.</div>'; return; }
+
+  pieChartInstance = new Chart(canvas, {
+    type: 'doughnut', data: { labels: labels, datasets: [{ data: dataVals, backgroundColor: bgColors, borderWidth: 3, borderColor: '#ffffff', hoverOffset: 4 }] },
+    options: { 
+      responsive: true, cutout: '75%', plugins: { legend: { display: false }, tooltip: { padding: 12, cornerRadius: 8, bodyFont: { family: 'Plus Jakarta Sans', size: 14 } } },
+      onHover: (event, elements) => { event.native.target.style.cursor = elements.length ? 'pointer' : 'default'; },
+      onClick: (event, elements) => {
+        if (elements.length > 0) {
+          if (activeBucket) { window.toggleAccordion(activeBucket); } else {
+            const index = elements[0].index; const label = pieChartInstance.data.labels[index]; let bId = '';
+            if (label === 'Koszty Życia') bId = 'needs'; if (label === 'Zachcianki') bId = 'fun'; if (label === 'Oszczędności') bId = 'savings';
+            if (bId) window.toggleAccordion(bId);
+          }
+        }
+      }
+    }
+  });
+
+  var fCat = document.getElementById('histFilterCategory').value; legendEl.innerHTML = '';
+  var bucketConfig = [ { id: 'needs', name: 'Koszty Życia', color: '#3b82f6' }, { id: 'fun', name: 'Zachcianki', color: '#a855f7' }, { id: 'savings', name: 'Oszczędności', color: '#10b981' } ];
+
+  bucketConfig.forEach(b => {
+    if(bucketTotals[b.id] > 0) {
+      var bPct = Math.round((bucketTotals[b.id] / grandTotal) * 100);
+      var isOpen = window.openAccordionState[b.id];
+      var displayStyle = isOpen ? 'display: grid;' : 'display: none;';
+      var rotation = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+      
+      var bHtml = `
+        <div class="bucket-header" onclick="toggleAccordion('${b.id}')">
+          <span style="display:flex; align-items:center; gap:8px;">
+            <span style="display:block; width:12px; height:12px; border-radius:50%; background:${b.color}; flex-shrink: 0;"></span>
+            <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:90px;">${b.name}</span>
+            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">(${bPct}%)</span>
+          </span>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span>${bucketTotals[b.id].toLocaleString('pl-PL')} PLN</span>
+            <i data-lucide="chevron-down" id="icon-${b.id}" style="width:16px; transform:${rotation}; flex-shrink: 0;"></i>
+          </div>
+        </div>
+        <div class="bucket-details" id="details-${b.id}" style="${displayStyle}">
+      `;
+      
+      var subCats = Object.keys(catTotals[b.id]).sort((x, y) => catTotals[b.id][y] - catTotals[b.id][x]);
+      subCats.forEach(cName => {
+        var cVal = catTotals[b.id][cName]; var isActive = fCat === cName ? ' active-filter' : '';
+        bHtml += `
+          <div class="bucket-sub-item${isActive}" onclick="document.getElementById('histFilterCategory').value = '${cName}'; renderHistoryTable();">
+            <span class="cat-name" title="${cName}">${cName}</span>
+            <span class="cat-amt">${cVal.toLocaleString('pl-PL')} PLN</span>
+          </div>
+        `;
+      });
+      bHtml += `</div>`; legendEl.innerHTML += bHtml;
+    }
   });
   lucide.createIcons();
 }
 
-function addCustomCategory() {
-  var name = document.getElementById('newCatName').value.trim(); var bucket = document.getElementById('newCatBucket').value;
-  if(!name) { alert("Wpisz nazwę kategorii."); return; }
-  if(customCategories.some(c => c.name.toLowerCase() === name.toLowerCase())) { alert("Taka kategoria już istnieje!"); return; }
-  customCategories.push({ name: name, bucket: bucket }); document.getElementById('newCatName').value = '';
-  triggerSettingsSave(); renderCategoryDropdowns(); renderCategoryManagerList(); renderHistory();
+function renderHistoryTable() {
+  var tbody = document.getElementById('historyTableBody'); if (!tbody) return; tbody.innerHTML = '';
+  var fYear = document.getElementById('histFilterYear').value; var fMonth = document.getElementById('histFilterMonth').value;
+  var fCat = document.getElementById('histFilterCategory').value; var sortOrder = document.getElementById('histSortOrder').value;
+
+  var periodItems = historyLogs.filter(e => { var itemYear = String(e.year || e.month.split('-')[0]); var itemMonth = String(e.month_num || e.monthNum || e.month.split('-')[1]); return (fYear === 'ALL' || itemYear === fYear) && (fMonth === 'ALL' || itemMonth === fMonth); });
+  updateCategoryChart(periodItems);
+  var tableItems = periodItems.filter(e => fCat==='ALL' || e.category===fCat);
+  tableItems.sort((a, b) => sortOrder === 'asc' ? a.id - b.id : b.id - a.id);
+
+  var sum = tableItems.reduce((acc, curr) => acc + Number(curr.amount), 0);
+  document.getElementById('filteredMonthSum').textContent = sum.toLocaleString('pl-PL') + ' PLN';
+
+  if (tableItems.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="border:none;"><div class="empty-state"><i data-lucide="receipt"></i><strong>Brak wydatków na liście</strong>Zanotuj swój pierwszy wydatek u góry.</div></td></tr>'; setTimeout(() => lucide.createIcons(), 10); return; }
+
+  for (var k = 0; k < tableItems.length; k++) {
+    var cat = tableItems[k].category; var b = getCategoryBucket(cat); var displayDate = tableItems[k].exact_date ? tableItems[k].exact_date : formatPeriodToPL(tableItems[k].month);
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td class="col-okres" data-label="Data wydatku">' + displayDate + '</td>' +
+                   '<td class="col-cat" data-label="Kategoria"><span class="cat-badge cat-bucket-' + b + '">' + cat + '</span></td>' +
+                   '<td class="col-opis" data-label="Opis/Sklep"><strong>' + tableItems[k].name + '</strong></td>' +
+                   '<td class="col-amount" data-label="Kwota">' + Number(tableItems[k].amount).toLocaleString('pl-PL') + ' PLN</td>' +
+                   '<td class="col-actions" data-label="Akcje">' +
+                     '<button type="button" class="edit-btn" title="Edytuj" onclick="startEditEntry(' + tableItems[k].id + ')"><i data-lucide="pencil" style="width:16px;"></i></button>' +
+                     '<button type="button" class="del-btn" title="Usuń" onclick="deleteHistoryEntry(' + tableItems[k].id + ')"><i data-lucide="trash-2" style="width:16px;"></i></button>' +
+                   '</td>';
+    tbody.appendChild(tr);
+  }
+  setTimeout(() => lucide.createIcons(), 10);
 }
 
-function deleteCustomCategory(name) { customCategories = customCategories.filter(c => c.name !== name); triggerSettingsSave(); renderCategoryDropdowns(); renderCategoryManagerList(); renderHistory(); }
-
-var isRegisterMode = false;
-document.getElementById('toggleAuthBtn').onclick = function() {
-  isRegisterMode = !isRegisterMode;
-  var titleEl = document.getElementById('authModeTitle');
-  if(isRegisterMode) { titleEl.innerHTML = '<i data-lucide="user-plus" style="color: var(--success)"></i> Utwórz konto'; } else { titleEl.innerHTML = '<i data-lucide="log-in" style="color: var(--primary)"></i> Zaloguj się'; }
+function resetExpenseForm() {
+  document.getElementById('histName').value = ''; document.getElementById('histInputDate').valueAsDate = new Date();
+  document.getElementById('splitItemsContainer').innerHTML = ''; 
+  var catSelect = document.querySelector('.split-category'); if(catSelect && catSelect.options.length > 0) catSelect.selectedIndex = 0;
+  var amtInput = document.querySelector('.split-amount'); if (amtInput) amtInput.value = '';
+  var addBtn = document.getElementById('addSplitBtn'); if (addBtn) addBtn.style.display = 'inline-flex';
   lucide.createIcons();
-  document.getElementById('fullNameInput').style.display = isRegisterMode ? 'block' : 'none';
-  document.getElementById('loginBtn').style.display = isRegisterMode ? 'none' : 'flex';
-  document.getElementById('registerBtn').style.display = isRegisterMode ? 'flex' : 'none';
-  document.getElementById('toggleAuthBtn').textContent = isRegisterMode ? 'Masz już konto? Zaloguj się.' : 'Nie masz konta? Utwórz je.';
-  document.getElementById('authError').textContent = '';
-};
-
-async function handleLogin() {
-  const errorEl = document.getElementById('authError'); errorEl.style.color = 'var(--text-muted)'; errorEl.innerHTML = '<i data-lucide="loader" class="lucide-spin" style="width:16px; margin-bottom:-3px;"></i> Łączenie...'; lucide.createIcons();
-  if (!supabase) initSupabase(); if (!supabase) { errorEl.style.color = 'var(--danger)'; errorEl.textContent = 'Trwa ładowanie zabezpieczeń... Kliknij ponownie.'; return; }
-  const email = document.getElementById('emailInput').value.trim(); const password = document.getElementById('passwordInput').value;
-  if(!email || !password) { errorEl.style.color = 'var(--danger)'; errorEl.textContent = 'Wpisz email i hasło.'; return; }
-  try { const { error } = await supabase.auth.signInWithPassword({ email, password }); if (error) { errorEl.style.color = 'var(--danger)'; errorEl.textContent = 'Błąd logowania: ' + error.message; } else { window.location.reload(); } } catch (err) {}
 }
 
-async function handleRegister() {
-  const errorEl = document.getElementById('authError'); errorEl.style.color = 'var(--text-muted)'; errorEl.innerHTML = '<i data-lucide="loader" class="lucide-spin" style="width:16px; margin-bottom:-3px;"></i> Rejestrowanie...'; lucide.createIcons();
-  if (!supabase) initSupabase(); if (!supabase) { errorEl.style.color = 'var(--danger)'; errorEl.textContent = 'Trwa ładowanie...'; return; }
-  const fullName = document.getElementById('fullNameInput').value.trim(); const email = document.getElementById('emailInput').value.trim(); const password = document.getElementById('passwordInput').value;
-  if(!fullName || !email || password.length < 6) { errorEl.style.color = 'var(--danger)'; errorEl.textContent = 'Wypełnij poprawnie wszystkie pola.'; return; }
-  try {
-    const { data, error } = await supabase.auth.signUp({ email: email, password: password, options: { data: { full_name: fullName } } });
-    if (error) { errorEl.style.color = 'var(--danger)'; errorEl.textContent = 'Błąd: ' + error.message; } else {
-      if (data.session) window.location.reload(); else { errorEl.style.color = 'var(--success)'; errorEl.textContent = 'Sukces! Możesz się zalogować.'; document.getElementById('toggleAuthBtn').click(); }
-    }
-  } catch (err) {}
+function startEditEntry(id) {
+  var entry = historyLogs.find(e => e.id === id); if (!entry) return; editingEntryId = id; resetExpenseForm();
+  if(entry.exact_date) { document.getElementById('histInputDate').value = entry.exact_date; } else { var itemMonth = entry.month_num || entry.monthNum || entry.month.split('-')[1]; var itemYear = entry.year || entry.month.split('-')[0]; document.getElementById('histInputDate').value = itemYear + '-' + itemMonth + '-01'; }
+  document.getElementById('histName').value = entry.name; 
+  var catSel = document.querySelector('.split-category'); if(catSel) catSel.value = entry.category;
+  var amtSel = document.querySelector('.split-amount'); if(amtSel) amtSel.value = entry.amount;
+  document.getElementById('addSplitBtn').style.display = 'none'; document.getElementById('formTitle').innerHTML = '<i data-lucide="pencil" style="color:var(--primary)"></i> Edytujesz wydatek'; document.getElementById('addHistBtn').innerHTML = '<i data-lucide="save" style="width:18px;"></i> Zapisz'; document.getElementById('cancelEditBtn').style.display = 'inline-flex'; document.getElementById('expenseFormCard').style.backgroundColor = '#fdf8f6'; document.getElementById('expenseFormCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  lucide.createIcons();
 }
 
-async function handleLogout() { try { safeStorage.removeItem('walletwise_settings'); } catch(e){} if (supabase) await supabase.auth.signOut(); window.location.reload(); }
-async function loadCloudData() { if (!supabase) return; const { data: hlData, error: hlErr } = await supabase.from('history_logs').select('*'); if(!hlErr && hlData) { historyLogs = hlData; } renderHistory(); calculateAll(); checkSubReminders(); }
-
-var settingsSaveTimeout;
-function applySettings(s) {
-  if(!s) return;
-  if(s.income !== undefined) document.getElementById('income').value = s.income;
-  if(s.kids800 !== undefined) document.getElementById('kids800').value = s.kids800;
-  if(s.kidsActiveHome !== undefined) document.getElementById('kidsActiveHome').value = s.kidsActiveHome;
-  if(s.kidsActiveWork !== undefined) document.getElementById('kidsActiveWork').value = s.kidsActiveWork;
-  if(s.currentSavings !== undefined) document.getElementById('currentSavings').value = s.currentSavings;
-  if(s.rushEmergencyFund !== undefined) document.getElementById('rushEmergencyFund').checked = s.rushEmergencyFund;
-  if(s.categories && Array.isArray(s.categories)) customCategories = s.categories;
-  if(s.goals && Array.isArray(s.goals)) savingsGoals = s.goals;
-  if(s.subscriptions && Array.isArray(s.subscriptions)) subscriptions = s.subscriptions; 
-  if(s.historyLogs && Array.isArray(s.historyLogs)) historyLogs = s.historyLogs; 
-  renderCategoryDropdowns();
-  renderSubscriptions();
-}
-
-function triggerSettingsSave() {
-  calculateAll();
-  renderSubscriptions(); 
-  const s = {
-    income: document.getElementById('income').value, kids800: document.getElementById('kids800').value,
-    kidsActiveHome: document.getElementById('kidsActiveHome').value, kidsActiveWork: document.getElementById('kidsActiveWork').value,
-    currentSavings: document.getElementById('currentSavings').value, rushEmergencyFund: document.getElementById('rushEmergencyFund').checked,
-    categories: customCategories, goals: savingsGoals, subscriptions: subscriptions,
-    historyLogs: historyLogs 
-  };
-  
-  try { safeStorage.setItem('walletwise_settings', JSON.stringify(s)); } catch(e){}
-  
-  if (isLoggedIn && supabase) {
-      var syncIcon = document.getElementById('cloudSyncStatus');
-      if(syncIcon) { syncIcon.style.display = 'flex'; syncIcon.innerHTML = '<i data-lucide="loader" class="lucide-spin" style="width:14px; color: var(--text-muted);"></i> Zapisuję...'; syncIcon.style.color = 'var(--text-muted)'; lucide.createIcons(); }
-      clearTimeout(settingsSaveTimeout); settingsSaveTimeout = setTimeout(saveSettingsToCloud, 1000);
-  }
-}
-
-async function saveSettingsToCloud() {
-  if(!supabase || !isLoggedIn) return;
-  const s = {
-      income: document.getElementById('income').value, kids800: document.getElementById('kids800').value,
-      kidsActiveHome: document.getElementById('kidsActiveHome').value, kidsActiveWork: document.getElementById('kidsActiveWork').value,
-      currentSavings: document.getElementById('currentSavings').value, rushEmergencyFund: document.getElementById('rushEmergencyFund').checked,
-      categories: customCategories, goals: savingsGoals, subscriptions: subscriptions
-  };
-  const { error } = await supabase.auth.updateUser({ data: { budget_settings: s } });
-  var syncIcon = document.getElementById('cloudSyncStatus');
-  if(syncIcon) {
-    if(!error) { syncIcon.innerHTML = '<i data-lucide="check-circle-2" style="width:14px;"></i> Zapisano w chmurze'; syncIcon.style.color = 'var(--success)'; } 
-    else { syncIcon.innerHTML = '<i data-lucide="alert-circle" style="width:14px;"></i> Błąd zapisu'; syncIcon.style.color = 'var(--danger)'; }
-    lucide.createIcons(); setTimeout(() => { syncIcon.style.display = 'none'; }, 3000);
-  }
-}
-
-async function setupAuthListeners() {
-  if (!supabase) return;
-  supabase.auth.onAuthStateChange(function(event, session) { if (session) { document.getElementById('authScreen').style.display = 'none'; document.getElementById('appContainer').style.display = 'block'; } });
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      isLoggedIn = true; document.getElementById('showAuthBtn').style.display = 'none'; document.getElementById('userNav').style.display = 'flex';
-      const displayName = session.user.user_metadata?.full_name || session.user.email; document.getElementById('userEmailDisplay').textContent = displayName;
-      let initials = "U"; if (displayName.includes('@')) { initials = displayName.charAt(0).toUpperCase(); } else { const parts = displayName.trim().split(' '); if (parts.length > 1) { initials = (parts[0][0] + parts[parts.length-1][0]).toUpperCase(); } else { initials = displayName.substring(0, 2).toUpperCase(); } }
-      const avatarEl = document.getElementById('userAvatarInitials'); if (avatarEl) avatarEl.textContent = initials;
-      const cloudSettings = session.user.user_metadata?.budget_settings;
-      if (cloudSettings) { applySettings(cloudSettings); try { safeStorage.setItem('walletwise_settings', JSON.stringify(cloudSettings)); } catch(e){} } 
-      
-      document.getElementById('guestWarningBanner').style.display = 'none';
-      
-      calculateAll(); loadCloudData();
-    } else { 
-        isLoggedIn = false; 
-        
-        if (APP_CONFIG.guestBannerActive) {
-            document.getElementById('guestWarningBanner').style.display = 'flex';
-        } else {
-            document.getElementById('guestWarningBanner').style.display = 'none';
-        }
-
-        renderHistory();
-        calculateAll(); 
-    }
-  } catch(err) { 
-      isLoggedIn = false; 
-      renderHistory();
-      calculateAll(); 
-  }
+function cancelEditMode() {
+  editingEntryId = null; document.getElementById('formTitle').innerHTML = '<i data-lucide="pen-tool"></i> Dodaj wydatek'; document.getElementById('addHistBtn').innerHTML = '<i data-lucide="plus-circle" style="width:18px;"></i> Zapisz'; document.getElementById('cancelEditBtn').style.display = 'none'; document.getElementById('expenseFormCard').style.backgroundColor = '#ffffff'; resetExpenseForm();
 }
 
 window.onload = async function() {
@@ -1858,11 +1850,11 @@ window.onload = async function() {
       var first = validItemsToSave[0];
       if (isLoggedIn && supabase) { const { error } = await supabase.from('history_logs').update({ month: p, year: selY, month_num: selM, exact_date: dateVal, category: first.cat, name: n, amount: first.amt }).eq('id', editingEntryId); if (error) { alert("Błąd: " + error.message); return; } }
       var entry = historyLogs.find(e => e.id === editingEntryId); if(entry) { entry.month=p; entry.year=selY; entry.monthNum=selM; entry.exact_date=dateVal; entry.category=first.cat; entry.name=n; entry.amount=first.amt; }
-      cancelEditMode(); renderHistory();
+      cancelEditMode(); renderHistory(); triggerSettingsSave();
     } else {
       var newRecords = []; validItemsToSave.forEach(item => { newRecords.push({ month: p, year: selY, month_num: selM, exact_date: dateVal, category: item.cat, name: n, amount: item.amt }); });
-      if (isLoggedIn && supabase) { const { data, error } = await supabase.from('history_logs').insert(newRecords).select(); if (!error && data) { historyLogs = historyLogs.concat(data); resetExpenseForm(); renderHistory(); } else { alert("Błąd bazy: " + error.message); }
-      } else { newRecords.forEach((rec, i) => { rec.id = Date.now() + i; rec.monthNum = rec.month_num; historyLogs.push(rec); }); resetExpenseForm(); renderHistory(); }
+      if (isLoggedIn && supabase) { const { data, error } = await supabase.from('history_logs').insert(newRecords).select(); if (!error && data) { historyLogs = historyLogs.concat(data); resetExpenseForm(); renderHistory(); triggerSettingsSave(); } else { alert("Błąd bazy: " + error.message); }
+      } else { newRecords.forEach((rec, i) => { rec.id = Date.now() + i; rec.monthNum = rec.month_num; historyLogs.push(rec); }); resetExpenseForm(); renderHistory(); triggerSettingsSave(); }
     }
     
     var totalAddedToSavings = 0;
@@ -1875,7 +1867,6 @@ window.onload = async function() {
   ['histFilterYear', 'histFilterMonth', 'histFilterCategory', 'histSortOrder'].forEach(id => { document.getElementById(id).onchange = renderHistoryTable; });
   document.getElementById('selectReportPeriod').onchange = function() { renderReportTab(); };
 
-  // PRZYWRACANIE OSTATNIO OTWARTEJ ZAKŁADKI Z PAMIĘCI
   try {
     var savedTab = safeStorage.getItem('walletwise_activeTab');
     if(savedTab && document.getElementById(savedTab)) {
