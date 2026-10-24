@@ -196,7 +196,7 @@
     
     .col-okres { white-space: nowrap; width: 1%; color: var(--text-main); font-weight: 800; }
     .col-cat { white-space: normal; word-wrap: break-word; max-width: 140px; }
-    .col-opis { white-space: normal; word-wrap: break-word; max-width: 200px; }
+    .col-opis { white-space: normal; word-wrap: break-word; max-width: 240px; }
     .col-amount { font-weight: 800; color: var(--text-main); text-align: center; white-space: nowrap; }
     .col-actions { text-align: center; white-space: nowrap; }
     
@@ -216,6 +216,9 @@
     .cat-bucket-fun { background: #faf5ff; color: #9333ea; border: 1px solid #e9d5ff; } 
     .cat-bucket-savings { background: #ecfdf5; color: #166534; border: 1px solid #a7f3d0; } 
     .cat-bucket-unknown { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+    .cycle-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+    .cycle-badge.sinking { background: #fef3c7; color: #b45309; border-color: #fde68a; }
 
     /* GRID MASONRY LAYOUT DLA TAB 2 */
     .history-top-grid { display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 24px; align-items: start; }
@@ -431,22 +434,75 @@
   </div>
 </div>
 
-<!-- MENEDŻER SUBSKRYPCJI -->
+<!-- MENEDŻER SUBSKRYPCJI I OPŁAT NIEREGULARNYCH (SINKING FUNDS) -->
 <div id="subManagerModal" class="modal-overlay">
-  <div class="auth-card" style="max-width: 400px;">
+  <div class="auth-card" style="max-width: 440px;">
     <button class="close-auth-btn" onclick="document.getElementById('subManagerModal').style.display='none'"><i data-lucide="x"></i></button>
     <h2 style="justify-content: center;" id="subModalTitle"><i data-lucide="calendar-clock" style="color: var(--primary)"></i> Nowa Stała Opłata</h2>
-    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Dodaj rachunek lub subskrypcję, a przypomnimy Ci o jej zapłacie w odpowiednim dniu.</p>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Dodaj rachunek miesięczny lub wydatek roczny/kwartalny (np. OC), a my wyliczymy miesięczną rezerwę.</p>
     
     <div style="text-align: left;">
-      <label>Nazwa (np. Netflix, Czynsz)</label>
-      <input type="text" id="newSubName" class="auth-input" placeholder="np. Netflix">
-      <label>Kwota (PLN)</label>
-      <input type="number" id="newSubAmount" class="auth-input" placeholder="np. 43">
-      <label>Kategoria przypisania</label>
-      <select id="newSubCategory" class="auth-input split-category"></select>
-      <label>Dzień płatności w miesiącu (1-31)</label>
-      <input type="number" id="newSubDay" class="auth-input" placeholder="np. 12" min="1" max="31">
+      <label>Nazwa (np. Netflix, Ubezpieczenie OC)</label>
+      <input type="text" id="newSubName" class="auth-input" placeholder="np. Ubezpieczenie OC">
+      
+      <div class="input-row" style="margin-bottom: 0;">
+        <div>
+          <label>Pełna kwota (PLN)</label>
+          <input type="number" id="newSubAmount" class="auth-input" placeholder="np. 1200" oninput="updateSubModalPreview()">
+        </div>
+        <div>
+          <label>Częstotliwość</label>
+          <select id="newSubCycle" class="auth-input" style="font-weight: 700;" onchange="toggleSubCycleFields()">
+            <option value="monthly">Co miesiąc</option>
+            <option value="quarterly">Kwartalnie (co 3 m-ce)</option>
+            <option value="semi_annual">Półrocznie (co 6 m-cy)</option>
+            <option value="annual">Rocznie (raz w roku)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Pola dla opłat nieregularnych (kwartalne / półroczne / roczne) -->
+      <div id="irregularSubFields" style="display: none; background: #f8fafc; padding: 14px; border-radius: 14px; border: 1px dashed #cbd5e1; margin-bottom: 16px;">
+        <div class="input-row" style="margin-bottom: 0;">
+          <div>
+            <label>Miesiąc płatności</label>
+            <select id="newSubDueMonth" class="auth-input" style="margin-bottom: 0; font-weight: 700;" onchange="updateSubModalPreview()">
+              <option value="1">Styczeń</option>
+              <option value="2">Luty</option>
+              <option value="3">Marzec</option>
+              <option value="4">Kwiecień</option>
+              <option value="5">Maj</option>
+              <option value="6">Czerwiec</option>
+              <option value="7">Lipiec</option>
+              <option value="8">Sierpień</option>
+              <option value="9">Wrzesień</option>
+              <option value="10">Październik</option>
+              <option value="11">Listopad</option>
+              <option value="12">Grudzień</option>
+            </select>
+          </div>
+          <div>
+            <label>Już odłożono (PLN)</label>
+            <input type="number" id="newSubSavedSoFar" class="auth-input" style="margin-bottom: 0;" placeholder="0" min="0" oninput="updateSubModalPreview()">
+          </div>
+        </div>
+      </div>
+
+      <div class="input-row" style="margin-bottom: 0;">
+        <div>
+          <label>Kategoria</label>
+          <select id="newSubCategory" class="auth-input split-category"></select>
+        </div>
+        <div>
+          <label>Dzień płatności (1-31)</label>
+          <input type="number" id="newSubDay" class="auth-input" placeholder="np. 15" min="1" max="31">
+        </div>
+      </div>
+
+      <!-- Podgląd wyliczenia Sinking Fund na żywo -->
+      <div id="sinkingFundPreviewBox" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; font-size: 0.82rem; color: #1e3a8a; line-height: 1.5;">
+      </div>
+
       <input type="hidden" id="editingSubId">
       <button class="btn-add" onclick="saveSubscription()" style="width: 100%;"><i data-lucide="save"></i> Zapisz opłatę</button>
     </div>
@@ -788,10 +844,10 @@
     <div class="hero-top-row">
       <div class="metric-hero dark" style="background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%);">
         <div class="metric-hero-top">
-          <span class="tag" style="color: #93c5fd;"><i data-lucide="repeat" style="width: 16px;"></i> Suma Stałych Opłat</span>
+          <span class="tag" style="color: #93c5fd;"><i data-lucide="repeat" style="width: 16px;"></i> Miesięczne Obciążenie Opłatami</span>
         </div>
-        <div class="val" style="color: #fff;"><span id="totalSubsVal">0</span> PLN</div>
-        <p class="desc" style="color: #bfdbfe;">Wszystkie subskrypcje w jednym miesiącu.</p>
+        <div class="val" style="color: #fff;"><span id="totalSubsVal">0</span> PLN <span style="font-size: 1rem; font-weight: 600; color: #93c5fd;">/ mc</span></div>
+        <p class="desc" style="color: #bfdbfe;" id="totalSubsDesc">Suma opłat miesięcznych oraz rezerw na opłaty roczne/kwartalne.</p>
       </div>
 
       <div class="metric-hero light">
@@ -807,14 +863,14 @@
 
     <div class="card" style="padding: 24px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; flex-wrap: wrap; gap: 8px;">
-        <h2 style="margin:0;"><i data-lucide="list-checks" style="color: var(--primary);"></i> Kalendarz Płatności</h2>
+        <h2 style="margin:0;"><i data-lucide="list-checks" style="color: var(--primary);"></i> Kalendarz Płatności i Rezerw (Sinking Funds)</h2>
         <button type="button" class="btn-add" style="padding: 8px 16px; font-size: 0.85rem;" onclick="openAddSubModal()"><i data-lucide="plus" style="width:14px;"></i> Nowa Opłata</button>
       </div>
       <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 24px; font-weight: 500;">
-        Dodaj Netflixa, czynsz lub kredyt. Niezapłacone subskrypcje blokują środki w "Analizie". Jeśli klikniesz <strong>"Opłać"</strong>, wydatek natychmiast poleci do Dziennika.
+        Dodaj czynsz, Netflixa lub roczne ubezpieczenie OC. Dla opłat rocznych i kwartalnych system automatycznie wylicza i blokuje miesięczną rezerwę w „Analizie”, abyś w miesiącu płatności miał gotówkę bez dziury w budżecie.
       </p>
       
-      <div id="subsListContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+      <div id="subsListContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">
         <!-- Generowane dynamicznie kafelki -->
       </div>
     </div>
@@ -840,7 +896,7 @@
         <span id="forecastBasisTag" style="font-size: 0.75rem; background: #fae8ff; color: #a21caf; padding: 6px 14px; border-radius: 50px; font-weight: 800; text-transform: uppercase;">Zderzenie Danych</span>
       </div>
       <p style="font-size: 0.95rem; color: #701a75; margin-bottom: 24px; font-weight: 500; line-height: 1.5;">
-        Zestawiamy Twój budżet z wybranym miesiącem. <strong>Oczekujące subskrypcje</strong> blokują tutaj Twoje środki automatycznie!
+        Zestawiamy Twój budżet z wybranym miesiącem. <strong>Oczekujące subskrypcje oraz miesięczne rezerwy na opłaty roczne/kwartalne</strong> blokują tutaj Twoje środki automatycznie!
       </p>
       
       <div id="rolloverBadgeTab3" class="rollover-badge" style="display:none; margin-bottom:24px;">
@@ -898,7 +954,7 @@
 
       <div style="background: #f8fafc; border: 1px dashed var(--border); border-radius: 16px; padding: 20px; margin-bottom: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: baseline;">
-          <span style="font-size: 1rem; color: var(--text-muted); font-weight: 600;">Suma poniesionych i oczekujących:</span>
+          <span style="font-size: 1rem; color: var(--text-muted); font-weight: 600;">Suma poniesionych i rezerw w tym miesiącu:</span>
           <strong id="monthTotalExpense" style="font-size: 1.8rem; color: var(--text-main); font-weight: 900;">0 PLN</strong>
         </div>
       </div>
@@ -909,7 +965,7 @@
             <tr>
               <th class="col-cat">Kategoria</th>
               <th class="col-opis">Opis wydatku / Opłata</th>
-              <th class="col-amount">Kwota</th>
+              <th class="col-amount">Kwota w budżecie m-ca</th>
               <th style="text-align: center;">Udział</th>
             </tr>
           </thead>
@@ -1003,6 +1059,128 @@ function initSupabase() {
       return true;
     }
   } catch (e) {} return false;
+}
+
+// -------------------------------------------
+// SILNIK SINKING FUNDS (OPŁATY NIEREGULARNE)
+// -------------------------------------------
+function getCycleMonthsCount(cycle) {
+  if (cycle === 'annual') return 12;
+  if (cycle === 'semi_annual') return 6;
+  if (cycle === 'quarterly') return 3;
+  return 1;
+}
+
+function getCycleLabelPL(cycle) {
+  if (cycle === 'annual') return 'Rocznie';
+  if (cycle === 'semi_annual') return 'Półrocznie';
+  if (cycle === 'quarterly') return 'Kwartalnie';
+  return 'Miesięcznie';
+}
+
+function isSubDueInMonth(sub, monthNum) {
+  var cycle = sub.cycle || 'monthly';
+  if (cycle === 'monthly') return true;
+  var dueM = parseInt(sub.dueMonth) || 1;
+  var m = parseInt(monthNum);
+  var step = getCycleMonthsCount(cycle);
+  return ((m - dueM) % step + step) % step === 0;
+}
+
+function getSubNextDueInfo(sub, refYear, refMonth) {
+  var cycle = sub.cycle || 'monthly';
+  if (cycle === 'monthly') {
+    return { monthsInclusive: 1, dueMonth: refMonth, dueYear: refYear };
+  }
+  for (var offset = 0; offset < 12; offset++) {
+    var m = ((refMonth - 1 + offset) % 12) + 1;
+    var y = refYear + Math.floor((refMonth - 1 + offset) / 12);
+    if (isSubDueInMonth(sub, m)) {
+      return { monthsInclusive: offset + 1, dueMonth: m, dueYear: y };
+    }
+  }
+  return { monthsInclusive: 12, dueMonth: parseInt(sub.dueMonth) || 1, dueYear: refYear };
+}
+
+function getSubMonthlyAllocation(sub, refYear, refMonth) {
+  var cycle = sub.cycle || 'monthly';
+  var amt = Number(sub.amount) || 0;
+  if (cycle === 'monthly') return Math.round(amt);
+
+  var step = getCycleMonthsCount(cycle);
+  var standardMonthly = Math.round(amt / step);
+
+  var curPeriod = refYear + '-' + (refMonth < 10 ? '0' : '') + refMonth;
+  if (sub.lastPaidMonth === curPeriod) {
+    return standardMonthly;
+  }
+
+  // Jeśli opłata miała już pierwszą płatność w przeszłości, jedziemy spokojnym trybem standardowym
+  if (sub.lastPaidMonth && sub.lastPaidMonth < curPeriod) {
+    return standardMonthly;
+  }
+
+  var saved = Math.max(0, Number(sub.savedSoFar) || 0);
+  var needed = Math.max(0, amt - saved);
+
+  // Obliczamy od miesiąca utworzenia opłaty, aby kwota była stabilna przez cały okres zbierania
+  var startY = refYear;
+  var startM = refMonth;
+  if (sub.createdMonth) {
+    var parts = sub.createdMonth.split('-');
+    if (parts.length === 2) {
+      startY = parseInt(parts[0], 10);
+      startM = parseInt(parts[1], 10);
+    }
+  }
+
+  var info = getSubNextDueInfo(sub, startY, startM);
+  return Math.round(needed / Math.max(1, info.monthsInclusive));
+}
+
+function toggleSubCycleFields() {
+  var cycle = document.getElementById('newSubCycle').value;
+  var irrBox = document.getElementById('irregularSubFields');
+  if (cycle === 'monthly') {
+    irrBox.style.display = 'none';
+  } else {
+    irrBox.style.display = 'block';
+  }
+  updateSubModalPreview();
+}
+
+function updateSubModalPreview() {
+  var cycle = document.getElementById('newSubCycle').value;
+  var previewBox = document.getElementById('sinkingFundPreviewBox');
+  if (!previewBox) return;
+
+  if (cycle === 'monthly') {
+    previewBox.style.display = 'none';
+    return;
+  }
+
+  var amt = parseFloat(document.getElementById('newSubAmount').value) || 0;
+  var dueM = parseInt(document.getElementById('newSubDueMonth').value) || 1;
+  var saved = parseFloat(document.getElementById('newSubSavedSoFar').value) || 0;
+
+  if (amt <= 0) {
+    previewBox.style.display = 'none';
+    return;
+  }
+
+  var d = new Date();
+  var curY = d.getFullYear();
+  var curM = d.getMonth() + 1;
+
+  var tempSub = { amount: amt, cycle: cycle, dueMonth: dueM, savedSoFar: saved, createdMonth: curY + '-' + (curM < 10 ? '0' : '') + curM };
+  var info = getSubNextDueInfo(tempSub, curY, curM);
+  var catchUpAllocation = getSubMonthlyAllocation(tempSub, curY, curM);
+  var standardAllocation = Math.round(amt / getCycleMonthsCount(cycle));
+  var monthName = MONTH_NAMES_PL[info.dueMonth - 1];
+
+  previewBox.style.display = 'block';
+  previewBox.innerHTML = `<i data-lucide="calculator" style="width:15px; display:inline; vertical-align:-2px; margin-right:4px;"></i> Najbliższy termin: <strong>${monthName} ${info.dueYear}</strong> (zostało m-cy: <strong>${info.monthsInclusive}</strong>).<br>Aby zebrać brakujące <strong>${Math.max(0, amt - saved).toLocaleString('pl-PL')} PLN</strong>, system zarezerwuje w budżecie <strong>${catchUpAllocation.toLocaleString('pl-PL')} PLN / mc</strong> (po opłaceniu spadnie do ${standardAllocation.toLocaleString('pl-PL')} PLN / mc).`;
+  lucide.createIcons();
 }
 
 // -------------------------------------------
@@ -1371,15 +1549,21 @@ function renderGoals() {
 }
 
 // -------------------------------------------
-// SUBSKRYPCJE I STAŁE OPŁATY
+// SUBSKRYPCJE I STAŁE OPŁATY (Z SINKING FUNDS)
 // -------------------------------------------
 function openAddSubModal(id = null) {
   if (!isLoggedIn && APP_CONFIG.guestLimitsActive && subscriptions.length >= APP_CONFIG.maxGuestSubs) {
       if (id === null) { document.getElementById('guestLimitModal').style.display = 'flex'; return; }
   }
+  if (customCategories.length === 0) {
+      alert("Najpierw utwórz przynajmniej jedną kategorię (w zakładce Dziennik -> Kategorie).");
+      return;
+  }
 
   var modal = document.getElementById('subManagerModal');
   var title = document.getElementById('subModalTitle');
+  var d = new Date();
+
   if (id !== null) {
     var sub = subscriptions.find(s => s.id === id);
     if(sub) {
@@ -1388,30 +1572,75 @@ function openAddSubModal(id = null) {
       document.getElementById('newSubAmount').value = sub.amount;
       document.getElementById('newSubCategory').value = sub.category;
       document.getElementById('newSubDay').value = sub.dayOfMonth;
+      document.getElementById('newSubCycle').value = sub.cycle || 'monthly';
+      document.getElementById('newSubDueMonth').value = sub.dueMonth || (d.getMonth() + 1);
+      document.getElementById('newSubSavedSoFar').value = sub.savedSoFar || 0;
       title.innerHTML = '<i data-lucide="edit" style="color: var(--primary)"></i> Edytuj Opłatę';
     }
   } else {
-    document.getElementById('editingSubId').value = ''; document.getElementById('newSubName').value = ''; document.getElementById('newSubAmount').value = ''; document.getElementById('newSubDay').value = '';
+    document.getElementById('editingSubId').value = ''; 
+    document.getElementById('newSubName').value = ''; 
+    document.getElementById('newSubAmount').value = ''; 
+    document.getElementById('newSubDay').value = '10';
+    document.getElementById('newSubCycle').value = 'monthly';
+    document.getElementById('newSubDueMonth').value = d.getMonth() + 1;
+    document.getElementById('newSubSavedSoFar').value = '';
     title.innerHTML = '<i data-lucide="calendar-clock" style="color: var(--primary)"></i> Nowa Stała Opłata';
   }
-  lucide.createIcons(); modal.style.display = 'flex';
+  toggleSubCycleFields();
+  lucide.createIcons(); 
+  modal.style.display = 'flex';
 }
 
 function saveSubscription() {
-  var name = document.getElementById('newSubName').value.trim(); var amt = parseFloat(document.getElementById('newSubAmount').value); 
-  var cat = document.getElementById('newSubCategory').value; var day = parseInt(document.getElementById('newSubDay').value);
+  var name = document.getElementById('newSubName').value.trim(); 
+  var amt = parseFloat(document.getElementById('newSubAmount').value); 
+  var cat = document.getElementById('newSubCategory').value; 
+  var day = parseInt(document.getElementById('newSubDay').value);
+  var cycle = document.getElementById('newSubCycle').value || 'monthly';
+  var dueMonth = parseInt(document.getElementById('newSubDueMonth').value) || 1;
+  var savedSoFar = parseFloat(document.getElementById('newSubSavedSoFar').value) || 0;
   var id = document.getElementById('editingSubId').value;
   
-  if(!name || isNaN(amt) || amt <= 0 || isNaN(day) || day < 1 || day > 31) { alert("Wypełnij poprawnie wszystkie pola (dzień 1-31)."); return; }
+  if(!name || isNaN(amt) || amt <= 0 || isNaN(day) || day < 1 || day > 31) { 
+    alert("Wypełnij poprawnie wszystkie pola (kwota > 0, dzień 1-31)."); 
+    return; 
+  }
+
+  var d = new Date();
+  var curPeriod = d.getFullYear() + '-' + ((d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1));
 
   if(id) { 
       var sub = subscriptions.find(s => s.id == id); 
-      if(sub) { sub.name = name; sub.amount = amt; sub.category = cat; sub.dayOfMonth = day; } 
+      if(sub) { 
+        sub.name = name; 
+        sub.amount = amt; 
+        sub.category = cat; 
+        sub.dayOfMonth = day; 
+        sub.cycle = cycle;
+        sub.dueMonth = dueMonth;
+        sub.savedSoFar = savedSoFar;
+        if (!sub.createdMonth) sub.createdMonth = curPeriod;
+      } 
   } else { 
-      subscriptions.push({ id: Date.now(), name: name, amount: amt, category: cat, dayOfMonth: day, lastPaidMonth: null }); 
+      subscriptions.push({ 
+        id: Date.now(), 
+        name: name, 
+        amount: amt, 
+        category: cat, 
+        dayOfMonth: day, 
+        cycle: cycle,
+        dueMonth: dueMonth,
+        savedSoFar: savedSoFar,
+        createdMonth: curPeriod,
+        lastPaidMonth: null 
+      }); 
   }
 
-  document.getElementById('subManagerModal').style.display = 'none'; triggerSettingsSave(); renderSubscriptions(); renderHistory();
+  document.getElementById('subManagerModal').style.display = 'none'; 
+  triggerSettingsSave(); 
+  renderSubscriptions(); 
+  renderHistory();
 }
 
 async function deleteSubscription(id) {
@@ -1452,9 +1681,21 @@ async function paySubscription(id) {
 
   if (isLoggedIn && supabase) {
     const { data, error } = await supabase.from('history_logs').insert([newRecord]).select();
-    if (!error && data) { historyLogs = historyLogs.concat(data); sub.lastPaidMonth = p; triggerSettingsSave(); renderHistory(); }
+    if (!error && data) { 
+      historyLogs = historyLogs.concat(data); 
+      sub.lastPaidMonth = p; 
+      sub.savedSoFar = 0; // Po opłaceniu zerujemy licznik startowy i przechodzimy na spokojny tryb
+      triggerSettingsSave(); 
+      renderHistory(); 
+    }
   } else {
-    newRecord.id = Date.now(); newRecord.monthNum = selM; historyLogs.push(newRecord); sub.lastPaidMonth = p; triggerSettingsSave(); renderHistory();
+    newRecord.id = Date.now(); 
+    newRecord.monthNum = selM; 
+    historyLogs.push(newRecord); 
+    sub.lastPaidMonth = p; 
+    sub.savedSoFar = 0;
+    triggerSettingsSave(); 
+    renderHistory();
   }
 }
 
@@ -1488,39 +1729,79 @@ function renderSubscriptions() {
   if(!container) return;
   container.innerHTML = '';
   
-  var d = new Date(); var curPeriod = d.getFullYear() + '-' + ((d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1));
-  var totalSubs = 0;
+  var d = new Date(); 
+  var curY = d.getFullYear();
+  var curM = d.getMonth() + 1;
+  var curPeriod = curY + '-' + ((curM < 10 ? '0' : '') + curM);
+  
+  var totalMonthlyBurden = 0;
+  var irregularReservesSum = 0;
 
   subscriptions.sort((a, b) => a.dayOfMonth - b.dayOfMonth).forEach(sub => {
-    totalSubs += sub.amount;
+    var cycle = sub.cycle || 'monthly';
+    var monthlyAlloc = getSubMonthlyAllocation(sub, curY, curM);
+    totalMonthlyBurden += monthlyAlloc;
+    if (cycle !== 'monthly') irregularReservesSum += monthlyAlloc;
+
     var isPaidThisMonth = sub.lastPaidMonth === curPeriod;
+    var dueInThisMonth = isSubDueInMonth(sub, curM);
     var b = getCategoryBucket(sub.category);
+    var nextInfo = getSubNextDueInfo(sub, curY, curM);
     
-    var dueText = "Dzień płatności: " + sub.dayOfMonth;
-    var isToday = sub.dayOfMonth === d.getDate();
-    if(isToday && !isPaidThisMonth) dueText = "<strong style='color: var(--danger);'>Płatność dzisiaj!</strong>";
+    var dueText = "";
+    if (cycle === 'monthly') {
+      dueText = "Co miesiąc • dzień: " + sub.dayOfMonth;
+      if (sub.dayOfMonth === d.getDate() && !isPaidThisMonth) {
+        dueText = "<strong style='color: var(--danger);'>Płatność dzisiaj!</strong>";
+      }
+    } else {
+      var mName = MONTH_NAMES_PL[(nextInfo.dueMonth || 1) - 1];
+      if (dueInThisMonth && !isPaidThisMonth) {
+        dueText = `<strong style="color: var(--warning);">Termin w tym miesiącu (${sub.dayOfMonth}. ${mName})!</strong>`;
+      } else {
+        dueText = `Termin: ${sub.dayOfMonth}. ${mName} ${nextInfo.dueYear} (za ${nextInfo.monthsInclusive} m-ce)`;
+      }
+    }
     
-    var statusHtml = isPaidThisMonth 
-        ? `<div style="display:flex; align-items:center; gap: 8px;">
-             <span style="background: #ecfdf5; color: #047857; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 800;"><i data-lucide="check-circle-2" style="width:14px; margin-bottom:-2px;"></i> Opłacono</span>
-             <button onclick="unpaySubscription(${sub.id})" class="edit-btn" style="width: 26px; height: 26px; border-radius: 6px; background: transparent; border: 1px solid #fca5a5; margin:0; color: var(--danger);" title="Cofnij płatność"><i data-lucide="rotate-ccw" style="width:12px;"></i></button>
-           </div>` 
-        : `<button class="btn-add" style="padding: 6px 12px; font-size: 0.8rem; background: var(--warning); box-shadow: none;" onclick="paySubscription(${sub.id})"><i data-lucide="wallet" style="width:14px;"></i> Opłać teraz</button>`;
+    var statusHtml = "";
+    if (isPaidThisMonth) {
+      statusHtml = `<div style="display:flex; align-items:center; gap: 8px;">
+           <span style="background: #ecfdf5; color: #047857; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 800;"><i data-lucide="check-circle-2" style="width:14px; margin-bottom:-2px;"></i> Opłacono</span>
+           <button onclick="unpaySubscription(${sub.id})" class="edit-btn" style="width: 26px; height: 26px; border-radius: 6px; background: transparent; border: 1px solid #fca5a5; margin:0; color: var(--danger);" title="Cofnij płatność"><i data-lucide="rotate-ccw" style="width:12px;"></i></button>
+         </div>`;
+    } else if (dueInThisMonth) {
+      statusHtml = `<button class="btn-add" style="padding: 6px 12px; font-size: 0.8rem; background: var(--warning); box-shadow: none;" onclick="paySubscription(${sub.id})"><i data-lucide="wallet" style="width:14px;"></i> Opłać (${sub.amount.toLocaleString('pl-PL')} zł)</button>`;
+    } else {
+      statusHtml = `<span style="background: #eff6ff; color: #1e40af; padding: 5px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px;"><i data-lucide="piggy-bank" style="width:14px;"></i> Rezerwuję ${monthlyAlloc.toLocaleString('pl-PL')} zł/mc</span>`;
+    }
+
+    var amountBlockHtml = cycle === 'monthly' 
+      ? `<div class="goal-amounts" style="font-size: 1.15rem; color: var(--text-main); font-weight: 900;">${sub.amount.toLocaleString('pl-PL')} PLN<span style="display:block; font-size:0.7rem; color:var(--text-muted); font-weight:600;">co miesiąc</span></div>`
+      : `<div class="goal-amounts" style="text-align: right;">
+           <span style="font-size: 1.1rem; color: var(--primary); font-weight: 900; display: block;">${monthlyAlloc.toLocaleString('pl-PL')} PLN / mc</span>
+           <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">Cel: ${sub.amount.toLocaleString('pl-PL')} PLN</span>
+         </div>`;
+
+    var cycleBadgeClass = cycle === 'monthly' ? 'cycle-badge' : 'cycle-badge sinking';
 
     var row = document.createElement('div');
-    row.className = 'goal-item'; row.style.cssText = isPaidThisMonth ? "background: #f8fafc; border-color: var(--border); opacity: 0.85;" : "background: #fff; border-color: #bfdbfe; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.05);";
+    row.className = 'goal-item'; 
+    row.style.cssText = isPaidThisMonth ? "background: #f8fafc; border-color: var(--border); opacity: 0.85;" : "background: #fff; border-color: #bfdbfe; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.05);";
     row.innerHTML = `
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 12px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 10px; gap: 8px;">
         <div>
            <div class="goal-title">${sub.name}</div>
            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">${dueText}</div>
         </div>
-        <div class="goal-amounts" style="font-size: 1.1rem; color: var(--text-main); font-weight: 900;">${sub.amount.toLocaleString('pl-PL')} PLN</div>
+        ${amountBlockHtml}
       </div>
-      <span class="cat-badge cat-bucket-${b}" style="margin-bottom: 12px; font-size: 0.65rem;">${sub.category}</span>
-      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border); padding-top: 12px;">
+      <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;">
+        <span class="cat-badge cat-bucket-${b}" style="font-size: 0.65rem;">${sub.category}</span>
+        <span class="${cycleBadgeClass}">${getCycleLabelPL(cycle)}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border); padding-top: 12px; gap: 8px; flex-wrap: wrap;">
         ${statusHtml}
-        <div style="display:flex; gap:6px;">
+        <div style="display:flex; gap:6px; margin-left: auto;">
           <button class="edit-btn" style="width: 28px; height: 28px; border-radius: 6px; background: #f1f5f9; border: none; margin:0;" onclick="openAddSubModal(${sub.id})"><i data-lucide="settings-2" style="width:12px; color:var(--text-muted);"></i></button>
           <button class="del-btn" style="width: 28px; height: 28px; border-radius: 6px; background: #fef2f2; border: none; margin:0;" onclick="deleteSubscription(${sub.id})"><i data-lucide="trash" style="width:12px; color:var(--danger);"></i></button>
         </div>
@@ -1530,21 +1811,30 @@ function renderSubscriptions() {
   });
   
   if(subscriptions.length === 0) {
-      container.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;"><i data-lucide="calendar-x" style="width:48px; height:48px; color:#cbd5e1; margin-bottom:12px;"></i><strong>Brak stałych opłat</strong>Dodaj czynsz lub subskrypcje, by o niczym nie zapomnieć.</div>';
+      container.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;"><i data-lucide="calendar-x" style="width:48px; height:48px; color:#cbd5e1; margin-bottom:12px;"></i><strong>Brak stałych opłat</strong>Dodaj czynsz, subskrypcje lub roczne OC, by o niczym nie zapomnieć.</div>';
   }
   
   var totalSubsEl = document.getElementById('totalSubsVal');
-  if (totalSubsEl) totalSubsEl.textContent = totalSubs.toLocaleString('pl-PL');
+  if (totalSubsEl) totalSubsEl.textContent = totalMonthlyBurden.toLocaleString('pl-PL');
+  var totalSubsDescEl = document.getElementById('totalSubsDesc');
+  if (totalSubsDescEl) {
+    if (irregularReservesSum > 0) {
+      totalSubsDescEl.textContent = `W tym ${irregularReservesSum.toLocaleString('pl-PL')} PLN miesięcznej rezerwy na opłaty roczne/kwartalne.`;
+    } else {
+      totalSubsDescEl.textContent = `Suma wszystkich opłat miesięcznych.`;
+    }
+  }
   lucide.createIcons();
 }
 
 function checkSubReminders() {
     if (!('Notification' in window) || Notification.permission !== 'granted') return;
     var d = new Date(); var today = d.getDate(); var tomorrow = new Date(d); tomorrow.setDate(tomorrow.getDate() + 1); var tmrw = tomorrow.getDate();
-    var curPeriod = d.getFullYear() + '-' + ((d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1));
+    var curM = d.getMonth() + 1;
+    var curPeriod = d.getFullYear() + '-' + ((curM < 10 ? '0' : '') + curM);
     
-    var dueToday = subscriptions.filter(s => s.dayOfMonth === today && s.lastPaidMonth !== curPeriod);
-    var dueTomorrow = subscriptions.filter(s => s.dayOfMonth === tmrw && s.lastPaidMonth !== curPeriod);
+    var dueToday = subscriptions.filter(s => isSubDueInMonth(s, curM) && s.dayOfMonth === today && s.lastPaidMonth !== curPeriod);
+    var dueTomorrow = subscriptions.filter(s => isSubDueInMonth(s, curM) && s.dayOfMonth === tmrw && s.lastPaidMonth !== curPeriod);
     
     if (dueToday.length > 0) {
         new Notification("WiseWallet - Rachunki", { body: `Masz dzisiaj do opłacenia ${dueToday.length} rachunków (m.in. ${dueToday[0].name}). Otwórz aplikację, by zrealizować płatność.`, icon: "https://cdn-icons-png.flaticon.com/512/3344/3344055.png" });
@@ -1898,7 +2188,9 @@ function renderHistory() {
   renderHistoryTable();
   
   var d = new Date();
-  var curPeriod = d.getFullYear() + '-' + ((d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1));
+  var curY = d.getFullYear();
+  var curM = d.getMonth() + 1;
+  var curPeriod = curY + '-' + ((curM < 10 ? '0' : '') + curM);
   
   var totalInc = getTotalIncome(); 
   var rush = document.getElementById('rushEmergencyFund').checked;
@@ -1914,7 +2206,13 @@ function renderHistory() {
     if(e.month === curPeriod) {
       curMonthLogs.push(e);
       if (getCategoryBucket(e.category) === 'fun') {
-        spentFunThisMonth += Number(e.amount);
+        // Sprawdzamy czy ten wpis to opłacona w tym miesiącu opłata nieregularna (np. roczna)
+        var matchedIrregular = subscriptions.find(s => (s.cycle && s.cycle !== 'monthly') && (s.name + " (Opłata stała)" === e.name));
+        if (matchedIrregular) {
+          spentFunThisMonth += getSubMonthlyAllocation(matchedIrregular, curY, curM);
+        } else {
+          spentFunThisMonth += Number(e.amount);
+        }
         if(e.exact_date) { 
            var parts = e.exact_date.split('-'); 
            if(parts.length === 3) funDays.add(parseInt(parts[2], 10)); 
@@ -1925,7 +2223,7 @@ function renderHistory() {
 
   subscriptions.forEach(sub => {
       if (sub.lastPaidMonth !== curPeriod && getCategoryBucket(sub.category) === 'fun') {
-          spentFunThisMonth += Number(sub.amount);
+          spentFunThisMonth += getSubMonthlyAllocation(sub, curY, curM);
       }
   });
   
@@ -2062,7 +2360,9 @@ function renderReportTab() {
   if (!sel) return;
   var curSel = sel.value;
   var d = new Date();
-  var curPeriod = d.getFullYear() + '-' + ((d.getMonth() + 1 < 10 ? '0' : '') + (d.getMonth() + 1));
+  var curY = d.getFullYear();
+  var curM = d.getMonth() + 1;
+  var curPeriod = curY + '-' + ((curM < 10 ? '0' : '') + curM);
 
   var uniquePeriods = [...new Set(historyLogs.map(e => e.month))];
   if (!uniquePeriods.includes(curPeriod) && subscriptions.length > 0) {
@@ -2082,16 +2382,44 @@ function renderReportTab() {
   }
   
   var isCurrentMonth = (sel.value === curPeriod);
+  var selParts = sel.value ? sel.value.split('-') : [curY, curM];
+  var repY = parseInt(selParts[0], 10);
+  var repM = parseInt(selParts[1], 10);
 
-  var allReportItems = [...filtered];
+  // Budujemy listę pozycji do Analizy z uwzględnieniem Sinking Funds
+  var allReportItems = [];
+  filtered.forEach(item => {
+    var copy = Object.assign({}, item);
+    var matchedSub = subscriptions.find(s => (s.cycle && s.cycle !== 'monthly') && (s.name + " (Opłata stała)" === item.name));
+    if (matchedSub) {
+      var alloc = getSubMonthlyAllocation(matchedSub, repY, repM);
+      copy.fullPaidAmount = copy.amount;
+      copy.amount = alloc;
+      copy.sinkingNote = `Opłacono ${Number(copy.fullPaidAmount).toLocaleString('pl-PL')} PLN • w budżecie m-ca liczona rezerwa (${getCycleLabelPL(matchedSub.cycle)})`;
+    }
+    allReportItems.push(copy);
+  });
+
   if (isCurrentMonth) {
       subscriptions.forEach(sub => {
           if (sub.lastPaidMonth !== curPeriod) {
+              var cycle = sub.cycle || 'monthly';
+              var alloc = getSubMonthlyAllocation(sub, curY, curM);
+              var dueNow = isSubDueInMonth(sub, curM);
+              var note = '';
+              if (cycle === 'monthly') {
+                note = 'Oczekująca opłata miesięczna';
+              } else if (dueNow) {
+                note = `Płatność w tym m-cu (${sub.amount.toLocaleString('pl-PL')} PLN) • rezerwa budżetowa: ${alloc.toLocaleString('pl-PL')} PLN`;
+              } else {
+                note = `Rezerwa celowa (${getCycleLabelPL(cycle)}: ${sub.amount.toLocaleString('pl-PL')} PLN w m-cu: ${MONTH_NAMES_PL[(sub.dueMonth || 1) - 1]})`;
+              }
               allReportItems.push({
                   category: sub.category,
                   name: sub.name,
-                  amount: sub.amount,
-                  isPending: true
+                  amount: alloc,
+                  isPending: true,
+                  sinkingNote: note
               });
           }
       });
@@ -2181,12 +2509,12 @@ function renderReportTab() {
       
       var bgRow = item.isPending ? 'background: #fffbeb; border: 1px dashed #fcd34d;' : '';
       var namePrefix = item.isPending ? '<i data-lucide="clock" style="width:14px; margin-right:4px; margin-bottom:-2px; color:#d97706;"></i>' : '';
-      var pendingLabel = item.isPending ? '<span style="display:block; font-size:0.75rem; color:#d97706; margin-top:4px;">Oczekująca opłata</span>' : '';
+      var subNoteHtml = item.sinkingNote ? `<span style="display:block; font-size:0.75rem; color:${item.isPending ? '#d97706' : 'var(--primary)'}; margin-top:4px; font-weight:600;">${item.sinkingNote}</span>` : '';
       
       tr.style.cssText = bgRow;
       tr.innerHTML = '<td class="col-cat" data-label="Kategoria"><span class="cat-badge cat-bucket-' + b + '">' + cat + '</span></td>' +
-                     '<td class="col-opis" data-label="Opis/Sklep"><strong>' + namePrefix + item.name + '</strong>' + pendingLabel + '</td>' +
-                     '<td class="col-amount" data-label="Kwota">' + Number(item.amount).toLocaleString('pl-PL') + ' PLN</td>' +
+                     '<td class="col-opis" data-label="Opis/Sklep"><strong>' + namePrefix + item.name + '</strong>' + subNoteHtml + '</td>' +
+                     '<td class="col-amount" data-label="Kwota w m-cu">' + Number(item.amount).toLocaleString('pl-PL') + ' PLN</td>' +
                      '<td style="text-align: right; color: var(--text-muted); font-weight: 700;" data-label="Udział w m-cu">' + pct + '%</td>';
       tbody.appendChild(tr);
     });
@@ -2219,7 +2547,6 @@ function cancelEditMode() {
 }
 
 window.onload = async function() {
-  // 1. Inicjalizacja UI i odczyt lokalnych danych na samym starcie
   document.getElementById('appContainer').style.display = 'block';
   document.getElementById('histInputDate').valueAsDate = new Date();
 
@@ -2232,7 +2559,6 @@ window.onload = async function() {
   renderHistory();
   calculateAll();
 
-  // 2. Podpięcie wszystkich nasłuchiwaczy zdarzeń (niezależnie od chmury)
   document.getElementById('loginBtn').onclick = handleLogin;
   document.getElementById('registerBtn').onclick = handleRegister;
   document.getElementById('logoutBtn').onclick = handleLogout;
@@ -2282,7 +2608,6 @@ window.onload = async function() {
   ['histFilterYear', 'histFilterMonth', 'histFilterCategory', 'histSortOrder'].forEach(id => { document.getElementById(id).onchange = renderHistoryTable; });
   document.getElementById('selectReportPeriod').onchange = function() { renderReportTab(); };
 
-  // 3. Przywrócenie ostatnio otwartej zakładki
   try {
     var savedTab = safeStorage.getItem('walletwise_activeTab');
     if(savedTab && document.getElementById(savedTab)) {
@@ -2290,7 +2615,6 @@ window.onload = async function() {
     }
   } catch(e) {}
 
-  // 4. Inicjalizacja Supabase w tle na końcu
   if (!initSupabase()) {
     var fallbackScript = document.createElement('script'); fallbackScript.src = 'https://unpkg.com/@supabase/supabase-js@2';
     fallbackScript.onload = async function() { initSupabase(); await setupAuthListeners(); }; 
